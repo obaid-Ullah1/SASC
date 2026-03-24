@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DataGrid, { 
   Column, 
   Paging, 
@@ -8,19 +8,40 @@ import DataGrid, {
 } from 'devextreme-react/data-grid';
 import { List, Pencil, Trash2 } from 'lucide-react';
 
-const StandardTable = ({ title, data }) => {
-  
-  // Custom Renderer for Actions
-  const actionCellRender = () => (
+// Global Components
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
+
+const StandardTable = ({ title, data, onEdit, onDelete }) => {
+  const [deleteConfig, setDeleteConfig] = useState({ isOpen: false, itemId: null });
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // --- Logic Handlers ---
+  const handleDeleteClick = (id) => {
+    setDeleteConfig({ isOpen: true, itemId: id });
+  };
+
+  const handleConfirmDelete = () => {
+    if (onDelete && deleteConfig.itemId) {
+      onDelete(deleteConfig.itemId);
+      setDeleteConfig({ isOpen: false, itemId: null });
+      setShowSuccess(true);
+    }
+  };
+
+  // Custom Renderer for Actions (Keeping your exact design)
+  const actionCellRender = (cellData) => (
     <div className="flex justify-center gap-5">
       <Pencil 
         size={15} 
         strokeWidth={3} 
+        onClick={() => onEdit(cellData.data)} // Logic added
         className="text-blue-500 cursor-pointer hover:scale-110 transition-transform" 
       />
       <Trash2 
         size={15} 
         strokeWidth={3} 
+        onClick={() => handleDeleteClick(cellData.data.id)} // Logic added
         className="text-red-500 cursor-pointer hover:scale-110 transition-transform" 
       />
     </div>
@@ -37,17 +58,16 @@ const StandardTable = ({ title, data }) => {
         hoverStateEnabled={true}
         className="custom-standard-grid"
       >
-        {/* DevExtreme Features */}
         <FilterRow visible={true} />
-        <SearchPanel visible={false} /> {/* TableHeader handles search globally */}
+        <SearchPanel visible={false} />
         <Scrolling mode="virtual" />
         <Paging enabled={false} />
 
-        {/* # ID Column */}
+        {/* # ID Column - Keeping exact original CSS */}
         <Column 
           dataField="id" 
           caption="# ID" 
-          width={128} // Equivalent to w-32
+          width={128} 
           alignment="left"
           cssClass="px-6 py-3.5 text-xs font-bold text-slate-600 border-r border-slate-100"
           headerCellRender={() => (
@@ -55,7 +75,7 @@ const StandardTable = ({ title, data }) => {
           )}
         />
 
-        {/* Dynamic Name Column */}
+        {/* Name Column - Keeping exact original CSS */}
         <Column 
           dataField="name" 
           caption={`${title} Name`}
@@ -70,7 +90,7 @@ const StandardTable = ({ title, data }) => {
         {/* Actions Column */}
         <Column 
           caption="Actions" 
-          width={160} // Equivalent to w-40
+          width={160} 
           alignment="center"
           cellRender={actionCellRender}
           headerCellRender={() => (
@@ -79,12 +99,26 @@ const StandardTable = ({ title, data }) => {
         />
       </DataGrid>
 
-      {/* No Data Overlay - DevExtreme handles this automatically, but we can customize if data is empty */}
       {(!data || data.length === 0) && (
         <div className="px-6 py-10 text-center text-slate-400 text-xs italic border-t border-slate-100">
           No records found.
         </div>
       )}
+
+      {/* Popups */}
+      <ConfirmPopup 
+        isOpen={deleteConfig.isOpen}
+        onClose={() => setDeleteConfig({ isOpen: false, itemId: null })}
+        onConfirm={handleConfirmDelete}
+        title={`Delete ${title}`}
+        message={`Are you sure you want to remove this ${title.toLowerCase()}?`}
+      />
+
+      <SuccessPopup 
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        message="Record has been deleted successfully."
+      />
     </div>
   );
 };

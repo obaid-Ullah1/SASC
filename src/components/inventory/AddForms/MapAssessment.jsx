@@ -1,108 +1,201 @@
-import React, { useState } from 'react';
-import { X, Link2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Link2, ChevronDown, Check, Zap, Activity, ShieldCheck } from 'lucide-react';
 
-const MapAssessment = ({ onClose, onAdd }) => {
-  const [assessment, setAssessment] = useState('');
+const MapAssessment = ({ onClose, onAdd, initialData }) => {
+  const [selectedAssessments, setSelectedAssessments] = useState([]);
   const [type, setType] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const ASSESSMENT_OPTIONS = [
+    "Antihistamir", "Coughing", "Hives", "Itching", "Ithchi Eyes", 
+    "Left Before Time", "New Medication", "Runny Nose", "Sneezing", 
+    "Tightness in chest", "Watery Eyes", "Wheezing"
+  ];
+
+  const TYPE_OPTIONS = [
+    { value: 'pre', label: 'PRE-Treatment' },
+    { value: 'post', label: 'POST-Treatment' },
+    { value: 'rxn', label: 'Reaction (RXN)' },
+    { value: 'inj', label: 'Injection (INJ)' }
+  ];
+
+  // ✅ LOGIC: Fetch data for Edit Mode
+  useEffect(() => {
+    if (initialData) {
+      // Split "Coughing, Hives" back into ["Coughing", "Hives"]
+      const items = initialData.name ? initialData.name.split(', ') : [];
+      setSelectedAssessments(items);
+      setType(initialData.type?.toLowerCase() || '');
+      setIsActive(initialData.active ?? true);
+    } else {
+      // Reset for Add Mode
+      setSelectedAssessments([]);
+      setType('');
+      setIsActive(true);
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleAssessment = (option) => {
+    setSelectedAssessments(prev => 
+      prev.includes(option) ? prev.filter(item => item !== option) : [...prev, option]
+    );
+  };
+
+  const removeAssessment = (e, option) => {
+    e.stopPropagation();
+    setSelectedAssessments(prev => prev.filter(item => item !== option));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd({ assessment, type, active: isActive });
+    if (selectedAssessments.length === 0 || !type) return;
+    onAdd({ 
+      name: selectedAssessments.join(', '), 
+      type: type.toUpperCase(), 
+      active: isActive 
+    });
+    onClose();
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden mb-6 animate-in fade-in slide-in-from-top-1 duration-300">
+    <div className="relative z-[100] bg-white rounded-2xl border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.1)] mb-10 overflow-visible animate-in fade-in zoom-in-95 duration-300">
       
-      {/* Precision Header */}
-      <div className="flex justify-between items-center px-5 py-2.5 bg-[#E6F6FF] border-b border-[#D1E9FF]">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-[#00A3FF] rounded-md shadow-md shadow-blue-100 text-white">
-            <Link2 size={14} strokeWidth={3} />
+      {/* 💎 Premium Header */}
+      <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200 rounded-t-2xl">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 flex items-center justify-center bg-[#00A3FF] rounded-xl shadow-[0_8px_16px_rgba(0,163,255,0.3)] text-white">
+            <Activity size={20} strokeWidth={2.5} />
           </div>
           <div>
-            <h3 className="text-[12px] font-black text-[#004A7C] uppercase tracking-tight leading-none">
-              Map Assessment
+            <h3 className="text-[15px] font-extrabold text-slate-800 uppercase tracking-tight">
+              {/* Dynamic Title based on mode */}
+              {initialData ? 'Update Mapping' : 'Assessment Mapping'}
             </h3>
-            <p className="text-[9px] text-[#00A3FF] font-bold uppercase tracking-widest mt-0.5 opacity-80">
-              Mapping Module
-            </p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className={`w-2 h-2 rounded-full animate-pulse ${initialData ? 'bg-amber-500' : 'bg-green-500'}`}></span>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Configuration Portal</p>
+            </div>
           </div>
         </div>
         
         <button 
           onClick={onClose}
-          className="p-1 bg-[#FF4D4D] hover:bg-[#FF3333] text-white rounded transition-colors shadow-sm"
+          className="group p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-xl transition-all duration-200"
         >
-          <X size={12} strokeWidth={4} />
+          <X size={20} strokeWidth={2.5} />
         </button>
       </div>
 
-      {/* Professional Thin Form Body */}
-      <form onSubmit={handleSubmit} className="px-6 py-4 flex items-end gap-5 bg-white">
+      {/* 🚀 Modern Form Body */}
+      <form onSubmit={handleSubmit} className="p-8 space-y-8 bg-white overflow-visible">
         
-        {/* Assessment Select */}
-        <div className="flex-[2]">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
-            Assessment
-          </label>
-          <select
-            value={assessment}
-            onChange={(e) => setAssessment(e.target.value)}
-            className="w-full px-3 py-1.5 bg-slate-50 border border-[#e2e8f0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00A3FF]/10 focus:border-[#00A3FF] transition-all text-[12px] font-medium text-slate-600 outline-none appearance-none cursor-pointer"
-            style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', paddingRight: '2.5rem' }}
-          >
-            <option value="">Select assessments...</option>
-            <option value="1">Initial Evaluation</option>
-            <option value="2">Follow-up Check</option>
-          </select>
-        </div>
-
-        {/* Type Select */}
-        <div className="flex-1">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
-            Type
-          </label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="w-full px-3 py-1.5 bg-slate-50 border border-[#e2e8f0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00A3FF]/10 focus:border-[#00A3FF] transition-all text-[12px] font-medium text-slate-600 cursor-pointer outline-none appearance-none"
-            style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', paddingRight: '2.5rem' }}
-          >
-            <option value="">Select</option>
-            <option value="A">PRE</option>
-            <option value="B">POST</option>
-          </select>
-        </div>
-
-        {/* The Professional Toggle Switch */}
-        <div className="flex items-center gap-2 mb-1.5 px-2">
-          <button
-            type="button"
-            onClick={() => setIsActive(!isActive)}
-            className={`relative inline-flex h-4.5 w-8.5 items-center rounded-full transition-colors focus:outline-none ${
-              isActive ? 'bg-[#007bff]' : 'bg-[#dc3545]'
-            }`}
-          >
-            <span
-              className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
-                isActive ? 'translate-x-5' : 'translate-x-1'
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Multi-Select Tag Input (7 Columns) */}
+          <div className="lg:col-span-7 relative" ref={dropdownRef}>
+            <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500 mb-2.5 ml-1">
+              <ShieldCheck size={14} className="text-[#00A3FF]" /> Select Assessments
+            </label>
+            
+            <div 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`min-h-[52px] w-full px-4 py-2 bg-white border-2 rounded-2xl cursor-pointer flex flex-wrap gap-2 items-center transition-all shadow-sm ${
+                isDropdownOpen ? 'border-[#00A3FF] ring-4 ring-[#00A3FF]/5 shadow-lg' : 'border-slate-100 hover:border-slate-300'
               }`}
-            />
-          </button>
-          <span className="text-[11px] font-bold text-slate-600 min-w-[45px]">
-            {isActive ? 'Active' : 'Inactive'}
-          </span>
-        </div>
+            >
+              {selectedAssessments.length === 0 && (
+                <span className="text-[13px] text-slate-400 font-medium italic">Click to select assessments...</span>
+              )}
+              {selectedAssessments.map(item => (
+                <span key={item} className="flex items-center gap-1.5 bg-blue-50 text-[#00A3FF] pl-3 pr-1.5 py-1 rounded-lg text-[12px] font-bold border border-blue-100 animate-in zoom-in-90">
+                  {item}
+                  <button onClick={(e) => removeAssessment(e, item)} className="hover:bg-blue-200 p-0.5 rounded-md transition-colors">
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              <div className="ml-auto">
+                <ChevronDown size={18} className={`text-slate-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </div>
+            </div>
 
-        {/* Thin Vibrant Blue Button */}
-        <button
-          type="submit"
-          className="bg-[#00A3FF] hover:bg-[#008be6] text-white px-6 py-1.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all duration-300 shadow-sm flex items-center justify-center gap-2 h-[34px] hover:translate-y-[-1px] active:scale-[0.98]"
-        >
-          <span className="text-sm font-light">+</span>
-          <span>Add Record</span>
-        </button>
+            {/* Dropdown Menu */}
+            {isDropdownOpen && (
+              <div className="absolute z-[1000] left-0 right-0 mt-3 bg-white border border-slate-200 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-h-72 overflow-y-auto custom-scrollbar p-2 animate-in slide-in-from-top-2">
+                <div className="grid grid-cols-2 gap-1">
+                  {ASSESSMENT_OPTIONS.map((option) => (
+                    <div 
+                      key={option}
+                      onClick={() => toggleAssessment(option)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all ${
+                        selectedAssessments.includes(option) ? 'bg-[#00A3FF] text-white' : 'hover:bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      <span className="text-[12px] font-bold">{option}</span>
+                      {selectedAssessments.includes(option) && <Check size={16} strokeWidth={3} />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Type Selection (3 Columns) */}
+          <div className="lg:col-span-3">
+            <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500 mb-2.5 ml-1">
+              <Zap size={14} className="text-[#00A3FF]" /> Mapping Type
+            </label>
+            <div className="relative">
+              <select
+                required
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="w-full h-[52px] px-5 bg-white border-2 border-slate-100 rounded-2xl text-[13px] font-bold text-slate-700 outline-none hover:border-slate-300 focus:border-[#00A3FF] transition-all appearance-none cursor-pointer shadow-sm"
+              >
+                <option value="">Choose...</option>
+                {TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+              <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+            </div>
+          </div>
+
+          {/* Status & Add (2 Columns) */}
+          <div className="lg:col-span-2 flex flex-col justify-end gap-2">
+             <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active</span>
+                <button
+                  type="button"
+                  onClick={() => setIsActive(!isActive)}
+                  className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all ${
+                    isActive ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-slate-200'
+                  }`}
+                >
+                  <span className={`h-3.5 w-3.5 transform rounded-full bg-white transition-all ${isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+             </div>
+
+            <button
+              type="submit"
+              className={`w-full h-[52px] rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
+                initialData ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-100' : 'bg-[#00A3FF] hover:bg-[#008be6] shadow-blue-100'
+              } text-white`}
+            >
+              {initialData ? 'Update Record' : 'Save Record'}
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );

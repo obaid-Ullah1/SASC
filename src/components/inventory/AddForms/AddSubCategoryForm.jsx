@@ -22,14 +22,20 @@ const AddSubCategoryForm = ({ onAdd, onClose }) => {
     e.preventDefault();
     if (!formData.parentCategory || !formData.subCategoryName.trim()) return;
     
-    onAdd(formData);
+    // Mapping subCategoryName to 'name' so it displays correctly in GroupedTable
+    onAdd({
+      parentCategory: formData.parentCategory,
+      name: formData.subCategoryName.trim()
+    });
+
     setFormData({ parentCategory: "", subCategoryName: "" });
+    onClose(); // Close the entry module after saving
   };
 
   return (
     <div className="mb-8 bg-white rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] border-2 border-[#00A3FF]/20 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
       
-      {/* Header - Same High Visibility Style */}
+      {/* Header - Mapping Module Style */}
       <div className="flex items-center justify-between px-6 py-4 bg-[#00A3FF]/15 border-b border-[#00A3FF]/20">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-[#00A3FF] rounded-lg shadow-lg shadow-[#00A3FF]/30">
@@ -46,6 +52,7 @@ const AddSubCategoryForm = ({ onAdd, onClose }) => {
         </div>
         
         <button 
+          type="button"
           onClick={onClose}
           className="p-1.5 bg-[#ef4444] text-white rounded-md hover:bg-red-600 transition-all shadow-md active:scale-90"
         >
@@ -57,7 +64,7 @@ const AddSubCategoryForm = ({ onAdd, onClose }) => {
       <form onSubmit={handleSubmit} className="p-8 bg-gradient-to-b from-white to-slate-50/30">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
           
-          {/* Category Dropdown (Selection Only) */}
+          {/* Category Dropdown */}
           <div className="space-y-2.5">
             <div className="flex items-center gap-2 ml-1">
               <ListFilter size={14} className="text-[#00A3FF]" />
