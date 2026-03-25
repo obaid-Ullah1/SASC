@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, Search, RefreshCw, Filter, Plus } from 'lucide-react';
 import PreparationGrid from '../../components/Injection/PreparationGrid';
 
 const InjPrep = () => {
@@ -23,41 +22,43 @@ const InjPrep = () => {
     setDataSource(mockData);
   }, []);
 
+  const handleAddClick = () => {
+    console.log("Opening Preparation Form...");
+  };
+
+  // ✅ NEW: Handles the data coming up from the form
+  const handleSaveNewPrep = (formData) => {
+    const newRecord = {
+      id: dataSource.length > 0 ? Math.max(...dataSource.map(d => d.id)) + 1 : 1, 
+      type: formData.type || "Manual Entry",
+      name: formData.injection || "New Custom Mix",
+      code: `SA-NEW-${Math.floor(Math.random() * 1000)}`,
+      qty: `${formData.quantity || 0} ${formData.measurementType || 'mL'}`,
+      stock: "0.00",
+      used: "0.00",
+      lot: "PENDING",
+      batch: "01",
+      status: formData.status || "Pending",
+      notes: formData.notes || "",
+      instructions: formData.instructions || ""
+    };
+
+    // Add the new record to the TOP of the grid
+    setDataSource(prevData => [newRecord, ...prevData]);
+  };
+
   return (
-    <div className="flex flex-col h-full min-h-screen w-full bg-[#FFE4E1] overflow-hidden rounded-t-[10px]">
+    <div className="flex flex-col h-full min-h-screen w-full bg-[#F1F5F9] overflow-hidden">
       
-      <div className="bg-gradient-to-r from-[#88F298] via-[#A7F590] to-[#E4FC76] px-4 py-2 flex items-center justify-between shrink-0 shadow-sm z-10">
-        <div className="flex items-center gap-2 text-slate-800">
-          <Tag size={20} fill="currentColor" className="text-slate-800 opacity-80" />
-          <h1 className="text-[15px] font-bold tracking-tight opacity-90">Injection Preparation</h1>
+      {/* Main Content Area - Grid now contains its own header */}
+      <div className="flex-1 min-h-0 overflow-hidden p-0">
+        <div className="h-full bg-white rounded-xl shadow-xl border border-slate-300 overflow-hidden">
+          <PreparationGrid 
+            dataSource={dataSource} 
+            onAddClick={handleAddClick}
+            onSaveNew={handleSaveNewPrep} // ✅ Pass the function down to the grid
+          />
         </div>
-
-        <div className="flex items-center gap-2">
-          <button className="bg-[#0066FF] hover:bg-blue-700 text-white p-1.5 rounded-full shadow-md active:scale-95 transition-all flex items-center justify-center w-8 h-8">
-            <Plus size={20} strokeWidth={3} />
-          </button>
-
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Search.........." 
-              className="bg-white text-slate-700 rounded-full pl-9 pr-4 py-1.5 w-64 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-inner italic"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-          </div>
-
-          <button className="bg-[#1A1A1A] hover:bg-black text-white p-1.5 rounded-[4px] shadow-sm active:scale-95 transition-all w-8 h-8 flex items-center justify-center">
-            <RefreshCw size={16} />
-          </button>
-
-          <button className="bg-[#DC3545] hover:bg-red-700 text-white p-1.5 rounded-[4px] shadow-sm active:scale-95 transition-all w-8 h-8 flex items-center justify-center">
-            <Filter size={16} fill="currentColor" />
-          </button>
-        </div>
-      </div>
-
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <PreparationGrid dataSource={dataSource} />
       </div>
 
     </div>

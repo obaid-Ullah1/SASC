@@ -12,7 +12,6 @@ import DataGrid, {
 import ConfirmPopup from '../global/ConfirmPopup';
 import SuccessPopup from '../global/SuccessPopup';
 
-// 1. Removed { data } prop - This component is entirely self-sufficient
 const TestRecord = () => {
   const [selectedGroup, setSelectedGroup] = useState("");
 
@@ -20,7 +19,7 @@ const TestRecord = () => {
   const [confirmPopup, setConfirmPopup] = useState({ isOpen: false, type: 'update' });
   const [successPopup, setSuccessPopup] = useState({ isOpen: false, type: 'Added' });
 
-  // Scalable Mock Data Architecture
+  // Logic remains exactly as provided
   const gridData = useMemo(() => {
     if (!selectedGroup) return [];
 
@@ -85,55 +84,45 @@ const TestRecord = () => {
     return allRows;
   }, [selectedGroup]);
 
-  // Premium Grid CSS with enhanced readability and light blue themes
+  // ✅ Updated Theme Grid Classes
   const gridClasses = `
-    /* Light blue tinted headers for a cleaner look */
-    [&_.dx-datagrid-headers]:!bg-[#f4faff] 
-    [&_.dx-datagrid-headers]:!border-b-2
-    [&_.dx-datagrid-headers]:!border-[#e0f2fe]
+    [&_.dx-datagrid-headers]:!bg-[#f8fafc] 
+    [&_.dx-datagrid-headers]:!text-slate-500 
+    [&_.dx-datagrid-headers]:!font-black 
+    [&_.dx-datagrid-headers]:!text-[11px]
+    [&_.dx-datagrid-headers]:!uppercase
+    [&_.dx-datagrid-headers]:!tracking-widest
+    [&_.dx-datagrid-headers_td]:!border-b-2
+    [&_.dx-datagrid-headers_td]:!border-sky-100
     
-    [&_.dx-header-row_td]:!py-3.5 
-    [&_.dx-header-row_td]:!text-slate-600
-    [&_.dx-header-row_td]:!font-extrabold
-    [&_.dx-header-row_td]:!text-[11px]
-    [&_.dx-header-row_td]:!uppercase
-    [&_.dx-header-row_td]:!tracking-wider
+    [&_.dx-data-row>td]:!py-2
+    [&_.dx-data-row>td]:!text-slate-800
+    [&_.dx-data-row>td]:!text-[13px]
+    [&_.dx-data-row>td]:!font-semibold
     
-    [&_.dx-data-row>td]:!py-1.5 
-    [&_.dx-data-row>td]:!px-2 
-    [&_.dx-data-row>td]:!align-middle
-    [&_.dx-data-row>td]:!border-b
-    [&_.dx-data-row>td]:!border-slate-100
-    
-    /* Interactive Row Hover Effect */
-    [&_.dx-data-row.dx-state-hover>td]:!bg-[#e0f2fe]
-    [&_.dx-data-row.dx-state-hover>td]:!transition-colors
-    
-    [&_.dx-selection-disabled]:!bg-transparent
-    [&_.dx-datagrid-group-row]:!bg-white
-    [&_.dx-datagrid-group-opened]:!text-[black]
-    [&_.dx-datagrid-group-closed]:!text-[black]
+    [&_.dx-data-row.dx-state-hover>td]:!bg-[#f0f9ff]
+    [&_.dx-datagrid-group-row]:!bg-sky-50/50
+    [&_.dx-datagrid-group-row]:!text-sky-900
+    [&_.dx-datagrid-group-row]:!font-black
   `;
 
-  // Enhanced Shared Tailwind classes for the form inputs
-  const inputBaseClasses = "w-full border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-800 font-medium hover:border-[#00A3FF]/40 focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/10 outline-none transition-all bg-white shadow-sm cursor-pointer";
-  const readOnlyInputClasses = "w-full border-0 bg-slate-50 rounded-lg px-3 py-2 text-[13px] text-slate-700 font-bold cursor-default outline-none hover:bg-slate-100 transition-colors";
+  // ✅ Theme Input Classes
+  const labelClass = "flex items-center gap-2 text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1 group-hover:text-[#00A3FF] transition-colors";
+  const inputBaseClasses = "w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/10 outline-none transition-all bg-white shadow-sm";
+  const readOnlyInputClasses = "w-full border-0 bg-transparent py-2 text-[13px] text-slate-800 font-black cursor-default outline-none";
 
-  // --- POPUP HANDLERS ---
+  // Popup Handlers remain same
   const handleSaveClick = () => {
-    // Open Confirmation Popup first
     setConfirmPopup({ isOpen: true, type: 'update' });
   };
 
   const confirmSave = () => {
-    // Close confirmation, trigger success
     setConfirmPopup({ isOpen: false, type: 'update' });
     setSuccessPopup({ isOpen: true, type: 'Added' });
   };
 
   return (
     <>
-      {/* GLOBAL POPUPS */}
       <ConfirmPopup 
         isOpen={confirmPopup.isOpen}
         type={confirmPopup.type}
@@ -143,37 +132,38 @@ const TestRecord = () => {
       />
       <SuccessPopup 
         isOpen={successPopup.isOpen}
-        type="Saved" // Changed text to "Saved Successfully"
+        message="Allergy Test Record saved successfully!"
         onClose={() => setSuccessPopup({ ...successPopup, isOpen: false })}
       />
 
-      <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-20">
+      <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-10">
         
-        {/* Premium Main Card Wrapper */}
-        <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+        {/* ✅ THEMED MAIN CONTAINER */}
+        <div className="bg-white rounded-3xl shadow-2xl border-2 border-sky-100 overflow-hidden">
           
-          {/* ADDED: Professional Sky Blue Gradient Header */}
-          <div className="bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-white px-8 py-5 border-b border-sky-100 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-white p-2.5 rounded-xl shadow-sm border border-sky-100 flex items-center justify-center">
-                <ClipboardCheck size={24} className="text-[#00A3FF]" strokeWidth={2.5} />
+          {/* ✅ SLIM GRADIENT HEADER */}
+          <div className="bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-white px-6 py-4 border-b-2 border-sky-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2 rounded-xl shadow-sm border border-sky-100 flex items-center justify-center">
+                <ClipboardCheck size={20} className="text-[#00A3FF]" strokeWidth={3} />
               </div>
               <div>
-                <h2 className="text-[18px] font-black text-slate-800 uppercase tracking-tight leading-none">Test Record</h2>
-                <p className="text-[12px] font-bold text-[#00A3FF] uppercase tracking-wider mt-1">Patient Allergy Testing Details</p>
+                <h2 className="text-[16px] font-black text-sky-950 uppercase tracking-tight leading-none">Test Record</h2>
+                <p className="text-[10px] font-black text-[#00A3FF] uppercase tracking-[0.2em] mt-1">Diagnostic Laboratory</p>
               </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-full border border-sky-100 shadow-sm">
+                <Activity size={14} className="text-[#00A3FF] animate-pulse" />
+                <span className="text-[9px] font-black text-sky-800 uppercase tracking-widest">System Active</span>
             </div>
           </div>
 
-          <div className="p-8">
-            {/* Top Form Fields: 4 Columns */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              
+          <div className="p-6 md:p-8">
+            {/* TOP FORM FIELDS */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
               <div className="space-y-2 group">
-                <label className="flex items-center gap-2 text-[12px] font-bold text-slate-500 uppercase tracking-wider ml-1 group-hover:text-[#00A3FF] transition-colors">
-                  <User size={14} className="text-[#00A3FF]" /> Patient
-                </label>
-                <select className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 hover:border-slate-200 focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/10 outline-none transition-all bg-slate-50/50 cursor-pointer appearance-none shadow-sm">
+                <label className={labelClass}><User size={13} /> Patient</label>
+                <select className={`${inputBaseClasses} appearance-none cursor-pointer`}>
                   <option value="">Select Patient</option>
                   <option value="1664">Napoli , Emily (1664)</option>
                   <option value="9823">Smith , John (9823)</option>
@@ -182,227 +172,138 @@ const TestRecord = () => {
               </div>
 
               <div className="space-y-2 group">
-                <label className="flex items-center gap-2 text-[12px] font-bold text-slate-500 uppercase tracking-wider ml-1 group-hover:text-[#00A3FF] transition-colors">
-                  <Calendar size={14} className="text-[#00A3FF]" /> Date
-                </label>
-                <input type="date" className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 hover:border-slate-200 focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/10 outline-none transition-all bg-slate-50/50 shadow-sm" />
+                <label className={labelClass}><Calendar size={13} /> Date</label>
+                <input type="date" className={inputBaseClasses} />
               </div>
 
               <div className="space-y-2 group">
-                <label className="flex items-center gap-2 text-[12px] font-bold text-slate-500 uppercase tracking-wider ml-1 group-hover:text-[#00A3FF] transition-colors">
-                  <ClipboardCheck size={14} className="text-[#00A3FF]" /> Performed By
-                </label>
-                <input type="text" placeholder="Enter Name" className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 hover:border-slate-200 focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/10 outline-none transition-all bg-slate-50/50 placeholder:text-slate-400 shadow-sm" />
+                <label className={labelClass}><ClipboardCheck size={13} /> Performed By</label>
+                <input type="text" placeholder="Enter Name" className={inputBaseClasses} />
               </div>
 
               <div className="space-y-2 group">
-                <label className="flex items-center gap-2 text-[12px] font-bold text-slate-500 uppercase tracking-wider ml-1 group-hover:text-[#00A3FF] transition-colors">
-                  <Layers size={14} className="text-[#00A3FF]" /> Test Type
-                </label>
-                <select className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 hover:border-slate-200 focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/10 outline-none transition-all bg-slate-50/50 cursor-pointer appearance-none shadow-sm">
-                  <option value="">Select Test Type</option>
+                <label className={labelClass}><Layers size={13} /> Test Type</label>
+                <select className={`${inputBaseClasses} appearance-none cursor-pointer`}>
+                  <option value="">Select Type</option>
                   <option value="Prick">Prick</option>
                   <option value="Intradermal">Intradermal</option>
                 </select>
               </div>
             </div>
 
-            <hr className="border-slate-100 mb-8" />
-
-            {/* Group Selection Dropdown */}
-            <div className="max-w-sm space-y-2 mb-8 group">
-              <label className="text-[12px] font-bold text-slate-500 uppercase tracking-wider ml-1 group-hover:text-[#00A3FF] transition-colors">Select Group</label>
-              <div className="relative">
-                <select 
-                  value={selectedGroup}
-                  onChange={(e) => setSelectedGroup(e.target.value)}
-                  className="w-full border-2 border-[#00A3FF]/20 rounded-2xl px-4 py-3 text-sm focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/20 outline-none transition-all font-bold bg-[#f0f9ff] hover:bg-[#e0f2fe] cursor-pointer appearance-none shadow-sm text-slate-800"
-                >
-                  <option value="">-- Select Group --</option>
-                  <option value="SPT-90">SPT-90</option>
-                  <option value="SPT-Food">SPT-Food</option>
-                  <option value="Limited/PEDS">Limited/PEDS</option>
-                  <option value="SPT-Food 1">SPT-Food 1</option>
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#00A3FF]">
-                  <Activity size={18} />
+            {/* ✅ GROUP SELECTION BAR - IMPROVED VISIBILITY */}
+            <div className="bg-[#f0f9ff]/60 border-2 border-sky-100 rounded-2xl p-6 mb-10 flex flex-col md:flex-row items-center gap-8 shadow-inner">
+              <div className="w-full md:max-w-xs space-y-2 group">
+                <label className="text-[11px] font-black text-sky-600 uppercase tracking-widest ml-1">Select Group</label>
+                <div className="relative">
+                  <select 
+                    value={selectedGroup}
+                    onChange={(e) => setSelectedGroup(e.target.value)}
+                    className="w-full border-2 border-[#00A3FF]/30 rounded-xl px-4 py-3 text-sm font-black bg-white hover:bg-white focus:border-[#00A3FF] outline-none transition-all cursor-pointer appearance-none shadow-md text-rose-600"
+                  >
+                    <option value="" className="text-slate-400">-- Choose Allergen Group --</option>
+                    <option value="SPT-90">SPT-90</option>
+                    <option value="SPT-Food">SPT-Food</option>
+                    <option value="Limited/PEDS">Limited/PEDS</option>
+                    <option value="SPT-Food 1">SPT-Food 1</option>
+                  </select>
+                  <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#00A3FF] pointer-events-none" />
                 </div>
+              </div>
+
+              <div className="hidden md:block h-12 w-[2px] bg-sky-100"></div>
+
+              <div className="flex-1 flex flex-wrap justify-around gap-6 w-full">
+                  <div className="text-center">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Items Loaded</p>
+                    <p className="text-lg font-black text-slate-700 leading-none">{gridData.length}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1">Positives</p>
+                    <p className="text-lg font-black text-rose-600 leading-none">0</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1">Negatives</p>
+                    <p className="text-lg font-black text-emerald-600 leading-none">0</p>
+                  </div>
               </div>
             </div>
 
-            {/* Allergens Tested Section */}
+            {/* ✅ DATAGRID SECTION */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-slate-800 mb-2 px-1">
-                <Syringe size={18} className="text-[#00A3FF]" />
-                <h3 className="text-[14px] font-black uppercase tracking-wider">Allergens Tested</h3>
+              <div className="flex items-center gap-2 text-slate-800 px-1">
+                <Syringe size={16} className="text-[#00A3FF]" />
+                <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Allergen Input Matrix</h3>
               </div>
               
-              <div className={`h-[600px] border-2 border-slate-100 rounded-[1.5rem] overflow-hidden shadow-sm flex flex-col ${gridClasses}`}>
+              <div className={`h-[500px] border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col ${gridClasses}`}>
                 <DataGrid
                   dataSource={gridData} 
                   keyExpr="id"
                   showBorders={false}
                   showRowLines={true}
                   hoverStateEnabled={true}
-                  noDataText={selectedGroup ? "Loading..." : "No allergens added. Please select a group."}
-                  rowAlternationEnabled={false}
-                  columnAutoWidth={false}
+                  noDataText={selectedGroup ? "Initializing..." : "Please select an allergen group to begin recording results."}
                   height="100%"
-                  width="100%"
                 >
-                  <Scrolling mode="standard" showScrollbar="always" />
+                  <Scrolling mode="virtual" />
                   <Paging enabled={false} />
-                  <Sorting mode="none" />
-                  <Grouping autoExpandAll={false} expandMode="rowClick" />
+                  <Grouping autoExpandAll={true} />
 
-                  {/* Group Heading Configuration */}
                   <Column
                     dataField="groupTitle"
                     groupIndex={0}
                     visible={false}
-                    groupCellRender={(cell) => {
-                      const count = cell?.data?.items?.length || 0;
-                      return (
-                        <div className="flex justify-between items-center w-full pr-4 py-2 hover:opacity-80 transition-opacity">
-                          <div className="flex items-center gap-3">
-                            <Layers size={16} className="text-[#00A3FF]" />
-                            <span className="text-[14px] font-bold text-slate-800 tracking-wide uppercase">
-                              {cell.value}
-                            </span>
-                            <span className="text-[#00A3FF] text-[12px] font-bold bg-[#00A3FF]/10 px-2.5 py-0.5 rounded-md">
-                              {count}
-                            </span>
-                          </div>
-                          {/* File Upload aligned to the right */}
-                          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
-                             <input 
-                               type="file" 
-                               className="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-4 file:rounded-xl file:border file:border-slate-200 file:text-xs file:font-semibold file:bg-white file:text-slate-700 hover:file:bg-slate-50 cursor-pointer transition-all shadow-sm"
-                             />
-                          </div>
+                    groupCellRender={(cell) => (
+                      <div className="flex justify-between items-center w-full pr-4 py-1">
+                        <div className="flex items-center gap-3">
+                          <Layers size={14} className="text-[#00A3FF]" />
+                          <span className="text-[12px] font-black text-sky-900 uppercase tracking-wider">{cell.value}</span>
+                          <span className="text-[#00A3FF] text-[10px] font-black bg-white px-2 py-0.5 rounded border border-sky-100 shadow-sm">{cell?.data?.items?.length || 0} ITEMS</span>
                         </div>
-                      );
-                    }}
-                  />
-
-                  {/* --- CUSTOM FORM DATA COLUMNS --- */}
-                  <Column 
-                    dataField="allergen" 
-                    caption="Allergen" 
-                    minWidth={200}
-                    cellRender={(cell) => (
-                      <input type="text" readOnly value={cell.data.allergen} className={readOnlyInputClasses} />
-                    )} 
-                  />
-                  
-                  <Column 
-                    dataField="siteLabel" 
-                    caption="Site Label" 
-                    width={110} 
-                    alignment="center"
-                    cellRender={(cell) => (
-                      <span className="px-3 py-1.5 rounded-lg bg-[#00A3FF]/10 border border-[#00A3FF]/20 text-[#00A3FF] text-[12px] font-bold tracking-wide shadow-sm">
-                        {cell.data.siteLabel}
-                      </span>
+                        <input type="file" className="hidden" id={`file-${cell.value}`} />
+                        <label htmlFor={`file-${cell.value}`} className="cursor-pointer text-[9px] font-black bg-[#00A3FF] text-white px-3 py-1.5 rounded-lg shadow-md hover:bg-sky-600 active:scale-95 transition-all">UPLOAD IMAGE</label>
+                      </div>
                     )}
                   />
-                  
-                  <Column 
-                    dataField="wheal" 
-                    caption="Wheal (mm)" 
-                    width={130} 
-                    cellRender={() => (
-                      <div className="flex items-center gap-3">
-                        <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#00A3FF] focus:ring-[#00A3FF] transition-all cursor-pointer" />
-                        <input type="number" defaultValue="0" className={inputBaseClasses} />
-                      </div>
-                    )} 
-                  />
-                  
-                  <Column 
-                    dataField="result" 
-                    caption="Result" 
-                    width={150} 
-                    cellRender={() => (
-                      <div className="relative">
-                        <select className={`${inputBaseClasses} appearance-none pr-8`}>
-                          <option value="Negative">Negative</option>
-                          <option value="Positive">Positive</option>
-                        </select>
-                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00A3FF] pointer-events-none" />
-                      </div>
-                    )} 
-                  />
-                  
-                  <Column 
-                    dataField="flare" 
-                    caption="Flare (mm)" 
-                    width={120} 
-                    cellRender={() => (
-                      <input type="number" defaultValue="0" className={inputBaseClasses} />
-                    )} 
-                  />
-                  
-                  <Column 
-                    dataField="controlType" 
-                    caption="Control Type" 
-                    width={160} 
-                    cellRender={() => (
-                      <div className="relative">
-                        <select className={`${inputBaseClasses} appearance-none pr-8`}>
-                          <option value="Negative">Negative</option>
-                          <option value="Positive">Positive</option>
-                        </select>
-                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00A3FF] pointer-events-none" />
-                      </div>
-                    )} 
-                  />
-                  
-                  <Column 
-                    dataField="ids" 
-                    caption="IDs" 
-                    width={100} 
-                    cellRender={() => (
-                      <input type="text" className={inputBaseClasses} />
-                    )} 
-                  />
-                </DataGrid>
-              </div>
 
-              {/* Interactive Totals Summary Bar */}
-              <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 mt-2 shadow-sm">
-                <span className="text-[12px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-3">
-                  Total Allergens
-                  <span className="bg-white border-2 border-slate-200 px-4 py-1.5 rounded-xl text-slate-800 shadow-sm font-black text-sm">{gridData.length} / 0</span>
-                </span>
-                
-                <div className="flex gap-4">
-                    <div className="flex items-center gap-3 bg-red-50/80 border border-red-100 px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition-all cursor-default">
-                      <span className="text-[11px] font-extrabold text-red-500 uppercase tracking-wider">Positives</span>
-                      <span className="w-7 h-7 rounded-lg bg-white text-red-600 flex items-center justify-center font-black shadow-sm text-sm border border-red-100">0</span>
+                  <Column dataField="allergen" caption="Allergen Name" minWidth={220} cellRender={(c) => <input readOnly value={c.data.allergen} className={readOnlyInputClasses} />} />
+                  <Column dataField="siteLabel" caption="Site" width={90} alignment="center" cellRender={(c) => <span className="bg-sky-100/50 text-[#00A3FF] text-[11px] font-black px-2.5 py-1 rounded-md border border-sky-100">{c.data.siteLabel}</span>} />
+                  <Column dataField="wheal" caption="Wheal (mm)" width={130} cellRender={() => (
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="w-4 h-4 rounded border-sky-200 text-[#00A3FF] focus:ring-[#00A3FF] cursor-pointer" />
+                      <input type="number" defaultValue="0" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-center focus:border-[#00A3FF] outline-none" />
                     </div>
-                    <div className="flex items-center gap-3 bg-green-50/80 border border-green-100 px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition-all cursor-default">
-                      <span className="text-[11px] font-extrabold text-green-600 uppercase tracking-wider">Negatives</span>
-                      <span className="w-7 h-7 rounded-lg bg-white text-green-600 flex items-center justify-center font-black shadow-sm text-sm border border-green-100">0</span>
-                    </div>
-                </div>
+                  )} />
+                  <Column dataField="result" caption="Outcome" width={140} cellRender={() => (
+                    <select className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-black text-slate-700 outline-none cursor-pointer">
+                      <option value="Negative">NEGATIVE</option>
+                      <option value="Positive">POSITIVE</option>
+                    </select>
+                  )} />
+                  <Column dataField="flare" caption="Flare (mm)" width={120} cellRender={() => <input type="number" defaultValue="0" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-center focus:border-[#00A3FF] outline-none" />} />
+                  <Column dataField="controlType" caption="Ctrl Type" width={140} cellRender={() => (
+                    <select className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-black text-slate-700 outline-none cursor-pointer">
+                      <option value="Negative">NEGATIVE</option>
+                      <option value="Positive">POSITIVE</option>
+                    </select>
+                  )} />
+                  <Column dataField="ids" caption="Unique IDs" width={110} cellRender={() => <input type="text" placeholder="ID..." className="w-full bg-transparent border-b border-slate-100 text-[11px] font-bold outline-none placeholder:text-slate-300" />} />
+                </DataGrid>
               </div>
             </div>
 
-            {/* Form Action Buttons */}
-            <div className="flex justify-end gap-4 mt-10">
-              <button className="group flex items-center gap-2 px-6 py-3.5 rounded-2xl border-2 border-slate-200 text-slate-500 font-bold text-[12px] hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300 transition-all uppercase tracking-wider shadow-sm">
-                <XCircle size={18} className="group-hover:rotate-90 transition-transform duration-300" /> 
-                Cancel
+            {/* ✅ FORM ACTION BUTTONS */}
+            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-12 border-t border-slate-100 pt-8">
+              <button className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl border-2 border-slate-200 text-slate-500 font-black text-[11px] hover:bg-slate-50 hover:text-slate-800 transition-all uppercase tracking-widest active:scale-95">
+                <XCircle size={16} /> Cancel Testing
               </button>
               
-              {/* SAVED BUTTON WIRED TO POPUP */}
               <button 
                 onClick={handleSaveClick}
-                className="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[#00A3FF] text-white font-bold text-[12px] hover:bg-[#008fdf] shadow-[0_8px_20px_rgba(0,163,255,0.3)] transition-all uppercase tracking-widest hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
+                className="flex items-center justify-center gap-2 px-12 py-3.5 rounded-xl bg-[#00A3FF] text-white font-black text-[11px] hover:bg-[#008fdf] shadow-[0_10px_20px_rgba(0,163,255,0.2)] transition-all uppercase tracking-[0.2em] active:scale-95"
               >
-                <Save size={18} /> 
-                Save Test
+                <Save size={16} /> Save Record
               </button>
             </div>
 

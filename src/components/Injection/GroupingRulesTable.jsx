@@ -12,6 +12,9 @@ import { Pencil, Trash2, Layout, List } from 'lucide-react';
 
 import TableHeader from '../TableHeader';
 import AddGroupingRules from './AddForms/AddGroupingRules'; 
+// ✅ Navigate Popups
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
 const GroupingRulesTable = () => {
   const [data, setData] = useState([
@@ -25,6 +28,10 @@ const GroupingRulesTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingData, setEditingData] = useState(null);
+
+  // --- ✅ POPUP STATES ---
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
+  const [successInfo, setSuccessInfo] = useState({ show: false, message: "" });
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -45,10 +52,16 @@ const GroupingRulesTable = () => {
     setShowAddForm(true);
   };
 
-  const handleDelete = (id) => {
-    if(window.confirm("Are you sure you want to delete this grouping rule?")) {
-      setData(data.filter(item => item.id !== id));
-    }
+  // ✅ Trigger Delete Confirmation
+  const handleDeleteClick = (id) => {
+    setConfirmDelete({ show: true, id });
+  };
+
+  // ✅ Perform Delete after confirmation
+  const handleConfirmDelete = () => {
+    setData(data.filter(item => item.id !== confirmDelete.id));
+    setConfirmDelete({ show: false, id: null });
+    setSuccessInfo({ show: true, message: "Grouping rule deleted successfully!" });
   };
 
   const handleFormSubmit = (formData) => {
@@ -56,9 +69,11 @@ const GroupingRulesTable = () => {
       setData(data.map(item => 
         item.id === editingData.id ? { ...item, ...formData } : item
       ));
+      setSuccessInfo({ show: true, message: "Grouping rule updated successfully!" });
     } else {
       const nextId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
       setData([{ id: nextId, ...formData, group: 'New Group' }, ...data]);
+      setSuccessInfo({ show: true, message: "New grouping rule added successfully!" });
     }
     setShowAddForm(false);
     setEditingData(null);
@@ -66,7 +81,6 @@ const GroupingRulesTable = () => {
 
   const actionCellRender = (cellData) => (
     <div className="flex items-center justify-center gap-2">
-      {/* EDIT BUTTON: Blue hover effect */}
       <button 
         onClick={() => handleEditClick(cellData.data)}
         className="w-7 h-7 rounded-full border border-[#00A3FF] text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white transition-all shadow-sm active:scale-90"
@@ -74,9 +88,8 @@ const GroupingRulesTable = () => {
         <Pencil size={12} strokeWidth={2.5} />
       </button>
 
-      {/* DELETE BUTTON: Rose hover effect */}
       <button 
-        onClick={() => handleDelete(cellData.data.id)}
+        onClick={() => handleDeleteClick(cellData.data.id)}
         className="w-7 h-7 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-90"
       >
         <Trash2 size={12} strokeWidth={2.5} />
@@ -114,7 +127,6 @@ const GroupingRulesTable = () => {
         onAddClick={handleAddNewClick} 
       />
 
-      {/* Passed editData (prop name matching your form) and added a key to force re-renders on row switch */}
       <AddGroupingRules 
         key={editingData?.id || 'new'}
         isOpen={showAddForm} 
@@ -185,6 +197,22 @@ const GroupingRulesTable = () => {
             />
           </DataGrid>
         </div>
+
+        {/* ✅ CONFIRM DELETE POPUP */}
+        <ConfirmPopup 
+          isOpen={confirmDelete.show}
+          onClose={() => setConfirmDelete({ show: false, id: null })}
+          onConfirm={handleConfirmDelete}
+          title="Delete Grouping Rule"
+          message="Are you sure you want to delete this grouping rule? This action cannot be undone."
+        />
+
+        {/* ✅ SUCCESS POPUP */}
+        <SuccessPopup 
+          isOpen={successInfo.show}
+          onClose={() => setSuccessInfo({ show: false, message: "" })}
+          message={successInfo.message}
+        />
 
         <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex items-center justify-end shrink-0">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">

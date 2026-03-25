@@ -13,6 +13,9 @@ import { Pencil, Trash2, Check, X, CircleDot, Ruler, List } from 'lucide-react';
 // Import Header and our dynamically rendered Form
 import TableHeader from '../TableHeader'; 
 import AddScaleForm from './AddForms/AddScaleForm';
+// ✅ Import Navigate Popups
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
 const ScaleTable = () => {
   const [data, setData] = useState([
@@ -25,6 +28,11 @@ const ScaleTable = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
+
+  // --- ✅ POPUP STATES ---
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
+  const [successInfo, setSuccessInfo] = useState({ show: false, message: "" });
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -35,50 +43,75 @@ const ScaleTable = () => {
     );
   }, [searchTerm, data]);
 
-  const handleDelete = (id) => {
-    if(window.confirm("Are you sure you want to delete this scale entry?")) {
-      setData(data.filter(item => item.id !== id));
-    }
+  // ✅ Trigger Delete Confirmation
+  const handleDeleteClick = (id) => {
+    setConfirmDelete({ show: true, id });
   };
 
-  // Handler to push new data from Form into the Grid
-  const handleAddNewScale = (newScale) => {
-    const nextId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
-    
-    const formattedScale = {
-      id: nextId,
-      grade: newScale.grade,
-      whealMin: newScale.whealMin || 0,
-      whealMax: newScale.whealMax || 0,
-      flareMin: newScale.flareMin || 0,
-      flareMax: newScale.flareMax || 0,
-      result: newScale.result || '',
-      description: newScale.description,
-      status: newScale.isActive ? 'Active' : 'Inactive',
-      isDefault: newScale.isDefChecked
-    };
+  // ✅ Perform Delete
+  const handleConfirmDelete = () => {
+    setData(data.filter(item => item.id !== confirmDelete.id));
+    setConfirmDelete({ show: false, id: null });
+    setSuccessInfo({ show: true, message: "Scale entry deleted successfully!" });
+  };
 
-    setData([formattedScale, ...data]);
+  // ✅ HANDLES BOTH ADD AND UPDATE
+  const handleSaveScale = (newScale) => {
+    if (editingRecord) {
+      // Update Logic
+      setData(data.map(item => 
+        item.id === editingRecord.id ? { 
+          ...item, 
+          grade: newScale.grade,
+          whealMin: newScale.whealMin || 0,
+          whealMax: newScale.whealMax || 0,
+          flareMin: newScale.flareMin || 0,
+          flareMax: newScale.flareMax || 0,
+          result: newScale.result || '',
+          description: newScale.description,
+          status: newScale.isActive ? 'Active' : 'Inactive',
+          isDefault: newScale.isDefChecked
+        } : item
+      ));
+      setSuccessInfo({ show: true, message: "Scale entry updated successfully!" });
+    } else {
+      // Add Logic
+      const nextId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
+      const formattedScale = {
+        id: nextId,
+        grade: newScale.grade,
+        whealMin: newScale.whealMin || 0,
+        whealMax: newScale.whealMax || 0,
+        flareMin: newScale.flareMin || 0,
+        flareMax: newScale.flareMax || 0,
+        result: newScale.result || '',
+        description: newScale.description,
+        status: newScale.isActive ? 'Active' : 'Inactive',
+        isDefault: newScale.isDefChecked
+      };
+      setData([formattedScale, ...data]);
+      setSuccessInfo({ show: true, message: "New scale added successfully!" });
+    }
     setShowAddForm(false);
+    setEditingRecord(null);
   };
 
   const handleEditClick = (rowData) => {
-    console.log("Editing:", rowData);
+    setEditingRecord(rowData);
     setShowAddForm(true);
   };
 
-  // --- EXACT MATCH CELL RENDERERS ---
   const actionCellRender = (cellData) => (
     <div className="flex items-center justify-center gap-2">
       <button 
         onClick={() => handleEditClick(cellData.data)}
-        className="w-6 h-6 rounded-full border border-[#00A3FF] text-[#00A3FF] flex items-center justify-center hover:bg-blue-50 transition-all shadow-sm"
+        className="w-6 h-6 rounded-full border border-[#00A3FF] text-[#00A3FF] flex items-center justify-center hover:bg-blue-50 transition-all shadow-sm active:scale-90"
       >
         <Pencil size={11} strokeWidth={2.5} />
       </button>
       <button 
-        onClick={() => handleDelete(cellData.data.id)}
-        className="w-6 h-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 transition-all shadow-sm"
+        onClick={() => handleDeleteClick(cellData.data.id)}
+        className="w-6 h-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 transition-all shadow-sm active:scale-90"
       >
         <Trash2 size={11} strokeWidth={2.5} />
       </button>
@@ -143,13 +176,20 @@ const ScaleTable = () => {
         icon={Ruler}
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
-        onAddClick={() => setShowAddForm(!showAddForm)} 
+        onAddClick={() => {
+          setEditingRecord(null);
+          setShowAddForm(!showAddForm);
+        }} 
       />
 
       <AddScaleForm 
         isOpen={showAddForm} 
-        onClose={() => setShowAddForm(false)} 
-        onAdd={handleAddNewScale} 
+        onClose={() => {
+          setShowAddForm(false);
+          setEditingRecord(null);
+        }} 
+        onAdd={handleSaveScale} 
+        initialData={editingRecord}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
@@ -210,9 +250,32 @@ const ScaleTable = () => {
             <Column caption="Actions" alignment="center" width={100} headerCellRender={headerActionRender} cellRender={actionCellRender} fixed={true} fixedPosition="right" />
 
             <Paging defaultPageSize={20} />
-            <Pager visible={true} allowedPageSizes={[10, 20, 50, 100]} displayMode="full" showPageSizeSelector={true} showInfo={true} showNavigationButtons={true} />
+            <Pager
+              visible={true}
+              allowedPageSizes={[10, 20, 50, 100]}
+              displayMode="full"
+              showPageSizeSelector={true}
+              showInfo={true}
+              showNavigationButtons={true}
+            />
           </DataGrid>
         </div>
+
+        {/* ✅ Confirm Delete Popup */}
+        <ConfirmPopup 
+          isOpen={confirmDelete.show}
+          onClose={() => setConfirmDelete({ show: false, id: null })}
+          onConfirm={handleConfirmDelete}
+          title="Delete Scale Entry"
+          message="Are you sure you want to delete this scale entry? This action cannot be undone."
+        />
+
+        {/* ✅ Success Popup */}
+        <SuccessPopup 
+          isOpen={successInfo.show}
+          onClose={() => setSuccessInfo({ show: false, message: "" })}
+          message={successInfo.message}
+        />
 
         <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex items-center justify-end shrink-0">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">

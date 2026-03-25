@@ -58,7 +58,8 @@ const PersonPage = ({ activeColor }) => {
   };
 
   return (
-    <div className={`h-full w-full flex flex-col px-6 pt-4 pb-4 gap-4 ${showAddForm ? "overflow-auto" : "overflow-hidden"}`}>
+    /* Changed px-6 pt-4 pb-4 to p-2 md:p-3 for a thinner, cleaner layout */
+    <div className={`h-full w-full flex flex-col p-2 md:p-0 gap-3 ${showAddForm ? "overflow-auto" : "overflow-hidden"}`}>
       
       {showAddForm && (
         <div className="w-full shrink-0">
@@ -70,11 +71,11 @@ const PersonPage = ({ activeColor }) => {
         </div>
       )}
 
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 bg-white rounded-2xl shadow-xl border border-slate-300 overflow-hidden">
         <PersonGrid
           data={peopleData}
           onAddClick={() => { setEditingData(null); setShowAddForm(true); }}
-          onEditClick={handleEditClick} // Ensure your Grid component calls this prop!
+          onEditClick={handleEditClick} 
         />
       </div>
 

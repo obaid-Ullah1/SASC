@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Settings, Activity, Palette, PlayCircle, List, 
+  Activity, Palette, PlayCircle, List, 
   RefreshCw, Workflow, Pencil, Trash2 
 } from 'lucide-react';
 
@@ -266,36 +266,35 @@ const StatusPage = ({ activeColor = "bg-[#1D68F1]" }) => {
   const current = tabConfigs[activeSubTab];
 
   return (
-    <div className={`w-full flex flex-col bg-[#f0f4f7] font-sans transition-all duration-300 ${showAddForm ? "h-auto min-h-screen overflow-y-auto" : "h-full overflow-hidden"}`}>
+    <div className={`w-full flex flex-col p-1.5 md:p-2 bg-[#f0f4f7] font-sans transition-all duration-300 ${showAddForm ? "h-auto min-h-screen overflow-y-auto" : "h-full overflow-hidden"}`}>
       
-      <div className="flex flex-col items-center py-4 shrink-0 px-4">
-        <div className="flex items-center gap-2.5 text-[#1D68F1]">
-          <Settings size={24} strokeWidth={3} />
-          <h1 className="text-[20px] sm:text-[24px] font-black tracking-tight uppercase text-slate-800">General Management</h1>
-        </div>
+      {/* ======================================================== */}
+      {/* UPDATED TABS CONTAINER: Official Pill Theme */}
+      {/* ======================================================== */}
+      <div className="flex flex-wrap justify-center gap-1.5 mb-3 mt-4 shrink-0 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-300 w-fit mx-auto">
+        {Object.keys(tabConfigs).map((tabKey) => {
+          const TabIcon = tabConfigs[tabKey].icon;
+          const isActive = activeSubTab === tabKey;
+          return (
+            <button
+              key={tabKey}
+              onClick={() => { setActiveSubTab(tabKey); closeForm(); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
+                isActive 
+                  ? 'bg-[#00A3FF] text-white shadow-lg scale-105' 
+                  : 'bg-transparent text-slate-500 hover:bg-slate-50 hover:text-[#00A3FF]'
+              }`}
+            >
+              <TabIcon size={15} strokeWidth={isActive ? 3 : 2} />
+              <span className="text-[11px] font-black uppercase tracking-wider">{tabKey}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="w-full px-6 mb-6 shrink-0">
-        <div className="flex flex-wrap justify-center gap-3">
-          {Object.keys(tabConfigs).map((tabKey) => {
-            const TabIcon = tabConfigs[tabKey].icon;
-            const isActive = activeSubTab === tabKey;
-            return (
-              <button
-                key={tabKey}
-                onClick={() => { setActiveSubTab(tabKey); closeForm(); }}
-                className={`flex items-center gap-3 px-5 py-2.5 rounded-xl transition-all duration-300 border shadow-sm ${isActive ? 'bg-[#1D68F1] text-white border-[#1D68F1] scale-105 z-10' : 'bg-white text-slate-500 border-gray-100 hover:bg-slate-50'} min-w-[140px] max-w-fit`}
-              >
-                <TabIcon size={16} strokeWidth={isActive ? 3 : 2} />
-                <span className="text-[11px] font-bold uppercase tracking-wider">{tabKey}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
+      {/* Form Container */}
       {showAddForm && (
-        <div className="px-6 mb-6 shrink-0 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="px-1 mb-2 shrink-0 animate-in fade-in slide-in-from-top-4 duration-300">
            {activeSubTab === 'Status' && <AddStatusForm onCancel={closeForm} onSave={handleSaveStatus} initialData={editingRecord} />}
            {activeSubTab === 'Process' && <AddProcessForm onCancel={closeForm} onSave={handleSaveProcess} initialData={editingRecord} />}
            {activeSubTab === 'Color' && <AddColorForm onCancel={closeForm} onSave={handleSaveColor} initialData={editingRecord} />}
@@ -305,14 +304,17 @@ const StatusPage = ({ activeColor = "bg-[#1D68F1]" }) => {
         </div>
       )}
 
-      <div className={`${showAddForm ? "w-full px-6 pb-6 h-[450px]" : "flex-1 min-h-0 w-full px-6 pb-6 overflow-hidden"}`}>
-        <ManagementGrid
-          title={current.title}
-          data={current.data}
-          columns={current.columns}
-          icon={current.icon}
-          onAddClick={() => { setEditingRecord(null); setShowAddForm(true); }}
-        />
+      {/* Grid Container */}
+      <div className={`${showAddForm ? "w-full px-1 pb-1 h-[400px]" : "flex-1 min-h-0 w-full px-1 pb-1 overflow-hidden"}`}>
+        <div className="h-full bg-white rounded-2xl shadow-xl border border-slate-300 overflow-hidden">
+          <ManagementGrid
+            title={current.title}
+            data={current.data}
+            columns={current.columns}
+            icon={current.icon}
+            onAddClick={() => { setEditingRecord(null); setShowAddForm(true); }}
+          />
+        </div>
       </div>
 
       <ConfirmPopup 

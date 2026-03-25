@@ -11,6 +11,9 @@ import {
   Zap
 } from 'lucide-react';
 
+// ✅ Added Success Popup Import
+import SuccessPopup from '../../components/global/SuccessPopup';
+
 const AppointmentRules = () => {
   const [autoSchedule, setAutoSchedule] = useState(true);
   const [dayBased, setDayBased] = useState(true);
@@ -18,52 +21,70 @@ const AppointmentRules = () => {
   const [runTime, setRunTime] = useState("02:00 PM");
   const [notes, setNotes] = useState("Standard system automation for clinic hours.");
 
+  // ✅ Added Popup State
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // ✅ Added Save Handler
+  const handleSave = () => {
+    // Perform your logic here
+    setShowSuccess(true);
+  };
+
+  // Official Theme Input Classes
+  const inputClasses = "w-full bg-white border-2 border-slate-200 rounded-lg text-[13px] text-slate-700 transition-all focus:outline-none focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/10 font-medium";
+
   return (
-    <div className="w-full min-h-screen bg-[#F4F7FA] p-4 md:p-8 font-sans overflow-y-auto animate-in fade-in duration-700">
-      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden transform transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
+    <div className="w-full min-h-screen bg-[#F3F4F6] p-4 md:p-8 font-sans overflow-y-auto animate-in fade-in duration-500">
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-slate-200 overflow-hidden transform transition-all duration-500">
         
-        {/* MEDICAL HEADER - Animated Gradient */}
-        <div className="bg-gradient-to-r from-[#1D68F1] via-[#3A7FFF] to-[#1D68F1] bg-[length:200%_auto] animate-[gradient_8s_ease_infinite] px-6 md:px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-4 text-white">
-          <div className="flex items-center gap-4 transition-transform duration-300 hover:scale-105">
-            <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-md animate-pulse">
-              <Settings size={24} strokeWidth={2} />
+        {/* OFFICIAL HEADER - Custom Gradient & Branding */}
+        <div className="bg-gradient-to-r from-[#00A3FF] via-[#008bdb] to-[#00A3FF] bg-[length:200%_auto] animate-[gradient_8s_ease_infinite] px-6 md:px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-4 text-white">
+          <div className="flex items-center gap-4 transition-transform duration-300">
+            <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur-md shadow-inner">
+              <Settings size={22} strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-lg font-extrabold tracking-tight">Appointment Generation Rules</h1>
-              <p className="text-[11px] text-blue-100/80 font-medium tracking-wide">Automated Clinical Scheduling Engine</p>
+              <h1 className="text-[16px] font-black tracking-tight uppercase">Appointment Generation Rules</h1>
+              <p className="text-[11px] text-blue-50/90 font-bold tracking-wider">Automated Clinical Scheduling Engine</p>
             </div>
           </div>
           
-          <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all duration-500 shadow-lg border ${
+          <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all duration-500 shadow-md border-2 ${
             autoSchedule 
-              ? 'bg-[#2B9E64] border-emerald-400 text-white scale-110' 
-              : 'bg-slate-200 border-slate-300 text-slate-500 opacity-80'
+              ? 'bg-[#10b981] border-[#10b981] text-white scale-105' 
+              : 'bg-slate-100 border-slate-200 text-slate-500'
           }`}>
-            <ShieldCheck size={12} className={autoSchedule ? "animate-bounce" : ""} />
+            <ShieldCheck size={14} className={autoSchedule ? "animate-pulse" : ""} strokeWidth={3} />
             {autoSchedule ? 'SYSTEM ACTIVE' : 'SYSTEM PAUSED'}
           </div>
         </div>
 
-        <div className="p-6 md:p-10 space-y-10 md:space-y-12">
+        <div className="p-6 md:p-8 space-y-8 md:space-y-10">
           
-          {/* SECTION: SYSTEM STATUS - Interactive Hover Effect */}
+          {/* SECTION: SYSTEM STATUS */}
           <section className="relative group overflow-hidden rounded-2xl">
-            <div className="flex flex-col sm:flex-row items-center justify-between p-6 bg-blue-50/30 border border-blue-100/50 transition-all duration-300 group-hover:bg-blue-50/60">
+            <div className={`flex flex-col sm:flex-row items-center justify-between p-6 transition-all duration-300 border-2 rounded-2xl ${
+              autoSchedule ? 'bg-[#00A3FF]/5 border-[#00A3FF]/20' : 'bg-slate-50 border-slate-200'
+            }`}>
               <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                <div className={`p-3 rounded-full transition-all duration-500 ${autoSchedule ? 'bg-blue-100 text-blue-600 rotate-[360deg]' : 'bg-slate-100 text-slate-400'}`}>
+                <div className={`p-3 rounded-xl transition-all duration-500 shadow-sm ${autoSchedule ? 'bg-[#00A3FF] text-white rotate-[360deg]' : 'bg-slate-200 text-slate-400'}`}>
                    <Zap size={20} className={autoSchedule ? "animate-pulse" : ""} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">System Status</h3>
-                  <p className="text-xs text-slate-500">Enable or disable all automated scheduling logic.</p>
+                  <h3 className="text-[14px] font-black text-slate-800 uppercase tracking-tight">System Status</h3>
+                  <p className="text-[12px] font-medium text-slate-500 mt-0.5">Enable or disable all automated scheduling logic globally.</p>
                 </div>
               </div>
+              
+              {/* Custom Animated Toggle */}
               <div 
-                className="group flex items-center gap-3 cursor-pointer select-none active:scale-90 transition-transform" 
+                className="group flex items-center gap-3 cursor-pointer select-none active:scale-95 transition-transform" 
                 onClick={() => setAutoSchedule(!autoSchedule)}
               >
-                <div className={`w-14 h-7 flex items-center rounded-full px-1 transition-all duration-500 ease-in-out ${autoSchedule ? 'bg-[#1D68F1] shadow-[0_0_15px_rgba(29,104,241,0.4)]' : 'bg-slate-300'}`}>
-                  <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${autoSchedule ? 'translate-x-7' : 'translate-x-0'}`} />
+                <div className={`w-14 h-7 flex items-center rounded-full px-1 transition-all duration-500 ease-in-out border-2 ${
+                  autoSchedule ? 'bg-[#00A3FF] border-[#00A3FF] shadow-[0_0_15px_rgba(0,163,255,0.4)]' : 'bg-slate-200 border-slate-300'
+                }`}>
+                  <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${autoSchedule ? 'translate-x-6' : 'translate-x-0'}`} />
                 </div>
               </div>
             </div>
@@ -71,62 +92,63 @@ const AppointmentRules = () => {
 
           {/* SECTION: SCHEDULING STRATEGY */}
           <section>
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex items-center gap-3 mb-5">
               <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Scheduling Rules</h2>
-              <div className="h-[1px] flex-1 bg-slate-100 animate-[width_1.5s_ease-in-out]"></div>
+              <div className="h-[2px] flex-1 bg-slate-100 rounded-full"></div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
               {/* Day-Based Card */}
               <div 
                 onClick={() => setDayBased(!dayBased)}
-                className={`group relative p-6 rounded-2xl border-2 transition-all duration-500 cursor-pointer ${
+                className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
                   dayBased 
-                  ? 'border-blue-500 bg-blue-50/20 shadow-xl scale-[1.02] z-10' 
-                  : 'border-slate-100 bg-white hover:border-slate-200 hover:scale-[1.01]'
+                  ? 'border-[#00A3FF] bg-[#00A3FF]/5 shadow-lg scale-[1.02] z-10' 
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-xl transition-all duration-500 ${dayBased ? 'bg-blue-500 text-white shadow-lg shadow-blue-200' : 'bg-slate-100 text-slate-400'}`}>
-                    <Calendar size={20} />
+                  <div className={`p-2.5 rounded-lg transition-all duration-300 ${dayBased ? 'bg-[#00A3FF] text-white shadow-md shadow-[#00A3FF]/30' : 'bg-slate-100 text-slate-400'}`}>
+                    <Calendar size={18} strokeWidth={2.5} />
                   </div>
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${dayBased ? 'bg-blue-500 border-blue-500 rotate-0' : 'border-slate-200 rotate-90 opacity-0'}`}>
-                    <CheckCircle2 size={14} className="text-white" />
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${dayBased ? 'bg-[#00A3FF] border-[#00A3FF]' : 'border-slate-300 opacity-50'}`}>
+                    <CheckCircle2 size={12} className="text-white" strokeWidth={4} />
                   </div>
                 </div>
-                <h4 className="text-sm font-bold text-slate-800 mb-1">Day-Based Scheduling</h4>
-                <p className="text-[11px] leading-relaxed text-slate-500">Generate slots based on fixed weekday availability (e.g. Every Monday).</p>
+                <h4 className="text-[13px] font-black text-slate-800 uppercase tracking-tight mb-1.5">Day-Based Scheduling</h4>
+                <p className="text-[12px] font-medium leading-relaxed text-slate-500">Generate slots based on fixed weekday availability (e.g. Every Monday).</p>
               </div>
 
               {/* Frequency-Based Card */}
               <div 
                 onClick={() => setFrequencyBased(!frequencyBased)}
-                className={`group relative p-6 rounded-2xl border-2 transition-all duration-500 cursor-pointer ${
+                className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
                   frequencyBased 
-                  ? 'border-emerald-500 bg-emerald-50/20 shadow-xl scale-[1.02] z-10' 
-                  : 'border-slate-100 bg-white hover:border-slate-200 hover:scale-[1.01]'
+                  ? 'border-[#10b981] bg-[#10b981]/5 shadow-lg scale-[1.02] z-10' 
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-xl transition-all duration-500 ${frequencyBased ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-slate-100 text-slate-400'}`}>
-                    <History size={20} />
+                  <div className={`p-2.5 rounded-lg transition-all duration-300 ${frequencyBased ? 'bg-[#10b981] text-white shadow-md shadow-[#10b981]/30' : 'bg-slate-100 text-slate-400'}`}>
+                    <History size={18} strokeWidth={2.5} />
                   </div>
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${frequencyBased ? 'bg-emerald-500 border-emerald-500 rotate-0' : 'border-slate-200 rotate-90 opacity-0'}`}>
-                    <CheckCircle2 size={14} className="text-white" />
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${frequencyBased ? 'bg-[#10b981] border-[#10b981]' : 'border-slate-300 opacity-50'}`}>
+                    <CheckCircle2 size={12} className="text-white" strokeWidth={4} />
                   </div>
                 </div>
-                <h4 className="text-sm font-bold text-slate-800 mb-1">Frequency-Based Scheduling</h4>
-                <p className="text-[11px] leading-relaxed text-slate-500">Create Appointments using intervals frequency (e.g. Every 15 minutes).</p>
+                <h4 className="text-[13px] font-black text-slate-800 uppercase tracking-tight mb-1.5">Frequency-Based</h4>
+                <p className="text-[12px] font-medium leading-relaxed text-slate-500">Create Appointments using intervals frequency (e.g. Every 15 minutes).</p>
               </div>
             </div>
           </section>
 
-          {/* TWO COLUMN BOTTOM SECTION - Responsive Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+          {/* TWO COLUMN BOTTOM SECTION */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            
             {/* SCHEDULER TIME */}
-            <section className="bg-slate-50/80 p-6 rounded-2xl border border-slate-100 space-y-4 transition-all duration-300 hover:bg-white hover:shadow-md">
-              <div className="flex items-center gap-2 text-amber-600 font-bold text-xs uppercase tracking-wider">
-                <Clock size={16} className="animate-spin-slow" />
+            <section className="bg-slate-50/50 p-6 rounded-2xl border-2 border-slate-100 space-y-3 transition-all hover:bg-white hover:shadow-sm">
+              <div className="flex items-center gap-2 text-[#00A3FF] font-black text-[11px] uppercase tracking-widest mb-1">
+                <Clock size={14} className="animate-spin-slow" />
                 Scheduler Running Time
               </div>
               <div className="relative group">
@@ -134,46 +156,58 @@ const AppointmentRules = () => {
                   type="text" 
                   value={runTime}
                   onChange={(e) => setRunTime(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
+                  className={`${inputClasses} h-[38px] px-3`}
                 />
-                <Clock className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-blue-500 transition-colors" size={16} />
+                <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#00A3FF] transition-colors" size={16} />
               </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed italic">
+              <p className="text-[11px] text-slate-400 font-medium italic pt-1">
                 * System triggers auto-generation engine daily at this timestamp.
               </p>
             </section>
 
             {/* ADMIN NOTES */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2 text-slate-500 font-bold text-xs uppercase tracking-wider">
-                <Info size={16} />
+            <section className="space-y-3">
+              <div className="flex items-center gap-2 text-slate-500 font-black text-[11px] uppercase tracking-widest mb-1">
+                <Info size={14} />
                 Admin Notes
               </div>
               <textarea 
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full h-[120px] bg-white border border-slate-200 rounded-2xl p-4 text-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all resize-none shadow-sm hover:shadow-md"
+                className={`${inputClasses} h-[100px] p-3 resize-none`}
                 placeholder="Log internal updates here..."
               />
             </section>
           </div>
 
           {/* FOOTER ACTION */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-100">
-            <div className="flex items-center gap-2">
-               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-               <p className="text-[11px] text-slate-400 font-medium italic text-center sm:text-left">
-                 Last successful sync: Today at 02:00 PM
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-5 pt-6 border-t-2 border-slate-100 mt-2">
+            <div className="flex items-center gap-2.5">
+               <span className="flex h-2.5 w-2.5 rounded-full bg-[#10b981] animate-pulse shadow-[0_0_8px_#10b981]"></span>
+               <p className="text-[12px] text-slate-500 font-bold">
+                 Last successful sync: <span className="text-slate-800">Today at 02:00 PM</span>
                </p>
             </div>
-            <button className="w-full sm:w-auto flex items-center justify-center gap-3 bg-[#1D68F1] hover:bg-[#1656cc] text-white px-10 py-3 rounded-xl font-bold text-sm transition-all shadow-[0_10px_25px_-5px_rgba(29,104,241,0.4)] hover:shadow-blue-600/40 active:scale-95 group">
-              <Save size={18} className="transition-transform group-hover:rotate-12" />
-              Save Configuration
+            
+            {/* Official Animated Save Button - Added onClick */}
+            <button 
+              onClick={handleSave}
+              className="w-full sm:w-auto h-[38px] px-8 bg-[#00A3FF] hover:bg-[#008bdb] text-white text-[13px] font-bold rounded-lg transition-all shadow-[0_4px_10px_rgba(0,163,255,0.2)] hover:shadow-[0_6px_15px_rgba(0,163,255,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Save size={16} strokeWidth={2.5} />
+              SAVE CONFIGURATION
             </button>
           </div>
 
         </div>
       </div>
+
+      {/* ✅ Success Popup Component Integration */}
+      <SuccessPopup 
+        isOpen={showSuccess} 
+        onClose={() => setShowSuccess(false)} 
+        message="System configuration has been successfully updated." 
+      />
 
       {/* Tailwind CSS Animations */}
       <style jsx>{`

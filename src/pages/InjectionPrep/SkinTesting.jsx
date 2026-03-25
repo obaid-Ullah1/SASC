@@ -49,10 +49,11 @@ const SkinTesting = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#f8fafc] p-6 overflow-hidden">
+    /* Changed p-0 to px-5 pt-2 pb-8 to bring the content down and give room at the bottom */
+    <div className="w-full h-full flex flex-col bg-[#f8fafc] px-0 pt-0 pb-10 overflow-hidden min-h-screen">
       
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap justify-center gap-2 mb-8 shrink-0 bg-white p-2 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto">
+      {/* Navigation Tabs - Added my-4 for better vertical centering */}
+      <div className="flex flex-wrap justify-center gap-2 my-4 shrink-0 bg-white p-0 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto">
         {tabs.map((tab) => (
           <button
             key={tab.name}
@@ -64,15 +65,15 @@ const SkinTesting = () => {
             }`}
           >
             <tab.icon size={16} strokeWidth={activeTab === tab.name ? 3 : 2} />
-            <span className="text-[12px] font-black uppercase tracking-wider">
+            <span className="text-[11px] font-black uppercase tracking-wider">
               {tab.name}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Content Area */}
-      <div className="flex-1 flex flex-col bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+      {/* Content Area - Rounded-3xl and shadow-xl look great here */}
+      <div className="flex-1 flex flex-col bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden mb-2">
         <div className="flex-1 overflow-y-auto bg-slate-50/30 p-0">
           <div className="h-full w-full">
             {renderContent()}
@@ -80,6 +81,8 @@ const SkinTesting = () => {
         </div>
       </div>
 
+      {/* Subtle Bottom Spacer to ensure it doesn't hit the very edge of the screen */}
+      <div className="h-2 w-full shrink-0" />
     </div>
   );
 };

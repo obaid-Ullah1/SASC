@@ -14,7 +14,9 @@ import {
 } from 'lucide-react';
 
 import TableHeader from '../TableHeader'; 
-import AddGroups from './AddForms/AddGroups'; // Connected to our new template form
+import AddGroups from './AddForms/AddGroups'; 
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
 const GroupsTable = () => {
   const [data, setData] = useState([
@@ -27,6 +29,11 @@ const GroupsTable = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
+
+  // --- POPUP STATES ---
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
+  const [successInfo, setSuccessInfo] = useState({ show: false, message: "" });
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -37,15 +44,18 @@ const GroupsTable = () => {
     );
   }, [searchTerm, data]);
 
-  const handleDelete = (id) => {
-    if(window.confirm("Are you sure you want to delete this group?")) {
-      setData(data.filter(item => item.id !== id));
-    }
+  const handleDeleteClick = (id) => {
+    setConfirmDelete({ show: true, id });
+  };
+
+  const handleConfirmDelete = () => {
+    setData(data.filter(item => item.id !== confirmDelete.id));
+    setConfirmDelete({ show: false, id: null });
+    setSuccessInfo({ show: true, message: "Group deleted successfully!" });
   };
 
   const handleAddNewGroup = (newGroupData) => {
     const nextId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
-    
     const formattedGroup = {
       id: nextId,
       category: newGroupData.category || 'N/A',
@@ -54,13 +64,13 @@ const GroupsTable = () => {
       reqAllergen: newGroupData.requiredAllergens,
       status: newGroupData.isActive ? 'Active' : 'Inactive'
     };
-
     setData([formattedGroup, ...data]);
     setShowAddForm(false);
+    setSuccessInfo({ show: true, message: "New group added successfully!" });
   };
 
   const handleEditClick = (rowData) => {
-    console.log("Editing:", rowData);
+    setEditingRecord(rowData);
     setShowAddForm(true);
   };
 
@@ -68,20 +78,19 @@ const GroupsTable = () => {
     <div className="flex items-center justify-center gap-2">
       <button 
         onClick={() => handleEditClick(cellData.data)}
-        className="w-6 h-6 rounded-full border border-[#00A3FF] text-[#00A3FF] flex items-center justify-center hover:bg-blue-50 transition-all shadow-sm"
+        className="w-6 h-6 rounded-full border border-[#00A3FF] text-[#00A3FF] flex items-center justify-center hover:bg-blue-50 transition-all shadow-sm active:scale-90"
       >
         <Pencil size={11} strokeWidth={2.5} />
       </button>
       <button 
-        onClick={() => handleDelete(cellData.data.id)}
-        className="w-6 h-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 transition-all shadow-sm"
+        onClick={() => handleDeleteClick(cellData.data.id)}
+        className="w-6 h-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 transition-all shadow-sm active:scale-90"
       >
         <Trash2 size={11} strokeWidth={2.5} />
       </button>
     </div>
   );
 
-  // RED/GREEN DYNAMIC STATUS BADGE LOGIC IN THE GRID
   const statusCellRender = (cellData) => {
     const isActive = cellData.value === 'Active';
     return (
@@ -94,20 +103,17 @@ const GroupsTable = () => {
     );
   };
 
-  const headerIdRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} className="text-slate-500" /> ID</div>;
-  const headerCategoryRender = () => <div className="flex items-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} className="text-slate-500" /> Category</div>;
-  const headerNameRender = () => <div className="flex items-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} className="text-slate-500" /> Name</div>;
-  const headerDescriptionRender = () => <div className="flex items-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} className="text-slate-500" /> Description</div>;
-  const headerReqRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} className="text-slate-500" /> Req Allergen</div>;
-  const headerStatusRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><CheckCircle2 size={14} className="text-slate-500" /> Status</div>;
-  const headerActionRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><Pencil size={14} className="text-slate-500" /> Actions</div>;
+  const headerIdRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} /> ID</div>;
+  const headerCategoryRender = () => <div className="flex items-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} /> Category</div>;
+  const headerNameRender = () => <div className="flex items-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} /> Name</div>;
+  const headerDescriptionRender = () => <div className="flex items-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} /> Description</div>;
+  const headerReqRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><List size={14} /> Req Allergen</div>;
+  const headerStatusRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><CheckCircle2 size={14} /> Status</div>;
+  const headerActionRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[12px]"><Pencil size={14} /> Actions</div>;
 
   const gridTailwindClasses = `
     [&_.dx-datagrid-header-panel]:!hidden 
     [&_.dx-datagrid-headers]:!bg-[#F8FAFC] 
-    [&_.dx-datagrid-headers]:!text-slate-500 
-    [&_.dx-datagrid-headers]:!font-bold 
-    [&_.dx-datagrid-headers]:!text-[12px]
     [&_.dx-datagrid-headers_td]:!border-b
     [&_.dx-datagrid-headers_td]:!border-slate-200
     [&_.dx-row-alt>td]:!bg-[#F8FAFC]
@@ -125,14 +131,20 @@ const GroupsTable = () => {
         icon={Users}
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
-        onAddClick={() => setShowAddForm(!showAddForm)} 
+        onAddClick={() => {
+          setEditingRecord(null);
+          setShowAddForm(!showAddForm);
+        }} 
       />
 
-      {/* Render the Dynamic Form just below header, separated perfectly */}
       <AddGroups 
         isOpen={showAddForm} 
-        onClose={() => setShowAddForm(false)} 
-        onAdd={handleAddNewGroup} 
+        onClose={() => {
+          setShowAddForm(false);
+          setEditingRecord(null);
+        }} 
+        onAdd={handleAddNewGroup}
+        initialData={editingRecord}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
@@ -171,8 +183,6 @@ const GroupsTable = () => {
             hoverStateEnabled={true}
           >
             <Scrolling mode="standard" showScrollbar="always" />
-            <SearchPanel visible={false} /> 
-            <FilterRow visible={false} />
             <HeaderFilter visible={true} />
 
             <Column dataField="id" headerCellRender={headerIdRender} width={80} alignment="center" />
@@ -184,6 +194,7 @@ const GroupsTable = () => {
             <Column caption="Actions" alignment="center" width={120} headerCellRender={headerActionRender} cellRender={actionCellRender} />
 
             <Paging defaultPageSize={20} />
+            {/* ✅ RESTORED FULL PAGINATION SETTINGS */}
             <Pager
               visible={true}
               allowedPageSizes={[10, 20, 50, 100]}
@@ -194,6 +205,20 @@ const GroupsTable = () => {
             />
           </DataGrid>
         </div>
+
+        <ConfirmPopup 
+          isOpen={confirmDelete.show}
+          onClose={() => setConfirmDelete({ show: false, id: null })}
+          onConfirm={handleConfirmDelete}
+          title="Delete Group"
+          message="Are you sure you want to delete this group? This action cannot be undone."
+        />
+
+        <SuccessPopup 
+          isOpen={successInfo.show}
+          onClose={() => setSuccessInfo({ show: false, message: "" })}
+          message={successInfo.message}
+        />
 
         <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex items-center justify-end shrink-0">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">

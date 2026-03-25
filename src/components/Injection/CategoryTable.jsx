@@ -13,6 +13,9 @@ import { List, Pencil, Trash2 } from 'lucide-react';
 
 import TableHeader from '../TableHeader'; 
 import AddCategoryForm from './AddForms/AddCategoryForm'; 
+// ✅ Navigate Popups
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
 const CategoryTable = () => {
   const [data, setData] = useState([
@@ -22,6 +25,11 @@ const CategoryTable = () => {
   
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
+
+  // --- POPUP STATES ---
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
+  const [successInfo, setSuccessInfo] = useState({ show: false, message: "" });
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -30,32 +38,50 @@ const CategoryTable = () => {
     );
   }, [searchTerm, data]);
 
-  const handleDelete = (id) => {
-    if(window.confirm("Are you sure you want to delete this category?")) {
-      setData(data.filter(item => item.id !== id));
-    }
+  // ✅ Trigger Delete Confirmation
+  const handleDeleteClick = (id) => {
+    setConfirmDelete({ show: true, id });
   };
 
-  const handleAddNewCategory = (newCategory) => {
-    const nextId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
-    setData([{ id: nextId, name: newCategory.name }, ...data]);
+  // ✅ Perform Delete
+  const handleConfirmDelete = () => {
+    setData(data.filter(item => item.id !== confirmDelete.id));
+    setConfirmDelete({ show: false, id: null });
+    setSuccessInfo({ show: true, message: "Category deleted successfully!" });
+  };
+
+  // ✅ Handles Save (Add/Update)
+  const handleSaveCategory = (categoryData) => {
+    if (editingRecord) {
+      // Update existing
+      setData(data.map(item => 
+        item.id === editingRecord.id ? { ...item, name: categoryData.name } : item
+      ));
+      setSuccessInfo({ show: true, message: "Category updated successfully!" });
+    } else {
+      // Add new
+      const nextId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
+      setData([{ id: nextId, name: categoryData.name }, ...data]);
+      setSuccessInfo({ show: true, message: "Category added successfully!" });
+    }
     setShowAddForm(false);
+    setEditingRecord(null);
   };
 
   const actionCellRender = (cellData) => (
     <div className="flex items-center justify-center gap-2">
       <button 
         onClick={() => {
-          console.log("Edit clicked for:", cellData.data);
+          setEditingRecord(cellData.data); // Load data for editing
           setShowAddForm(true);
         }}
-        className="w-6 h-6 rounded-full border border-[#00A3FF] text-[#00A3FF] flex items-center justify-center hover:bg-blue-50 transition-all shadow-sm"
+        className="w-6 h-6 rounded-full border border-[#00A3FF] text-[#00A3FF] flex items-center justify-center hover:bg-blue-50 transition-all shadow-sm active:scale-90"
       >
         <Pencil size={11} strokeWidth={2.5} />
       </button>
       <button 
-        onClick={() => handleDelete(cellData.data.id)}
-        className="w-6 h-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 transition-all shadow-sm"
+        onClick={() => handleDeleteClick(cellData.data.id)}
+        className="w-6 h-6 rounded-full border border-rose-500 text-rose-500 flex items-center justify-center hover:bg-rose-50 transition-all shadow-sm active:scale-90"
       >
         <Trash2 size={11} strokeWidth={2.5} />
       </button>
@@ -88,26 +114,29 @@ const CategoryTable = () => {
   `;
 
   return (
-    // SINGLE CONTAINER: Everything lives inside this one main card. No inner borders.
     <div className="flex flex-col h-full w-full bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
       
-      {/* 1. Gradient Header lives at the very top */}
       <TableHeader 
         title="Category List"
         icon={List}
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
-        onAddClick={() => setShowAddForm(!showAddForm)} 
+        onAddClick={() => {
+          setEditingRecord(null); // Clear editing state for fresh add
+          setShowAddForm(!showAddForm);
+        }} 
       />
 
-      {/* 2. Form renders flush under the header, pushing the grid down seamlessly */}
       <AddCategoryForm 
         isOpen={showAddForm} 
-        onClose={() => setShowAddForm(false)} 
-        onAdd={handleAddNewCategory} 
+        onClose={() => {
+          setShowAddForm(false);
+          setEditingRecord(null);
+        }} 
+        onAdd={handleSaveCategory} 
+        initialData={editingRecord}
       />
       
-      {/* 3. The Grid Container */}
       <div className={`flex-1 overflow-hidden relative custom-footer-grid ${gridTailwindClasses}`}>
         <style>{`
           .custom-footer-grid .dx-datagrid-pager {
@@ -115,7 +144,7 @@ const CategoryTable = () => {
             padding: 0 !important;
           }
           .custom-footer-grid .dx-datagrid-pager::before {
-            content: 'Total: ${filteredData.length}';
+            content: 'Total Items: ${filteredData.length}';
             display: block;
             width: 100%;
             padding: 10px 16px;
@@ -145,24 +174,9 @@ const CategoryTable = () => {
           <FilterRow visible={false} />
           <HeaderFilter visible={true} />
 
-          <Column 
-            dataField="id" 
-            headerCellRender={headerIdRender} 
-            width={100} 
-            alignment="center"
-          />
-          <Column 
-            dataField="name" 
-            headerCellRender={headerNameRender} 
-            alignment="left"
-          />
-          <Column 
-            caption="Actions" 
-            alignment="center" 
-            width={150} 
-            headerCellRender={headerActionRender} 
-            cellRender={actionCellRender} 
-          />
+          <Column dataField="id" headerCellRender={headerIdRender} width={100} alignment="center" />
+          <Column dataField="name" headerCellRender={headerNameRender} alignment="left" cssClass="font-semibold" />
+          <Column caption="Actions" alignment="center" width={150} headerCellRender={headerActionRender} cellRender={actionCellRender} />
 
           <Paging defaultPageSize={20} />
           <Pager
@@ -175,11 +189,25 @@ const CategoryTable = () => {
           />
         </DataGrid>
       </div>
+
+      {/* ✅ NAVIGATED POPUPS */}
+      <ConfirmPopup 
+        isOpen={confirmDelete.show}
+        onClose={() => setConfirmDelete({ show: false, id: null })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Category"
+        message="Are you sure you want to remove this category? This action cannot be undone."
+      />
+
+      <SuccessPopup 
+        isOpen={successInfo.show}
+        onClose={() => setSuccessInfo({ show: false, message: "" })}
+        message={successInfo.message}
+      />
       
-      {/* 4. Footer lives at the very bottom of the single frame */}
       <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex items-center justify-end shrink-0">
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          Last updated: {new Date().toLocaleString()}
+          Database Online
         </p>
       </div>
       
