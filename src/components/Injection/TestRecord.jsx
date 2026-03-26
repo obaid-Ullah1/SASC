@@ -12,11 +12,38 @@ import DataGrid, {
 import ConfirmPopup from '../global/ConfirmPopup';
 import SuccessPopup from '../global/SuccessPopup';
 
+// ✅ Dynamic Dropdown Component for Negative/Positive Colors              
+const StatusDropdown = () => {
+  const [status, setStatus] = useState("Negative");
+
+  // Determine dynamic colors based on selection
+  let colorClasses = "bg-white border-slate-300 text-slate-800";
+  if (status === "Positive") colorClasses = "bg-emerald-50 border-emerald-300 text-emerald-700 font-bold";
+  if (status === "Negative") colorClasses = "bg-rose-50 border-rose-300 text-rose-700 font-bold";
+
+  return (
+    <select 
+      value={status}
+      onChange={(e) => setStatus(e.target.value)}
+      className={`w-full rounded px-2 py-1.5 text-sm outline-none cursor-pointer border transition-colors focus:ring-2 focus:ring-[#00A3FF]/20 ${colorClasses}`}
+    >
+      <option value="Negative" className="bg-white text-slate-800 font-medium">Negative</option>
+      <option value="Positive" className="bg-white text-slate-800 font-medium">Positive</option>
+    </select>
+  );
+};
+
 const TestRecord = () => {
   const [selectedGroup, setSelectedGroup] = useState("");
+  
+  // State to store uploaded images for each group
+  const [uploadedImages, setUploadedImages] = useState({});
 
-  // Popup States
-  const [confirmPopup, setConfirmPopup] = useState({ isOpen: false, type: 'update' });
+  // ✅ NEW: Reset key to clear all uncontrolled inputs when cancelling
+  const [resetKey, setResetKey] = useState(0);
+
+  // ✅ UPDATED: Popup States to track if we are saving or cancelling
+  const [confirmPopup, setConfirmPopup] = useState({ isOpen: false, type: 'update', action: 'save' });
   const [successPopup, setSuccessPopup] = useState({ isOpen: false, type: 'Added' });
 
   // Logic remains exactly as provided
@@ -84,41 +111,68 @@ const TestRecord = () => {
     return allRows;
   }, [selectedGroup]);
 
-  // ✅ Updated Theme Grid Classes
+  // Theme Grid Classes - Lite color applied to headers
   const gridClasses = `
-    [&_.dx-datagrid-headers]:!bg-[#f8fafc] 
-    [&_.dx-datagrid-headers]:!text-slate-500 
-    [&_.dx-datagrid-headers]:!font-black 
-    [&_.dx-datagrid-headers]:!text-[11px]
-    [&_.dx-datagrid-headers]:!uppercase
-    [&_.dx-datagrid-headers]:!tracking-widest
+    [&_.dx-datagrid-headers]:!bg-[#e0f2fe] 
+    [&_.dx-datagrid-headers]:!text-sky-900 
+    [&_.dx-datagrid-headers]:!font-bold 
+    [&_.dx-datagrid-headers]:!text-[13px]
     [&_.dx-datagrid-headers_td]:!border-b-2
-    [&_.dx-datagrid-headers_td]:!border-sky-100
+    [&_.dx-datagrid-headers_td]:!border-sky-200
     
-    [&_.dx-data-row>td]:!py-2
+    [&_.dx-data-row>td]:!py-2.5
     [&_.dx-data-row>td]:!text-slate-800
     [&_.dx-data-row>td]:!text-[13px]
-    [&_.dx-data-row>td]:!font-semibold
+    [&_.dx-data-row>td]:!font-medium
     
-    [&_.dx-data-row.dx-state-hover>td]:!bg-[#f0f9ff]
-    [&_.dx-datagrid-group-row]:!bg-sky-50/50
-    [&_.dx-datagrid-group-row]:!text-sky-900
-    [&_.dx-datagrid-group-row]:!font-black
+    [&_.dx-data-row.dx-state-hover>td]:!bg-sky-50
+    [&_.dx-datagrid-group-row]:!bg-slate-100
+    [&_.dx-datagrid-group-row]:!text-slate-800
+    [&_.dx-datagrid-group-row]:!font-semibold
+
+    /* Inner borders explicitly visible */
+    [&_.dx-datagrid-borders>div]:!border-slate-300
+    [&_.dx-datagrid-content_.dx-datagrid-table_.dx-row>td]:!border-slate-300
   `;
 
-  // ✅ Theme Input Classes
-  const labelClass = "flex items-center gap-2 text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1 group-hover:text-[#00A3FF] transition-colors";
-  const inputBaseClasses = "w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:border-[#00A3FF] focus:ring-4 focus:ring-[#00A3FF]/10 outline-none transition-all bg-white shadow-sm";
-  const readOnlyInputClasses = "w-full border-0 bg-transparent py-2 text-[13px] text-slate-800 font-black cursor-default outline-none";
+  // Simple, readable input classes
+  const labelClass = "flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1 ml-1 group-hover:text-[#00A3FF] transition-colors";
+  const inputBaseClasses = "w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-800 focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 outline-none transition-all bg-white shadow-sm";
+  const readOnlyInputClasses = "w-full border-0 bg-transparent py-1.5 text-sm text-slate-800 font-medium cursor-default outline-none";
 
-  // Popup Handlers remain same
+  // ✅ UPDATED: Handlers to support Cancel and Save logic seamlessly
   const handleSaveClick = () => {
-    setConfirmPopup({ isOpen: true, type: 'update' });
+    setConfirmPopup({ isOpen: true, type: 'update', action: 'save' });
   };
 
-  const confirmSave = () => {
-    setConfirmPopup({ isOpen: false, type: 'update' });
-    setSuccessPopup({ isOpen: true, type: 'Added' });
+  const handleCancelClick = () => {
+    setConfirmPopup({ isOpen: true, type: 'cancel', action: 'cancel' });
+  };
+
+  const handlePopupConfirm = () => {
+    if (confirmPopup.action === 'cancel') {
+      // Reset everything to default state
+      setSelectedGroup("");
+      setUploadedImages({});
+      setResetKey(prev => prev + 1); // Forces React to clear all inputs
+      setConfirmPopup({ ...confirmPopup, isOpen: false });
+    } else {
+      // Proceed with Save
+      setConfirmPopup({ ...confirmPopup, isOpen: false });
+      setSuccessPopup({ isOpen: true, type: 'Added' });
+    }
+  };
+
+  // Handle Image Upload Logic
+  const handleImageUpload = (groupTitle, event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setUploadedImages(prev => ({
+        ...prev,
+        [groupTitle]: imageUrl
+      }));
+    }
   };
 
   return (
@@ -126,9 +180,9 @@ const TestRecord = () => {
       <ConfirmPopup 
         isOpen={confirmPopup.isOpen}
         type={confirmPopup.type}
-        itemName="Test Record"
+        itemName={confirmPopup.action === 'cancel' ? "Test Record Data" : "Test Record"}
         onClose={() => setConfirmPopup({ ...confirmPopup, isOpen: false })}
-        onConfirm={confirmSave}
+        onConfirm={handlePopupConfirm}
       />
       <SuccessPopup 
         isOpen={successPopup.isOpen}
@@ -138,31 +192,33 @@ const TestRecord = () => {
 
       <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-10">
         
-        {/* ✅ THEMED MAIN CONTAINER */}
-        <div className="bg-white rounded-3xl shadow-2xl border-2 border-sky-100 overflow-hidden">
+        {/* MAIN CONTAINER */}
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-300 overflow-hidden">
           
-          {/* ✅ SLIM GRADIENT HEADER */}
-          <div className="bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-white px-6 py-4 border-b-2 border-sky-100 flex items-center justify-between">
+          {/* TEST RECORD HEADER */}
+          <div className="bg-[#00A3FF] px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-white p-2 rounded-xl shadow-sm border border-sky-100 flex items-center justify-center">
-                <ClipboardCheck size={20} className="text-[#00A3FF]" strokeWidth={3} />
+              <div className="bg-white p-2 rounded-lg shadow-sm flex items-center justify-center">
+                <ClipboardCheck size={20} className="text-[#00A3FF]" />
               </div>
               <div>
-                <h2 className="text-[16px] font-black text-sky-950 uppercase tracking-tight leading-none">Test Record</h2>
-                <p className="text-[10px] font-black text-[#00A3FF] uppercase tracking-[0.2em] mt-1">Diagnostic Laboratory</p>
+                <h2 className="text-lg font-bold text-white leading-none">Test Record</h2>
+                <p className="text-sm font-medium text-sky-100 mt-1">Diagnostic Laboratory</p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-full border border-sky-100 shadow-sm">
-                <Activity size={14} className="text-[#00A3FF] animate-pulse" />
-                <span className="text-[9px] font-black text-sky-800 uppercase tracking-widest">System Active</span>
+            <div className="hidden sm:flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm">
+                <Activity size={16} className="text-[#00A3FF] animate-pulse" />
+                <span className="text-xs font-semibold text-slate-700">System Active</span>
             </div>
           </div>
 
-          <div className="p-6 md:p-8">
+          {/* ✅ Key added here to force re-render/reset of all child form elements */}
+          <div key={resetKey} className="p-6 md:p-8">
+            
             {/* TOP FORM FIELDS */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-              <div className="space-y-2 group">
-                <label className={labelClass}><User size={13} /> Patient</label>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="group">
+                <label className={labelClass}><User size={16} /> Patient</label>
                 <select className={`${inputBaseClasses} appearance-none cursor-pointer`}>
                   <option value="">Select Patient</option>
                   <option value="1664">Napoli , Emily (1664)</option>
@@ -171,18 +227,18 @@ const TestRecord = () => {
                 </select>
               </div>
 
-              <div className="space-y-2 group">
-                <label className={labelClass}><Calendar size={13} /> Date</label>
+              <div className="group">
+                <label className={labelClass}><Calendar size={16} /> Date</label>
                 <input type="date" className={inputBaseClasses} />
               </div>
 
-              <div className="space-y-2 group">
-                <label className={labelClass}><ClipboardCheck size={13} /> Performed By</label>
+              <div className="group">
+                <label className={labelClass}><ClipboardCheck size={16} /> Performed By</label>
                 <input type="text" placeholder="Enter Name" className={inputBaseClasses} />
               </div>
 
-              <div className="space-y-2 group">
-                <label className={labelClass}><Layers size={13} /> Test Type</label>
+              <div className="group">
+                <label className={labelClass}><Layers size={16} /> Test Type</label>
                 <select className={`${inputBaseClasses} appearance-none cursor-pointer`}>
                   <option value="">Select Type</option>
                   <option value="Prick">Prick</option>
@@ -191,15 +247,15 @@ const TestRecord = () => {
               </div>
             </div>
 
-            {/* ✅ GROUP SELECTION BAR - IMPROVED VISIBILITY */}
-            <div className="bg-[#f0f9ff]/60 border-2 border-sky-100 rounded-2xl p-6 mb-10 flex flex-col md:flex-row items-center gap-8 shadow-inner">
-              <div className="w-full md:max-w-xs space-y-2 group">
-                <label className="text-[11px] font-black text-sky-600 uppercase tracking-widest ml-1">Select Group</label>
+            {/* GROUP SELECTION BAR */}
+            <div className="bg-[#f0f9ff] border border-sky-200 rounded-xl p-5 mb-8 flex flex-col md:flex-row items-center gap-8 shadow-sm">
+              <div className="w-full md:max-w-xs group">
+                <label className="text-sm font-semibold text-sky-800 mb-1 block ml-1">Select Group</label>
                 <div className="relative">
                   <select 
                     value={selectedGroup}
                     onChange={(e) => setSelectedGroup(e.target.value)}
-                    className="w-full border-2 border-[#00A3FF]/30 rounded-xl px-4 py-3 text-sm font-black bg-white hover:bg-white focus:border-[#00A3FF] outline-none transition-all cursor-pointer appearance-none shadow-md text-rose-600"
+                    className="w-full border border-sky-200 rounded-lg px-4 py-2.5 text-sm font-semibold bg-white hover:bg-slate-50 focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 outline-none transition-all cursor-pointer appearance-none text-slate-800"
                   >
                     <option value="" className="text-slate-400">-- Choose Allergen Group --</option>
                     <option value="SPT-90">SPT-90</option>
@@ -207,41 +263,42 @@ const TestRecord = () => {
                     <option value="Limited/PEDS">Limited/PEDS</option>
                     <option value="SPT-Food 1">SPT-Food 1</option>
                   </select>
-                  <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#00A3FF] pointer-events-none" />
+                  <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-sky-500 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="hidden md:block h-12 w-[2px] bg-sky-100"></div>
+              <div className="hidden md:block h-10 w-[1px] bg-sky-200"></div>
 
               <div className="flex-1 flex flex-wrap justify-around gap-6 w-full">
                   <div className="text-center">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Items Loaded</p>
-                    <p className="text-lg font-black text-slate-700 leading-none">{gridData.length}</p>
+                    <p className="text-xs font-semibold text-sky-700 mb-1">Items Loaded</p>
+                    <p className="text-lg font-bold text-sky-900 leading-none">{gridData.length}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1">Positives</p>
-                    <p className="text-lg font-black text-rose-600 leading-none">0</p>
+                    <p className="text-xs font-semibold text-rose-500 mb-1">Positives</p>
+                    <p className="text-lg font-bold text-rose-600 leading-none">0</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1">Negatives</p>
-                    <p className="text-lg font-black text-emerald-600 leading-none">0</p>
+                    <p className="text-xs font-semibold text-emerald-600 mb-1">Negatives</p>
+                    <p className="text-lg font-bold text-emerald-700 leading-none">0</p>
                   </div>
               </div>
             </div>
 
-            {/* ✅ DATAGRID SECTION */}
-            <div className="space-y-4">
+            {/* DATAGRID SECTION */}
+            <div className="space-y-3">
               <div className="flex items-center gap-2 text-slate-800 px-1">
-                <Syringe size={16} className="text-[#00A3FF]" />
-                <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Allergen Input Matrix</h3>
+                <Syringe size={18} className="text-[#00A3FF]" />
+                <h3 className="text-base font-semibold">Allergen Input Matrix</h3>
               </div>
               
-              <div className={`h-[500px] border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col ${gridClasses}`}>
+              <div className={`h-[500px] border border-slate-300 rounded-xl overflow-hidden shadow-sm flex flex-col ${gridClasses}`}>
                 <DataGrid
                   dataSource={gridData} 
                   keyExpr="id"
-                  showBorders={false}
+                  showBorders={true}
                   showRowLines={true}
+                  showColumnLines={true}
                   hoverStateEnabled={true}
                   noDataText={selectedGroup ? "Initializing..." : "Please select an allergen group to begin recording results."}
                   height="100%"
@@ -255,55 +312,80 @@ const TestRecord = () => {
                     groupIndex={0}
                     visible={false}
                     groupCellRender={(cell) => (
-                      <div className="flex justify-between items-center w-full pr-4 py-1">
+                      <div className="flex justify-between items-center w-full pr-4 py-1.5">
                         <div className="flex items-center gap-3">
-                          <Layers size={14} className="text-[#00A3FF]" />
-                          <span className="text-[12px] font-black text-sky-900 uppercase tracking-wider">{cell.value}</span>
-                          <span className="text-[#00A3FF] text-[10px] font-black bg-white px-2 py-0.5 rounded border border-sky-100 shadow-sm">{cell?.data?.items?.length || 0} ITEMS</span>
+                          <Layers size={16} className="text-slate-500" />
+                          <span className="text-sm font-semibold text-slate-800">{cell.value}</span>
+                          <span className="text-slate-600 text-xs font-medium bg-slate-200 px-2.5 py-0.5 rounded-full border border-slate-300">{cell?.data?.items?.length || 0} Items</span>
                         </div>
-                        <input type="file" className="hidden" id={`file-${cell.value}`} />
-                        <label htmlFor={`file-${cell.value}`} className="cursor-pointer text-[9px] font-black bg-[#00A3FF] text-white px-3 py-1.5 rounded-lg shadow-md hover:bg-sky-600 active:scale-95 transition-all">UPLOAD IMAGE</label>
+                        
+                        {/* Image preview logic */}
+                        <div className="flex items-center gap-3">
+                          {uploadedImages[cell.value] && (
+                            <img 
+                              src={uploadedImages[cell.value]} 
+                              alt="Uploaded panel preview" 
+                              className="h-8 w-12 object-cover rounded border border-slate-300 shadow-sm"
+                            />
+                          )}
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            className="hidden" 
+                            id={`file-${cell.value}`} 
+                            onChange={(e) => handleImageUpload(cell.value, e)}
+                          />
+                          <label htmlFor={`file-${cell.value}`} className="cursor-pointer text-xs font-medium bg-white text-slate-700 border border-slate-300 px-4 py-1.5 rounded-md hover:bg-slate-50 transition-all shadow-sm">
+                            {uploadedImages[cell.value] ? "Change Image" : "Upload Image"}
+                          </label>
+                        </div>
                       </div>
                     )}
                   />
 
+                  {/* Simple text rendering inside cells */}
                   <Column dataField="allergen" caption="Allergen Name" minWidth={220} cellRender={(c) => <input readOnly value={c.data.allergen} className={readOnlyInputClasses} />} />
-                  <Column dataField="siteLabel" caption="Site" width={90} alignment="center" cellRender={(c) => <span className="bg-sky-100/50 text-[#00A3FF] text-[11px] font-black px-2.5 py-1 rounded-md border border-sky-100">{c.data.siteLabel}</span>} />
-                  <Column dataField="wheal" caption="Wheal (mm)" width={130} cellRender={() => (
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" className="w-4 h-4 rounded border-sky-200 text-[#00A3FF] focus:ring-[#00A3FF] cursor-pointer" />
-                      <input type="number" defaultValue="0" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-center focus:border-[#00A3FF] outline-none" />
+                  
+                  <Column dataField="siteLabel" caption="Site" width={90} alignment="center" cellRender={(c) => <span className="bg-slate-100 text-slate-700 text-sm font-medium px-3 py-1 rounded border border-slate-300">{c.data.siteLabel}</span>} />
+                  
+                  <Column dataField="wheal" caption="Wheal (mm)" width={140} cellRender={() => (
+                    <div className="flex items-center justify-center gap-3">
+                      <input type="checkbox" className="w-4 h-4 rounded border-slate-400 text-[#00A3FF] focus:ring-[#00A3FF] cursor-pointer" />
+                      <input type="number" defaultValue="0" className="w-16 bg-white border border-slate-300 rounded px-2 py-1 text-sm font-medium text-center focus:border-[#00A3FF] outline-none" />
                     </div>
                   )} />
-                  <Column dataField="result" caption="Outcome" width={140} cellRender={() => (
-                    <select className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-black text-slate-700 outline-none cursor-pointer">
-                      <option value="Negative">NEGATIVE</option>
-                      <option value="Positive">POSITIVE</option>
-                    </select>
+                  
+                  {/* Dynamic Color Dropdown for Outcome */}
+                  <Column dataField="result" caption="Outcome" width={140} cellRender={() => <StatusDropdown />} />
+                  
+                  <Column dataField="flare" caption="Flare (mm)" width={120} cellRender={() => (
+                    <input type="number" defaultValue="0" className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-sm font-medium text-center focus:border-[#00A3FF] outline-none" />
                   )} />
-                  <Column dataField="flare" caption="Flare (mm)" width={120} cellRender={() => <input type="number" defaultValue="0" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-center focus:border-[#00A3FF] outline-none" />} />
-                  <Column dataField="controlType" caption="Ctrl Type" width={140} cellRender={() => (
-                    <select className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-black text-slate-700 outline-none cursor-pointer">
-                      <option value="Negative">NEGATIVE</option>
-                      <option value="Positive">POSITIVE</option>
-                    </select>
+                  
+                  {/* Dynamic Color Dropdown for Ctrl Type */}
+                  <Column dataField="controlType" caption="Ctrl Type" width={140} cellRender={() => <StatusDropdown />} />
+                  
+                  <Column dataField="ids" caption="Unique IDs" width={120} cellRender={() => (
+                    <input type="text" placeholder="ID..." className="w-full bg-transparent border-b border-slate-300 text-sm font-medium outline-none placeholder:text-slate-400" />
                   )} />
-                  <Column dataField="ids" caption="Unique IDs" width={110} cellRender={() => <input type="text" placeholder="ID..." className="w-full bg-transparent border-b border-slate-100 text-[11px] font-bold outline-none placeholder:text-slate-300" />} />
                 </DataGrid>
               </div>
             </div>
 
-            {/* ✅ FORM ACTION BUTTONS */}
-            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-12 border-t border-slate-100 pt-8">
-              <button className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl border-2 border-slate-200 text-slate-500 font-black text-[11px] hover:bg-slate-50 hover:text-slate-800 transition-all uppercase tracking-widest active:scale-95">
-                <XCircle size={16} /> Cancel Testing
+            {/* ✅ FORM ACTION BUTTONS WITH NEW CANCEL FUNCTIONALITY */}
+            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8 border-t border-slate-200 pt-6">
+              <button 
+                onClick={handleCancelClick}
+                className="flex items-center justify-center gap-2 px-8 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-medium text-sm hover:bg-slate-50 hover:text-rose-600 transition-all active:scale-95"
+              >
+                <XCircle size={18} /> Cancel Testing
               </button>
               
               <button 
                 onClick={handleSaveClick}
-                className="flex items-center justify-center gap-2 px-12 py-3.5 rounded-xl bg-[#00A3FF] text-white font-black text-[11px] hover:bg-[#008fdf] shadow-[0_10px_20px_rgba(0,163,255,0.2)] transition-all uppercase tracking-[0.2em] active:scale-95"
+                className="flex items-center justify-center gap-2 px-10 py-2.5 rounded-lg bg-[#00A3FF] text-white font-medium text-sm hover:bg-[#008fdf] shadow-md transition-all active:scale-95"
               >
-                <Save size={16} /> Save Record
+                <Save size={18} /> Save Record
               </button>
             </div>
 

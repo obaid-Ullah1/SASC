@@ -16,7 +16,7 @@ const InjComposition = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#f8fafc] p-4 lg:p-6 gap-4">
+    <div className="flex flex-col h-full w-full bg-[#f8fafc] p-4 lg:p-0 gap-4">
       
       {/* NAVIGATION TABS - Matched to DoseRulesPage styles */}
       <div className="flex justify-center w-full shrink-0">

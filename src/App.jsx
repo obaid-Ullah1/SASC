@@ -31,8 +31,11 @@ import TestRules from './pages/Settings/TestRules';
 // IMPORT BIO MANAGEMENT SCREEN
 import BioManagement from './pages/Settings/BioManagement';
 
-// 🌟 IMPORT LIBRARY SCREEN
+// IMPORT LIBRARY SCREEN
 import LibraryPage from './pages/Library/Librarypage';
+
+// ✅ IMPORT NEW TESTING RESULT SCREEN
+import TestingResult from './pages/Testing/TestingResult';
 
 /**
  * LayoutWrapper syncs the URL path with the MainLayout's activeTab state.
@@ -83,12 +86,13 @@ function App() {
           <Route path="/appointment-rules" element={<AppointmentRules activeColor={themeColor} />} />
           <Route path="/positive-analysis" element={<PositiveAnalysis />} />
           
-          {/* 🌟 NEW PATH FOR LIBRARY DOCUMENTS */}
+          {/* PATH FOR LIBRARY DOCUMENTS */}
           <Route path="/library" element={<LibraryPage />} />
 
           {/* Testing Section */}
           <Route path="/treatment" element={<TreatmentPage />} />
           <Route path="/-pt-mapping" element={<PTMapping />} /> 
+          <Route path="/testing-result" element={<TestingResult />} /> {/* ✅ NEW ROUTE ADDED HERE */}
           
           {/* Bio Section */}
           <Route path="/diagnosis" element={<Diagnosis />} />
@@ -116,10 +120,10 @@ function App() {
           <Route path="/dose-rules" element={<DoseRulesPage />} /> 
           <Route path="/injection-composition" element={<InjComposition />} />
           
-          {/* NEW EXACT PATH FOR TEST RULES */}
+          {/* EXACT PATH FOR TEST RULES */}
           <Route path="/-test-rules" element={<TestRules />} />
 
-          {/* NEW PATH FOR BIO MANAGEMENT */}
+          {/* PATH FOR BIO MANAGEMENT */}
           <Route path="/bio-management" element={<BioManagement />} />
 
           {/* 404 / Fallback */}

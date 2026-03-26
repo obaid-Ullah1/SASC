@@ -7,7 +7,7 @@ const BioManagement = () => {
   const [activeMainTab, setActiveMainTab] = useState('Diagnosis');
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#f8fafc] p-4 lg:p-6 gap-4 animate-in fade-in duration-300">
+    <div className="flex flex-col h-full w-full bg-[#f8fafc] p-4 lg:p-0 gap-4 animate-in fade-in duration-300">
       
       {/* LEVEL 1 NAVIGATION */}
       <div className="flex justify-center w-full shrink-0">

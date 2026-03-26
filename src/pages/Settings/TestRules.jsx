@@ -47,7 +47,7 @@ const TestRules = () => {
 
   return (
     // Replaced h-screen/h-dvh with h-full to perfectly inherit your app's layout boundaries
-    <div className="w-full h-full flex flex-col bg-[#f8fafc] p-6 overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-[#f8fafc] p-0 overflow-hidden">
       
       {/* Navigation Tabs - Exact match to SkinTesting styling */}
       <div className="flex flex-wrap justify-center gap-2 mb-5 shrink-0 bg-white p-0 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto">
