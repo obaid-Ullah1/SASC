@@ -10,15 +10,139 @@ import DataGrid, {
   SearchPanel,
   ColumnChooser
 } from 'devextreme-react/data-grid';
-import { User, SquarePlus, ShoppingBag, List } from 'lucide-react';
+import { User, SquarePlus, ShoppingBag, List, Pill, X, Droplet, Layers, IdCard, XCircle } from 'lucide-react';
 
 // Import components
 import TableHeader from '../TableHeader';
 import TreatmentListForm from './AddForms/TreatmentListForm';
 
+// ✅ FIXED IMPORT: Now importing InjCourseBarcode
+import InjCourseBarcode from './AddForms/InjCourseBarcode';
+
+// ==========================================
+// MODAL 1: Patient Injections List
+// ==========================================
+const PatientInjectionsModal = ({ isOpen, onClose, patient, onInjectionClick }) => {
+  if (!isOpen || !patient) return null;
+
+  // Mock data for the injections list
+  const injections = [
+    { id: 1, name: "AIT MIX 1-11/25-01", qty: 7.75, unit: 30 },
+    { id: 2, name: "AIT MIX 2-11/25-01", qty: 7.75, unit: 30 },
+    { id: 3, name: "AIT MIX 4-11/25-01", qty: 7.75, unit: 30 },
+  ];
+
+  const totalQty = injections.reduce((acc, curr) => acc + curr.qty, 0).toFixed(2);
+  const totalUnit = injections.reduce((acc, curr) => acc + curr.unit, 0);
+
+  return (
+    <div className="fixed inset-0 z-[9000] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-4xl rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        
+        <div className="bg-[#1877F2] text-white px-5 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-[16px] tracking-wide">
+            <Pill size={18} strokeWidth={2.5} className="-rotate-45" /> Patient Injections
+          </div>
+          <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
+            <X size={20} strokeWidth={2.5} />
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[12px] font-bold text-slate-500">
+                <th className="py-3 px-4 w-12 text-center">#</th>
+                <th className="py-3 px-4 border-l border-slate-200">Patient No</th>
+                <th className="py-3 px-4 border-l border-slate-200">Patient Name</th>
+                <th className="py-3 px-4 border-l border-slate-200">Injection</th>
+                <th className="py-3 px-4 border-l border-slate-200 text-center">Quantity</th>
+                <th className="py-3 px-4 border-l border-slate-200 text-center">Unit</th>
+              </tr>
+            </thead>
+            <tbody className="text-[13px]">
+              {injections.map((inj, index) => (
+                <tr key={inj.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td className="py-3 px-4 text-center text-slate-600">{index + 1}</td>
+                  
+                  <td className="py-3 px-4 border-l border-slate-100">
+                    <div className="flex items-center gap-2 font-bold text-slate-700">
+                      <IdCard size={14} className="text-[#1877F2]" /> {patient.patientNo}
+                    </div>
+                  </td>
+                  
+                  <td className="py-3 px-4 border-l border-slate-100">
+                    <div className="flex items-center gap-2 font-bold text-slate-700">
+                      <User size={14} className="text-emerald-600" strokeWidth={3} /> {patient.fullName}
+                    </div>
+                  </td>
+                  
+                  <td className="py-3 px-4 border-l border-slate-100">
+                    {/* CLICKABLE INJECTION BADGE */}
+                    <button 
+                      onClick={() => onInjectionClick(inj)}
+                      className="inline-flex items-center gap-1.5 border border-blue-200 hover:border-[#1877F2] hover:bg-blue-50 rounded-full px-3 py-1 bg-white text-[#1877F2] font-bold text-[11px] shadow-sm transition-all active:scale-95"
+                    >
+                      <Pill size={12} className="-rotate-45" /> {inj.name}
+                    </button>
+                  </td>
+                  
+                  <td className="py-3 px-4 border-l border-slate-100 text-center">
+                    <span className="inline-flex items-center justify-center gap-1.5 border border-slate-200 rounded-full px-4 py-1 bg-white text-[#1877F2] font-bold text-[12px] shadow-sm min-w-[80px]">
+                      <Droplet size={12} className="fill-[#1877F2]" /> {inj.qty}
+                    </span>
+                  </td>
+                  
+                  <td className="py-3 px-4 border-l border-slate-100 text-center">
+                    <span className="inline-flex items-center justify-center gap-1.5 border border-slate-200 rounded-full px-4 py-1 bg-white text-emerald-600 font-bold text-[12px] shadow-sm min-w-[80px]">
+                      <Layers size={12} className="fill-emerald-600" /> {inj.unit}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            
+            <tfoot>
+              <tr className="bg-[#F8FAFC] border-t-2 border-slate-200">
+                <td colSpan="4" className="py-4 px-4 text-right font-black text-slate-800 text-[13px]">
+                  Grand Total:
+                </td>
+                <td className="py-4 px-4 text-center">
+                   <span className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 bg-[#1877F2] text-white font-bold text-[12px] shadow-md min-w-[90px]">
+                      <Droplet size={14} className="fill-white" /> {totalQty}
+                    </span>
+                </td>
+                <td className="py-4 px-4 text-center">
+                   <span className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 bg-[#10B981] text-white font-bold text-[12px] shadow-md min-w-[90px]">
+                      <Layers size={14} className="fill-white" /> {totalUnit}
+                    </span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div className="bg-[#F8FAFC] border-t border-slate-200 px-5 py-3 flex justify-end shrink-0">
+          <button onClick={onClose} className="flex items-center gap-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-600 px-5 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-all">
+            <XCircle size={16} /> Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 const TreatmentTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // MODAL STATES
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedInjection, setSelectedInjection] = useState(null);
 
   const [injectionData] = useState(
     Array.from({ length: 15 }, (_, i) => ({
@@ -57,6 +181,10 @@ const TreatmentTable = () => {
     [&_.dx-data-row>td]:!py-1.5
     [&_.dx-data-row>td]:!text-slate-800
     [&_.dx-data-row>td]:!text-[13px]
+
+    /* Add cursor pointer & hover effect so rows look clickable */
+    [&_.dx-data-row]:!cursor-pointer
+    [&_.dx-data-row:hover>td]:!bg-[#EFF6FF]
   `;
 
   const renderHeader = (title) => (
@@ -65,14 +193,41 @@ const TreatmentTable = () => {
     </div>
   );
 
+  // DOUBLE CLICK HANDLER FOR DATA GRID
+  const handleRowDblClick = (e) => {
+    setSelectedPatient(e.data);
+    setIsPatientModalOpen(true);
+  };
+
+  // CLICK HANDLER FOR INJECTION BADGE
+  const handleOpenInjectionDetails = (injection) => {
+    setSelectedInjection(injection);
+    setIsDetailsModalOpen(true);
+  };
+
   return (
-    // ✅ NEW WRAPPER: Flex column with a gap to separate the form and the table
-    <div className="flex flex-col h-full w-full gap-6">
+    <div className="flex flex-col h-full w-full gap-6 relative">
       
-      {/* ✅ FORM IS NOW OUTSIDE THE GRID: It will push the entire table down */}
+      {/* FORM IS NOW OUTSIDE THE GRID */}
       <TreatmentListForm 
         isOpen={showAddForm} 
         onClose={() => setShowAddForm(false)} 
+      />
+
+      {/* MODAL 1: Patient Injections */}
+      <PatientInjectionsModal 
+        isOpen={isPatientModalOpen}
+        onClose={() => setIsPatientModalOpen(false)}
+        patient={selectedPatient}
+        onInjectionClick={handleOpenInjectionDetails}
+      />
+
+      {/* ✅ FIXED TAG: MODAL 2: Injection Course Details (using the correct import) */}
+      <InjCourseBarcode 
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        patient={selectedPatient}
+        injection={selectedInjection}
       />
 
       {/* TABLE CARD CONTAINER */}
@@ -119,6 +274,7 @@ const TreatmentTable = () => {
               showRowLines={true}
               showColumnLines={true}
               hoverStateEnabled={true}
+              onRowDblClick={handleRowDblClick} // CONNECTED DOUBLE CLICK EVENT
             >
               <Scrolling mode="standard" showScrollbar="always" />
               <SearchPanel visible={true} width={250} placeholder="Search patients..." />
