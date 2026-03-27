@@ -17,9 +17,10 @@ import { CalendarCheck, Edit, Activity, FileText } from 'lucide-react';
 import DoubleSearchHeader from '../global/DoubleSearchHeader';
 import AddAppointment from './AddForm/AddAppointment'; 
 import SkinTestForm from './AddForm/SkinTestForm';
-
-// IMPORT INJECTION SHEET
 import InjectionSheet from './AddForm/InjectionSheet'; 
+
+// IMPORT NEW INJECTION LOG
+import InjectionLog from './InjectionLog';
 
 const AppointmentTable = () => {
   // 1. Edit Form State (1st Icon)
@@ -34,14 +35,18 @@ const AppointmentTable = () => {
   const [isInjectionSheetOpen, setIsInjectionSheetOpen] = useState(false);
   const [selectedInjectionData, setSelectedInjectionData] = useState(null);
 
+  // 4. Injection Log State (Clicking Patient No)
+  const [isLogOpen, setIsLogOpen] = useState(false);
+  const [logPatientData, setLogPatientData] = useState(null);
+
   const [fromDate, setFromDate] = useState('2026-03-03');
   const [toDate, setToDate] = useState('2026-03-03');
 
   const apptData = [
-    { id: 27303, fullName: 'Casillas, Norma', patientNo: '3601', patientType: 'Allergy', status: 'Inactive', apptType: 'PROCEDURE ONLY', office: 'Fresno North', verification: '-', dos: '2026-03-03', time: '', ptCode: '', nextDos: '', inActive: 'Active' },
+    { id: 27303, fullName: 'Casillas, Norma', patientNo: '3601', patientType: 'Allergy', status: 'Inactive', apptType: 'Allergy Shots', office: 'Fresno North', verification: '-', dos: '2026-03-03', time: '', ptCode: '', nextDos: '', inActive: 'Active' },
     { id: 27304, fullName: 'Martinez, Sylvia', patientNo: '3724', patientType: 'Allergy', status: 'Scheduled', apptType: 'Follow up', office: 'Fresno North', verification: '-', dos: '2026-03-03', time: '', ptCode: '', nextDos: '', inActive: 'Active' },
     { id: 27305, fullName: 'Ramos Ramirez, Gizel', patientNo: '3383', patientType: 'Allergy', status: 'Scheduled', apptType: 'Special Testing', office: 'Fresno North', verification: '-', dos: '2026-03-03', time: '', ptCode: '', nextDos: '', inActive: 'Active' },
-    { id: 27306, fullName: 'Mellenberger, Heather', patientNo: '634', patientType: 'Allergy', status: 'Inactive', apptType: 'Follow up', office: 'Fresno North', verification: '-', dos: '2026-03-03', time: '', ptCode: '', nextDos: '', inActive: 'Active' },
+    { id: 27306, fullName: 'Mellenberger, Heather', patientNo: '634', patientType: 'Allergy', status: 'Inactive', apptType: 'Allergy Shots', office: 'Fresno North', verification: '-', dos: '2026-03-03', time: '', ptCode: '', nextDos: '', inActive: 'Active' },
     { id: 27307, fullName: 'Caldera, Giovani', patientNo: '1558', patientType: 'Allergy', status: 'Scheduled', apptType: 'Follow up', office: 'Fresno North', verification: '-', dos: '2026-03-03', time: '', ptCode: '', nextDos: '', inActive: 'Active' },
   ];
 
@@ -70,6 +75,26 @@ const AppointmentTable = () => {
     [&_.dx-datagrid-total-footer]:!bg-white
   `;
 
+  // ✅ New Custom Renderer for Patient No (Sky Blue & Clickable)
+  const patientNoRender = useCallback((cellData) => {
+    return (
+      <span 
+        className="text-[#00A3FF] font-bold cursor-pointer hover:underline transition-all"
+        onClick={(e) => {
+          e.stopPropagation();
+          setLogPatientData({
+            no: cellData.value,
+            name: cellData.data.fullName
+          });
+          setIsLogOpen(true);
+        }}
+        title="View Injection Log"
+      >
+        {cellData.value}
+      </span>
+    );
+  }, []);
+
   const statusRender = (cellData) => {
     const isScheduled = cellData.value === 'Scheduled';
     return (
@@ -96,7 +121,6 @@ const AppointmentTable = () => {
     );
   };
 
-  // Wrapped in useCallback so DevExtreme doesn't lose the click reference
   const actionsRender = useCallback((cellData) => {
     return (
       <div className="flex items-center gap-1.5 justify-center">
@@ -132,8 +156,7 @@ const AppointmentTable = () => {
         <button 
           type="button"
           onClick={(e) => {
-            e.stopPropagation(); // Fixes DevExtreme row-click swallowing the button click
-            console.log("Opening Injection Sheet for:", cellData.data.fullName);
+            e.stopPropagation(); 
             setSelectedInjectionData({
               name: cellData.data.fullName,
               no: cellData.data.patientNo,
@@ -179,6 +202,14 @@ const AppointmentTable = () => {
         />
       )}
 
+      {/* ✅ NEW INJECTION LOG MODAL */}
+      <InjectionLog 
+        isOpen={isLogOpen}
+        onClose={() => setIsLogOpen(false)}
+        patientNo={logPatientData?.no}
+        patientName={logPatientData?.name}
+      />
+
       {/* MAIN TABLE CONTAINER */}
       <div className="flex-1 flex flex-col bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
         
@@ -219,7 +250,16 @@ const AppointmentTable = () => {
 
               <Column dataField="id" caption="ID" width={70} alignment="center" />
               <Column dataField="fullName" caption="Full Name" minWidth={180} />
-              <Column dataField="patientNo" caption="Patient No" minWidth={100} />
+              
+              {/* ✅ UPDATED PATIENT NO COLUMN */}
+              <Column 
+                dataField="patientNo" 
+                caption="Patient No" 
+                minWidth={100} 
+                alignment="center"
+                cellRender={patientNoRender} 
+              />
+              
               <Column dataField="patientType" caption="Patient Type" minWidth={120} />
               <Column dataField="status" caption="Status" minWidth={110} alignment="center" cellRender={statusRender} />
               <Column dataField="apptType" caption="Appt Type" minWidth={150} />
