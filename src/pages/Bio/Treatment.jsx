@@ -4,7 +4,8 @@ import TreatmentTable from '../../components/Bio/TreatmentTable';
 
 const Treatment = () => {
   return (
-    <div className="w-full h-full bg-[#f8fafc] p-4 sm:p-6 overflow-hidden flex flex-col">
+    // Changed bg to white and removed all padding (p-0 instead of p-4 sm:p-6)
+    <div className="w-full h-full bg-white p-0 overflow-hidden flex flex-col">
       <TreatmentTable />
     </div>
   );

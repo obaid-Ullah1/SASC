@@ -123,7 +123,7 @@ const AppointmentTable = () => {
 
   const actionsRender = useCallback((cellData) => {
     return (
-      <div className="flex items-center gap-1.5 justify-center">
+      <div className="flex items-center gap-1.5 justify-center flex-wrap">
         {/* 1. Edit Icon */}
         <button 
           type="button"
@@ -235,7 +235,8 @@ const AppointmentTable = () => {
               height="100%"
               showBorders={true}
               rowAlternationEnabled={true}
-              columnAutoWidth={false}
+              columnAutoWidth={true}
+              wordWrapEnabled={true} // ✅ Forces text to wrap onto multiple lines
               allowColumnResizing={true}
               columnResizingMode="widget"
               showRowLines={true}
@@ -248,29 +249,21 @@ const AppointmentTable = () => {
               <HeaderFilter visible={true} />
               <GroupPanel visible={true} emptyPanelText="Drag a column header here to group by that column" />
 
-              <Column dataField="id" caption="ID" width={70} alignment="center" />
-              <Column dataField="fullName" caption="Full Name" minWidth={180} />
-              
-              {/* ✅ UPDATED PATIENT NO COLUMN */}
-              <Column 
-                dataField="patientNo" 
-                caption="Patient No" 
-                minWidth={100} 
-                alignment="center"
-                cellRender={patientNoRender} 
-              />
-              
-              <Column dataField="patientType" caption="Patient Type" minWidth={120} />
-              <Column dataField="status" caption="Status" minWidth={110} alignment="center" cellRender={statusRender} />
-              <Column dataField="apptType" caption="Appt Type" minWidth={150} />
-              <Column dataField="office" caption="Office" minWidth={130} />
-              <Column dataField="verification" caption="Verification" minWidth={100} alignment="center" cellRender={verificationRender} />
-              <Column dataField="dos" caption="DoS" dataType="date" minWidth={110} alignment="center" />
-              <Column dataField="time" caption="Time" minWidth={90} />
-              <Column dataField="ptCode" caption="PT Code" minWidth={90} />
-              <Column dataField="nextDos" caption="Next DoS" dataType="date" minWidth={110} />
-              <Column dataField="inActive" caption="In Active" minWidth={100} alignment="center" cellRender={activeRender} />
-              <Column caption="Actions" width={120} alignment="center" cellRender={actionsRender} allowFiltering={false} allowSorting={false} />
+              {/* ✅ Removed strict minWidths so columns can squish and text can wrap on narrow screens */}
+              <Column dataField="id" caption="ID" width={60} alignment="center" />
+              <Column dataField="fullName" caption="Full Name" />
+              <Column dataField="patientNo" caption="Patient No" alignment="center" cellRender={patientNoRender} />
+              <Column dataField="patientType" caption="Patient Type" />
+              <Column dataField="status" caption="Status" alignment="center" cellRender={statusRender} />
+              <Column dataField="apptType" caption="Appt Type" />
+              <Column dataField="office" caption="Office" />
+              <Column dataField="verification" caption="Verification" alignment="center" cellRender={verificationRender} />
+              <Column dataField="dos" caption="DoS" dataType="date" alignment="center" />
+              <Column dataField="time" caption="Time" />
+              <Column dataField="ptCode" caption="PT Code" />
+              <Column dataField="nextDos" caption="Next DoS" dataType="date" />
+              <Column dataField="inActive" caption="In Active" alignment="center" cellRender={activeRender} />
+              <Column caption="Actions" alignment="center" cellRender={actionsRender} allowFiltering={false} allowSorting={false} />
 
               <Summary>
                 <TotalItem column="id" summaryType="count" displayFormat="Total: {0}" />

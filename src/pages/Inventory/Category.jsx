@@ -3,7 +3,7 @@ import {
   List, GitBranch, Tag, Beaker, Database, ClipboardCheck, Map 
 } from 'lucide-react';
 
-// Importing components
+// Components
 import TableHeader from '../../components/TableHeader'; 
 import StandardTable from '../../components/inventory/StandardTable';
 import GroupedTable from '../../components/inventory/GroupedTable';
@@ -11,7 +11,7 @@ import IngredientTable from '../../components/inventory/IngredientTable';
 import AssessmentTable from '../../components/inventory/AssessmentTable';
 import MapAssessmentTable from '../../components/inventory/MapAssessmentTable';
 
-// Import the Add Forms
+// Add Forms
 import AddCategoryForm from '../../components/inventory/AddForms/AddCategoryForm';
 import AddSubCategoryForm from '../../components/inventory/AddForms/AddSubCategoryForm';
 import TypeForm from '../../components/inventory/AddForms/TypeForm';
@@ -19,7 +19,7 @@ import AddIngredientForm from '../../components/inventory/AddForms/AddIngredient
 import BaseTypeForm from '../../components/inventory/AddForms/BaseType';
 import AddLable from '../../components/inventory/AddForms/AddLable';
 import MapAssessment from '../../components/inventory/AddForms/MapAssessment';
-import SynonymForm from '../../components/inventory/AddForms/SynonymForm'; // ✅ Added
+import SynonymForm from '../../components/inventory/AddForms/SynonymForm'; 
 
 // Global Components
 import SuccessPopup from '../../components/global/SuccessPopup';
@@ -29,7 +29,7 @@ const Category = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showSynonymForm, setShowSynonymForm] = useState(false); // ✅ Added
+  const [showSynonymForm, setShowSynonymForm] = useState(false); 
   const [editingItem, setEditingItem] = useState(null); 
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -69,7 +69,6 @@ const Category = () => {
     { name: 'Map Assessment Type', icon: Map },
   ];
 
-  // --- PERSISTENCE LOGIC ---
   const handleAddNewData = (newData) => {
     setAllData(prev => {
       let currentTabData = [...prev[activeTab]];
@@ -108,7 +107,6 @@ const Category = () => {
     setEditingItem(null);
   };
 
-  // ✅ SPECIALIZED LOGIC: SAVE SYNONYMS
   const handleSaveSynonyms = (ingredientId, updatedSynonyms) => {
     setAllData(prev => ({
       ...prev,
@@ -145,13 +143,13 @@ const Category = () => {
   const handleEditClick = (item) => {
     setEditingItem(item);
     setShowAddForm(true);
-    setShowSynonymForm(false); // Close synonym form if open
+    setShowSynonymForm(false); 
   };
 
   const handleManageSynonyms = (item) => {
     setEditingItem(item);
     setShowSynonymForm(true);
-    setShowAddForm(false); // Close add form if open
+    setShowAddForm(false); 
   };
 
   const handleTabChange = (tabName) => {
@@ -202,7 +200,7 @@ const Category = () => {
             title={group.title} 
             items={group.items} 
             {...tableProps} 
-            onManageSynonyms={handleManageSynonyms} // ✅ Added
+            onManageSynonyms={handleManageSynonyms} 
           />
         ));
       case 'Sub Category':
@@ -218,10 +216,11 @@ const Category = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#f1f5f9] p-2 md:p-3 overflow-hidden">
+    // OUTER CONTAINER: Pure white, no padding
+    <div className="w-full h-full flex flex-col bg-white p-0 overflow-hidden font-sans">
       
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap justify-center gap-1.5 mb-4 shrink-0 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-300 w-fit mx-auto">
+      {/* NAVIGATION TABS */}
+      <div className="flex flex-wrap justify-center gap-1.5 mb-5 mt-4 shrink-0 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 w-fit mx-auto">
         {tabs.map((tab) => (
           <button
             key={tab.name}
@@ -238,7 +237,12 @@ const Category = () => {
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] border border-slate-300 overflow-hidden">
+      {/* INNER CONTENT AREA:
+          - mx-0: Removes left and right spaces entirely.
+          - mb-0: Removes bottom space for a flush look.
+          - border-t: Separates the content from the tabs section.
+      */}
+      <div className="flex-1 flex flex-col bg-white mx-0 mb-0 border-t border-slate-200 overflow-hidden">
         <TableHeader 
           title={`${activeTab} List`} 
           icon={tabs.find(t => t.name === activeTab)?.icon}
@@ -250,11 +254,10 @@ const Category = () => {
           onCategoryToggle={handleCategoryToggle}
         />
 
-        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-white">
           
-          {/* ✅ SYNONYM FORM (MANAGEMENT) */}
           {showSynonymForm && editingItem && (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-400 mb-4">
+            <div className="animate-in fade-in slide-in-from-top-4 duration-400 mb-6">
               <SynonymForm 
                 initialData={editingItem} 
                 onClose={() => {setShowSynonymForm(false); setEditingItem(null);}} 
@@ -263,9 +266,8 @@ const Category = () => {
             </div>
           )}
 
-          {/* ADD / EDIT FORMS */}
           {showAddForm && (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-400 mb-4">
+            <div className="animate-in fade-in slide-in-from-top-4 duration-400 mb-6">
               {activeTab === 'Category' && <AddCategoryForm initialData={editingItem} onClose={() => setShowAddForm(false)} onAdd={handleAddNewData} />}
               {activeTab === 'Sub Category' && <AddSubCategoryForm initialData={editingItem} categories={allData['Category']} onClose={() => setShowAddForm(false)} onAdd={handleAddNewData} />}
               {activeTab === 'Type' && <TypeForm initialData={editingItem} onClose={() => setShowAddForm(false)} onAdd={handleAddNewData} />}
@@ -275,7 +277,10 @@ const Category = () => {
               {activeTab === 'Map Assessment Type' && <MapAssessment initialData={editingItem} onClose={() => setShowAddForm(false)} onAdd={handleAddNewData} />}
             </div>
           )}
-          {renderContent()}
+          
+          <div className="space-y-4">
+            {renderContent()}
+          </div>
         </div>
       </div>
 

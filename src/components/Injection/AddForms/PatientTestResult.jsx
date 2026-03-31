@@ -7,18 +7,17 @@ import DataGrid, {
 } from 'devextreme-react/data-grid';
 
 const PatientTestResult = ({ isOpen, onClose, patientData }) => {
-  // 1. STATE MANAGEMENT FOR UI TOGGLES
+  // 1. STATE MANAGEMENT (Same as original)
   const [viewModes, setViewModes] = useState({
-    "Group1": "ALL", // "ALL" or "BEST"
+    "Group1": "ALL",
     "Group2": "ALL"
   });
 
   const [dropdownValues, setDropdownValues] = useState({
-    "Group1": "SA", // "SA" or "LT"
+    "Group1": "SA",
     "Group2": "SA"
   });
 
-  // Handle toggling between "Show Best Match" and "Show All Injections"
   const toggleViewMode = (group) => {
     setViewModes(prev => ({
       ...prev,
@@ -26,7 +25,6 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
     }));
   };
 
-  // Handle Dropdown Change
   const handleDropdownChange = (group, value) => {
     setDropdownValues(prev => ({
       ...prev,
@@ -34,9 +32,8 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
     }));
   };
 
-  // 2. MOCK DATA (Replicating exact layout from screenshots)
+  // 2. MOCK DATA (Same as original)
   const mappingData = useMemo(() => [
-    // Group 1
     { id: 1, group: "Group1", count: "19 Allergens", panel: "Extract Tree (T3)", positive: "Walnut, Black", wheal: 4, ids: "-", priority: "High", std: true, ait: true, custom12: true, custom1: true, grass: false, custom1_2: true, custom13: true, weed: false, tree1: false, tree2: true },
     { id: 2, group: "Group1", count: "19 Allergens", panel: "Extract Grass (G1)", positive: "Allermed Bermuda", wheal: 4, ids: "-", priority: "High", std: true, ait: true, custom12: true, custom1: false, grass: true, custom1_2: false, custom13: false, weed: false, tree1: false, tree2: false },
     { id: 3, group: "Group1", count: "19 Allergens", panel: "Extract Grass (G1)", positive: "Johnson Grass", wheal: 4, ids: "-", priority: "High", std: true, ait: true, custom12: true, custom1: false, grass: true, custom1_2: false, custom13: false, weed: false, tree1: false, tree2: false },
@@ -50,11 +47,9 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
     { id: 11, group: "Group1", count: "19 Allergens", panel: "Extract Weed (W1)", positive: "Pigweed, Rough", wheal: 2, ids: "-", priority: "Low", std: true, ait: true, custom12: false, custom1: true, grass: false, custom1_2: false, custom13: false, weed: true, tree1: false, tree2: false },
     { id: 12, group: "Group1", count: "19 Allergens", panel: "Extract Weed (W1)", positive: "Sheep Sorrel", wheal: 2, ids: "-", priority: "Low", std: true, ait: true, custom12: false, custom1: true, grass: false, custom1_2: false, custom13: false, weed: true, tree1: false, tree2: false },
     { id: 13, group: "Group1", count: "19 Allergens", panel: "Extract Tree (T1)", positive: "Histamine", wheal: 4, ids: "-", priority: "High", std: false, ait: false, custom12: false, custom1: false, grass: false, custom1_2: false, custom13: false, weed: false, tree1: false, tree2: false },
-    // Group 2
     { id: 1, group: "Group2", count: "1 Allergens", panel: "Extract Epithelia (E1)", positive: "Cat", wheal: 2, ids: "-", priority: "Low", custom4: true },
   ], []);
 
-  // ALL Mix columns definitions mapped from first screenshot
   const mixDefinitions = [
     { field: 'std', title: 'STD MIX 1', stats: '(12/19, 63.2%)' },
     { field: 'ait', title: 'AIT MIX 1', stats: '(12/19, 63.2%)' },
@@ -73,12 +68,11 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
 
   const uniqueGroups = [...new Set(mappingData.map(d => d.group))];
 
-  // 3. UI RENDERERS MATCHING SCREENSHOT EXACTLY
   const MixHeader = (title, stats) => (
-    <div className="flex flex-col items-center justify-center py-0.5 leading-tight">
+    <div className="flex flex-col items-center justify-center py-0.5 leading-tight min-w-[80px]">
       <input type="checkbox" className="mb-1 w-3 h-3 cursor-pointer" />
-      <span className="text-[11px] font-bold text-[#00A3FF] uppercase">{title}</span>
-      <span className="text-[9px] font-semibold text-[#00A3FF] mt-0.5">{stats}</span>
+      <span className="text-[10px] sm:text-[11px] font-bold text-[#00A3FF] uppercase text-center">{title}</span>
+      <span className="text-[8px] sm:text-[9px] font-semibold text-[#00A3FF] mt-0.5">{stats}</span>
     </div>
   );
 
@@ -87,26 +81,27 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
     return (
       <div className="flex justify-center items-center h-full">
         {active ? (
-          <div className="bg-[#16A34A] rounded-[3px] w-4 h-4 flex items-center justify-center shadow-sm">
-            <Check size={14} className="text-white" strokeWidth={4} />
+          <div className="bg-[#16A34A] rounded-[3px] w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center shadow-sm">
+            <Check size={12} className="text-white" strokeWidth={4} />
           </div>
         ) : (
-          <X size={15} className="text-[#DC2626]" strokeWidth={4} />
+          <X size={13} className="text-[#DC2626]" strokeWidth={4} />
         )}
       </div>
     );
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[98vw] h-[95vh] bg-[#F4F6F8] rounded-lg shadow-2xl flex flex-col overflow-hidden border border-slate-400">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 p-2 sm:p-4 animate-in fade-in duration-200">
+      {/* RESPONSIVE: Width is 100% on mobile, 98vw on larger screens */}
+      <div className="w-full sm:max-w-[98vw] h-[98vh] sm:h-[95vh] bg-[#F4F6F8] rounded-lg shadow-2xl flex flex-col overflow-hidden border border-slate-400">
         
-        {/* MODAL HEADER: Lite Sky Blue */}
-        <div className="bg-[#00A3FF] px-4 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 text-white">
-             <FlaskConical size={16} strokeWidth={2.5} />
-             <h2 className="text-[14px] font-bold tracking-wide">
-               Patient Test Results – {patientData?.patient || "Gonzalez , Eliana"}
+        {/* MODAL HEADER */}
+        <div className="bg-[#00A3FF] px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2 text-white overflow-hidden">
+             <FlaskConical size={16} strokeWidth={2.5} className="shrink-0" />
+             <h2 className="text-[12px] sm:text-[14px] font-bold tracking-wide truncate">
+                Patient Test Results – {patientData?.patient || "Gonzalez , Eliana"}
              </h2>
           </div>
           <button onClick={onClose} className="text-white hover:bg-white/20 rounded p-1 transition-all">
@@ -114,8 +109,8 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
           </button>
         </div>
 
-        {/* SCROLLABLE BODY */}
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+        {/* BODY */}
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4 flex flex-col gap-4 sm:gap-6">
           
           {uniqueGroups.map((groupName, index) => {
             const groupData = mappingData.filter(d => d.group === groupName);
@@ -123,50 +118,46 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
             const currentMode = viewModes[groupName];
             const currentDD = dropdownValues[groupName];
             
-            // Determine which columns to show based on Mode
             let activeMixes = [];
             if (currentMode === "ALL") {
-              // Show all columns that have data for this group
               activeMixes = mixDefinitions.filter(mix => groupData.some(d => d[mix.field] !== undefined));
             } else {
-              // BEST MATCH LOGIC
               const bestMatchTitle = groupName === "Group1" 
                 ? (currentDD === "SA" ? "SAG1-01/26/D" : "LTG1-01/26/D") 
                 : "CUSTOM Mix 4";
               const bestMatchStats = groupName === "Group1" ? "(19/19, 100.0%)" : "(1/1, 100.0%)";
-              
               activeMixes = [{ field: 'best', title: bestMatchTitle, stats: bestMatchStats }];
             }
             
             return (
-              <div key={groupName} className="bg-white border border-slate-300 rounded shadow-sm flex flex-col">
+              <div key={groupName} className="bg-white border border-slate-300 rounded shadow-sm flex flex-col overflow-hidden">
                 
-                {/* Group Toolbar */}
-                <div className="flex justify-between items-center px-4 py-2 border-b border-slate-200 bg-white">
+                {/* RESPONSIVE TOOLBAR: Stacks on mobile (flex-col), row on desktop */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-3 py-2 border-b border-slate-200 bg-white gap-2">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-[#00A3FF] font-bold text-[14px]">{groupName}</span>
-                    <span className="text-slate-600 text-[12px]">({groupCount})</span>
+                    <span className="text-[#00A3FF] font-bold text-[13px] sm:text-[14px]">{groupName}</span>
+                    <span className="text-slate-600 text-[11px] sm:text-[12px]">({groupCount})</span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     <select 
                       value={currentDD}
                       onChange={(e) => handleDropdownChange(groupName, e.target.value)}
-                      className="border border-slate-300 rounded px-2 py-1 text-[12px] text-slate-700 outline-none focus:border-blue-500 w-16 cursor-pointer"
+                      className="border border-slate-300 rounded px-2 py-1 text-[11px] sm:text-[12px] text-slate-700 outline-none focus:border-blue-500 w-16 cursor-pointer bg-white"
                     >
                       <option value="SA">SA</option>
                       <option value="LT">LT</option>
                     </select>
                     <button 
                       onClick={() => toggleViewMode(groupName)}
-                      className="border border-slate-300 bg-white rounded px-4 py-1 text-[12px] text-slate-600 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                      className="flex-1 sm:flex-none border border-slate-300 bg-white rounded px-3 sm:px-4 py-1 text-[11px] sm:text-[12px] text-slate-600 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
                     >
                       {currentMode === "ALL" ? "Show Best Match" : "Show All Injections"}
                     </button>
                   </div>
                 </div>
 
-                {/* Group DataGrid */}
-                <div className="custom-matching-grid">
+                {/* GRID CONTAINER */}
+                <div className="custom-matching-grid overflow-x-auto">
                   <DataGrid
                     dataSource={groupData}
                     showBorders={true}
@@ -175,27 +166,26 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
                     columnAutoWidth={false}
                     rowAlternationEnabled={false}
                     hoverStateEnabled={true}
-                    height={index === 0 ? 550 : 150} 
+                    height={index === 0 ? (window.innerWidth < 640 ? 400 : 550) : 150} 
                   >
                     <Selection mode="multiple" showCheckBoxesMode="always" width={40} />
                     <Scrolling mode="virtual" />
 
-                    {/* ✅ Text changed to simple font-medium and standard sizes */}
-                    <Column dataField="id" caption="#" width={50} alignment="center" cssClass="text-slate-600 font-medium text-[12px]" />
-                    <Column dataField="panel" caption="Panel" width={180} cssClass="text-slate-700 font-medium text-[12px]" />
-                    <Column dataField="positive" caption="Pt Positive" minWidth={200} cssClass="text-slate-800 font-medium text-[12px]" />
-                    <Column dataField="wheal" caption="Wheal" width={70} alignment="left" cssClass="text-slate-700 font-medium text-[12px]" />
-                    <Column dataField="ids" caption="IDs" width={60} alignment="left" cssClass="text-slate-700 font-medium text-[12px]" />
-                    <Column dataField="priority" caption="Priority" width={90} alignment="left" cssClass="text-slate-700 font-medium text-[12px]" />
+                    {/* RESPONSIVE COLUMNS: Main columns use minWidth to prevent breaking on narrow screens */}
+                    <Column dataField="id" caption="#" width={40} alignment="center" cssClass="text-slate-600 font-medium text-[11px] sm:text-[12px]" />
+                    <Column dataField="panel" caption="Panel" minWidth={130} cssClass="text-slate-700 font-medium text-[11px] sm:text-[12px]" />
+                    <Column dataField="positive" caption="Pt Positive" minWidth={150} cssClass="text-slate-800 font-medium text-[11px] sm:text-[12px]" />
+                    <Column dataField="wheal" caption="Wheal" width={55} alignment="left" cssClass="text-slate-700 font-medium text-[11px] sm:text-[12px]" />
+                    <Column dataField="ids" caption="IDs" width={50} alignment="left" cssClass="text-slate-700 font-medium text-[11px] sm:text-[12px]" />
+                    <Column dataField="priority" caption="Priority" width={80} alignment="left" cssClass="text-slate-700 font-medium text-[11px] sm:text-[12px]" />
 
-                    {/* Dynamic Cyan Mix Columns */}
                     {activeMixes.map((mix) => (
                       <Column 
                         key={mix.field}
                         dataField={mix.field} 
                         headerCellRender={() => MixHeader(mix.title, mix.stats)} 
                         alignment="center" 
-                        width={110} 
+                        width={100} 
                         cssClass="mix-cell-border"
                         cellRender={(d) => <StatusIcon active={currentMode === "BEST" ? true : d.value} />} 
                       />
@@ -209,10 +199,10 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="bg-white px-6 py-3 flex justify-end border-t border-slate-300 shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <div className="bg-white px-4 py-3 flex justify-end border-t border-slate-300 shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
            <button 
              onClick={onClose} 
-             className="bg-[#6C757D] text-white px-6 py-1.5 rounded text-[13px] font-semibold hover:bg-[#5a6268] active:scale-95 transition-all shadow-sm"
+             className="w-full sm:w-auto bg-[#6C757D] text-white px-8 py-2 rounded text-[13px] font-semibold hover:bg-[#5a6268] active:scale-95 transition-all shadow-sm"
            >
              Close
            </button>
@@ -221,31 +211,26 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
       </div>
 
       <style jsx global>{`
-        .custom-matching-grid .dx-datagrid {
-          border: none !important;
-        }
+        .custom-matching-grid .dx-datagrid { border: none !important; }
         .custom-matching-grid .dx-datagrid-headers {
           background-color: #ffffff !important;
           color: #475569 !important;
           font-weight: 600 !important;
-          font-size: 11px !important;
-          border-bottom: 1px solid #cbd5e1 !important; /* Slightly darker header bottom */
+          font-size: 10px !important;
+          border-bottom: 1px solid #cbd5e1 !important;
         }
         
-        /* Cyan Header Application for mix columns (starts from 8th column due to checkbox + other core columns) */
         .custom-matching-grid .dx-header-row > td:nth-child(n+8) {
           background-color: #E0F7FA !important; 
           border-bottom: 1px solid #B2EBF2 !important;
         }
 
         .custom-matching-grid .dx-datagrid-borders > .dx-datagrid-headers, 
-        .custom-matching-grid .dx-datagrid-borders > .dx-datagrid-rowsview, 
-        .custom-matching-grid .dx-datagrid-borders > .dx-datagrid-filter-panel {
+        .custom-matching-grid .dx-datagrid-borders > .dx-datagrid-rowsview {
           border-left: none !important;
           border-right: none !important;
         }
 
-        /* ✅ Row and Column Borders made slightly more visible (#cbd5e1 = slate-300) */
         .custom-matching-grid .dx-column-lines > td {
           border-left: 1px solid #cbd5e1 !important;
           border-right: 1px solid #cbd5e1 !important;
@@ -255,8 +240,11 @@ const PatientTestResult = ({ isOpen, onClose, patientData }) => {
           border-bottom: 1px solid #cbd5e1 !important;
         }
 
-        .custom-matching-grid .dx-command-select {
-          border-right: 1px solid #cbd5e1 !important;
+        /* Responsive font adjustment for mobile */
+        @media (max-width: 640px) {
+          .custom-matching-grid .dx-datagrid-headers .dx-datagrid-text-content {
+            font-size: 9px !important;
+          }
         }
       `}</style>
     </div>

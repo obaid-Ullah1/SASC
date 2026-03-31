@@ -71,13 +71,11 @@ const MenusPage = () => {
     setShowAddForm(true);
   };
 
-  // ✅ Updated to open Confirm Popup instead of window.confirm
   const handleDeleteClick = (id) => {
     setRecordToDelete(id);
     setShowConfirm(true);
   };
 
-  // ✅ Added confirmation execution function
   const confirmDelete = () => {
     if (activeTab === 'Menu') {
       setMenuData(prev => prev.filter(item => item.id !== recordToDelete));
@@ -133,10 +131,11 @@ const MenusPage = () => {
   );
 
   return (
-    <div className="w-full min-h-screen bg-[#F3F4F6] font-sans p-0 flex flex-col">
+    // UPDATED: bg-[#F3F4F6] changed to bg-white to remove the gray frame effect
+    <div className="w-full min-h-screen bg-white font-sans p-0 flex flex-col">
 
       {/* ======================================================== */}
-      {/* UPDATED TABS NAVIGATION WITH OFFICIAL THEME */}
+      {/* TABS NAVIGATION */}
       {/* ======================================================== */}
       <div className="flex flex-wrap justify-center gap-1.5 mb-3 mt-0 shrink-0 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-300 w-fit mx-auto">
         <button
@@ -163,9 +162,10 @@ const MenusPage = () => {
         </button>
       </div>
 
-      {/* MAIN CARD WITH RESPONSIVE HEIGHT */}
+      {/* MAIN DATA AREA */}
+      {/* UPDATED: Removed mx-5, rounded-xl, and shadow-2xl to go edge-to-edge and remove gray space */}
       <div
-        className="bg-white border border-slate-300 rounded-xl shadow-2xl flex flex-col mx-5 relative"
+        className="bg-white border-t border-slate-300 flex flex-col relative"
         style={{ height: "calc(100vh - 140px)" }}
       >
 
@@ -188,7 +188,7 @@ const MenusPage = () => {
           </div>
         )}
 
-        {/* GRID AREA: min-h-0 and relative are critical to binding the sticky pager */}
+        {/* GRID AREA */}
         <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
           <DataGrid
             dataSource={activeTab === 'Menu' ? menuData : subMenuData}
@@ -207,7 +207,6 @@ const MenusPage = () => {
               storageKey={storageKey}
             />
 
-            {/* INTERNAL SCROLL ONLY */}
             <Scrolling mode="virtual" />
 
             <GroupPanel visible={true} />
@@ -227,7 +226,6 @@ const MenusPage = () => {
               displayMode="full"
             />
 
-            {/* COLUMNS FOR MENU AND SUB-MENU */}
             {activeTab === 'Menu' ? (
               <>
                 <Column dataField="id" caption="ID" width={60} alignment="center" />
@@ -255,7 +253,6 @@ const MenusPage = () => {
               alignment="center"
             />
 
-            {/* WIRED UP ACTION ICONS */}
             <Column
               caption="Action"
               width={110}
@@ -285,7 +282,6 @@ const MenusPage = () => {
         </div>
       </div>
 
-      {/* ✅ ADDED GLOBAL POPUPS */}
       <ConfirmPopup 
         isOpen={showConfirm} 
         onClose={() => setShowConfirm(false)} 
@@ -300,7 +296,6 @@ const MenusPage = () => {
       />
 
       <style jsx global>{`
-        /* FORCED STICKY FOOTER LOGIC */
         .dx-datagrid-pager, .dx-pager {
           position: sticky !important;
           bottom: 0 !important;

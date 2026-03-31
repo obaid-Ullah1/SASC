@@ -41,11 +41,9 @@ const RolesPage = () => {
   // --- HANDLERS ---
   const handleSaveRole = (formData) => {
     if (editingRecord) {
-      // Logic for Updating an existing record
       setRoles(prev => prev.map(r => r.id === editingRecord.id ? { ...r, ...formData } : r));
       setSuccessMsg("Role updated successfully!");
     } else {
-      // Logic for Adding a new record
       const newRole = { ...formData, id: crypto.randomUUID() };
       setRoles([newRole, ...roles]);
       setSuccessMsg("New role added successfully!");
@@ -75,11 +73,12 @@ const RolesPage = () => {
   }, [roles, searchQuery]);
 
   return (
-    <div className="w-full h-screen bg-[#F1F5F9] p-4 flex flex-col overflow-hidden font-sans animate-in fade-in duration-500">
+    // UPDATED: Changed bg-[#F1F5F9] to bg-white and removed p-4 to go edge-to-edge
+    <div className="w-full h-screen bg-white p-0 flex flex-col overflow-hidden font-sans animate-in fade-in duration-500">
       
-      {/* DYNAMIC FORM SECTION - Rendered above the unified table container */}
+      {/* DYNAMIC FORM SECTION */}
       {showAddForm && (
-        <div className="mb-4 shrink-0 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="mb-0 shrink-0 animate-in fade-in slide-in-from-top-4 duration-300 border-b border-slate-200 bg-slate-50 p-4">
           <AddRoleForm 
             onCancel={closeForm} 
             onSave={handleSaveRole}
@@ -88,11 +87,12 @@ const RolesPage = () => {
         </div>
       )}
 
-      {/* COMBINED HEADER & GRID SECTION - Eliminates gap and attaches them */}
-      <div className="flex-1 min-h-0 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
+      {/* COMBINED HEADER & GRID SECTION */}
+      {/* UPDATED: Removed border, rounded-lg, and shadow-sm to remove the frame effect */}
+      <div className="flex-1 min-h-0 bg-white flex flex-col overflow-hidden">
         
         {/* HEADER SECTION */}
-        <div className="shrink-0 border-b border-slate-200">
+        <div className="shrink-0 border-b border-slate-300">
           <TableHeader 
             title="Role Management"
             totalCount={roles.length}
@@ -119,7 +119,6 @@ const RolesPage = () => {
           >
             <HeaderFilter visible={true} />
             
-            {/* Added Pagination Elements */}
             <Paging defaultPageSize={10} />
             <Pager 
               showPageSizeSelector={true} 
@@ -155,7 +154,7 @@ const RolesPage = () => {
                 <div className="flex justify-center gap-1">
                   <button 
                     onClick={() => { 
-                      setEditingRecord(e.data); // Grabs row data for editing
+                      setEditingRecord(e.data); 
                       setShowAddForm(true); 
                     }}
                     className="p-1 text-blue-500 hover:bg-blue-50 rounded border border-transparent hover:border-blue-200 transition-all cursor-pointer"
@@ -228,10 +227,11 @@ const RolesPage = () => {
           vertical-align: middle !important;
         }
         
-        /* PAGER STYLING (Optional tweak to match minimal theme) */
-        .dx-datagrid-pager {
+        .dx-datagrid-pager, .dx-pager {
           border-top: 1px solid #e2e8f0 !important;
-          padding: 8px 16px !important;
+          padding: 10px 20px !important;
+          background: #fff !important;
+          box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05) !important;
         }
       `}</style>
     </div>
