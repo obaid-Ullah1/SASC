@@ -32,7 +32,7 @@ import TestRules from './pages/Settings/TestRules';
 import BioManagement from './pages/Settings/BioManagement';
 
 // IMPORT LIBRARY SCREEN
-import LibraryPage from './pages/Library/Librarypage';
+import LibraryPage from './pages/Library/LibraryPage';
 
 // ✅ IMPORT NEW TESTING RESULT SCREEN
 import TestingResult from './pages/Testing/TestingResult';

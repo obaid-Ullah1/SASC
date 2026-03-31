@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import DataGrid, { 
   Column, 
   Scrolling, 
@@ -109,15 +109,12 @@ const LibraryPage = () => {
 
   // --- GLOBAL POPUP DELETE FLOW ---
   const handleDeleteClick = (id) => {
-    // Open the confirm popup instead of window.confirm
     setConfirmPopup({ isOpen: true, idToDelete: id });
   };
 
   const executeDelete = () => {
-    // Actually delete the document
     setGridData(gridData.filter(item => item.id !== confirmPopup.idToDelete));
     setConfirmPopup({ isOpen: false, idToDelete: null });
-    // Show success popup
     setSuccessPopup({ isOpen: true, message: 'Document deleted successfully!' });
   };
 
@@ -230,32 +227,38 @@ const LibraryPage = () => {
   return (
     <div className="flex flex-col h-full w-full bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden relative">
       
-      {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0 gap-4 bg-white">
-        <div className="flex items-center gap-3">
+      {/* RESPONSIVE HEADER */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 shrink-0 gap-4 bg-white">
+        
+        {/* Title */}
+        <div className="flex items-center gap-3 w-full lg:w-auto">
           <FolderOpen size={24} className="text-[#007BFF]" strokeWidth={2.5} />
-          <h1 className="text-[18px] font-black text-[#007BFF] tracking-wide">
+          <h1 className="text-[16px] sm:text-[18px] font-black text-[#007BFF] tracking-wide">
             Library Documents
           </h1>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <div className="relative group">
+        {/* Controls - Stacking efficiently on mobile */}
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          
+          {/* Search Bar - Full width on very small screens, auto otherwise */}
+          <div className="relative group w-full sm:w-auto flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#007BFF] transition-colors" size={15} />
             <input 
               type="text" 
               placeholder="Search by file name..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-1.5 border border-slate-300 rounded-full text-[13px] w-[240px] focus:border-[#007BFF] focus:ring-2 focus:ring-blue-50 outline-none transition-all" 
+              className="pl-9 pr-4 py-1.5 border border-slate-300 rounded-full text-[13px] w-full sm:w-[240px] focus:border-[#007BFF] focus:ring-2 focus:ring-blue-50 outline-none transition-all" 
             />
           </div>
           
-          <div className="relative">
+          {/* Category Dropdown */}
+          <div className="relative w-full sm:w-auto flex-1 sm:flex-none">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="appearance-none flex items-center pl-4 pr-9 py-1.5 border border-slate-300 rounded-full text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 transition-colors outline-none cursor-pointer min-w-[120px]"
+              className="appearance-none flex items-center pl-4 pr-9 py-1.5 border border-slate-300 rounded-full text-[13px] font-medium text-slate-600 bg-white hover:bg-slate-50 transition-colors outline-none cursor-pointer w-full sm:min-w-[120px]"
             >
               <option value="All">All Categories</option>
               {CATEGORY_OPTIONS.map(cat => (
@@ -265,30 +268,35 @@ const LibraryPage = () => {
             <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
           </div>
 
+          {/* Reset Filters */}
           <button 
             onClick={handleResetFilters}
             title="Reset Filters"
-            className="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white hover:bg-slate-50 rounded-full text-slate-500 transition-colors"
+            className="w-8 h-8 flex items-center justify-center border border-slate-300 bg-white hover:bg-slate-50 rounded-full text-slate-500 transition-colors shrink-0"
           >
             <RotateCcw size={14} strokeWidth={2.5} />
           </button>
 
-          <div className="w-[1px] h-[20px] bg-slate-200 mx-1"></div>
+          <div className="w-[1px] h-[20px] bg-slate-200 mx-1 hidden sm:block"></div>
 
-          <button 
-            onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 bg-[#007BFF] text-white px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm hover:bg-[#0056b3] transition-colors"
-          >
-            <Plus size={14} strokeWidth={3} /> Add Document
-          </button>
+          {/* Action Buttons Group */}
+          <div className="flex items-center gap-1.5 w-full sm:w-auto mt-1 sm:mt-0">
+            <button 
+              onClick={handleOpenAdd}
+              className="flex items-center justify-center gap-1.5 bg-[#007BFF] text-white px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm hover:bg-[#0056b3] transition-colors flex-1 sm:flex-none"
+            >
+              <Plus size={14} strokeWidth={3} /> Add Doc
+            </button>
 
-          <button onClick={handleExportExcel} className="flex items-center gap-1.5 bg-[#16A34A] text-white px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm hover:bg-[#15803d] transition-colors ml-1">
-            <FileSpreadsheet size={14} strokeWidth={2.5} /> Excel
-          </button>
-          
-          <button onClick={handleExportPdf} className="flex items-center gap-1.5 bg-[#DC2626] text-white px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm hover:bg-[#B91C1C] transition-colors">
-            <FileText size={14} strokeWidth={2.5} /> PDF
-          </button>
+            <button onClick={handleExportExcel} className="flex items-center justify-center gap-1.5 bg-[#16A34A] text-white px-3 sm:px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm hover:bg-[#15803d] transition-colors flex-1 sm:flex-none">
+              <FileSpreadsheet size={14} strokeWidth={2.5} /> <span className="hidden sm:inline">Excel</span>
+            </button>
+            
+            <button onClick={handleExportPdf} className="flex items-center justify-center gap-1.5 bg-[#DC2626] text-white px-3 sm:px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm hover:bg-[#B91C1C] transition-colors flex-1 sm:flex-none">
+              <FileText size={14} strokeWidth={2.5} /> <span className="hidden sm:inline">PDF</span>
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -310,17 +318,17 @@ const LibraryPage = () => {
           showColumnLines={true}
           rowAlternationEnabled={true} 
           hoverStateEnabled={true} 
-          columnAutoWidth={false}
+          columnAutoWidth={true} // Ensures columns squish appropriately or trigger horizontal scroll
           height="100%"
           width="100%"
         >
           <Scrolling mode="standard" showScrollbar="always" />
           
-          <Column dataField="id" caption="#" width={60} alignment="center" cssClass="font-semibold text-slate-400" />
+          <Column dataField="id" caption="#" width={50} alignment="center" cssClass="font-semibold text-slate-400" />
           
           <Column 
             caption="Category" 
-            width={260}
+            minWidth={200}
             cellRender={(data) => {
               const isEditing = editingCategoryId === data.data.id;
 
@@ -348,7 +356,7 @@ const LibraryPage = () => {
               }
 
               return (
-                <div className="flex items-center justify-between px-1 w-full">
+                <div className="flex items-center justify-between px-1 w-full gap-2">
                   <span 
                     className="px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-wider truncate" 
                     style={{ backgroundColor: data.data.color }}
@@ -369,7 +377,7 @@ const LibraryPage = () => {
 
           <Column 
             caption="File Name" 
-            minWidth={300}
+            minWidth={220}
             cellRender={(data) => (
               <div className="flex items-center gap-2.5">
                 <FileIcon type={data.data.type} />
@@ -383,21 +391,23 @@ const LibraryPage = () => {
           <Column 
             dataField="ref" 
             caption="Ref" 
-            width={220}
+            minWidth={200}
             cellRender={(data) => <DocumentReference refData={data.value} />} 
           />
 
           <Column 
             dataField="date" 
             caption="Uploaded" 
-            width={120}
+            minWidth={110}
             cellRender={(data) => <span className="text-[12px] text-slate-600 font-bold">{data.value}</span>}
           />
 
           <Column 
             caption="Actions" 
-            width={140} 
+            width={120} 
             alignment="center"
+            fixed={true}
+            fixedPosition="right"
             cellRender={(data) => (
               <div className="flex justify-center gap-2 h-full items-center">
                 <button onClick={() => handleView(data.data)} className="w-[26px] h-[26px] rounded-full border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center transition-all shadow-sm group">
@@ -406,7 +416,6 @@ const LibraryPage = () => {
                 <button onClick={() => handleEdit(data.data)} className="w-[26px] h-[26px] rounded-full border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center transition-all shadow-sm group">
                   <Pencil size={12} strokeWidth={2.5} className="text-emerald-500 group-hover:scale-110 transition-transform" />
                 </button>
-                {/* Updated Delete Button to use ConfirmPopup */}
                 <button onClick={() => handleDeleteClick(data.data.id)} className="w-[26px] h-[26px] rounded-full border border-slate-200 bg-white hover:bg-rose-50 flex items-center justify-center transition-all shadow-sm group">
                   <Trash2 size={12} strokeWidth={2.5} className="text-rose-500 group-hover:scale-110 transition-transform" />
                 </button>
@@ -433,7 +442,6 @@ const LibraryPage = () => {
         document={viewingDoc}
       />
 
-      {/* Note: Ensure these prop names match exactly what your global components expect */}
       <ConfirmPopup 
         isOpen={confirmPopup.isOpen}
         onClose={() => setConfirmPopup({ isOpen: false, idToDelete: null })}

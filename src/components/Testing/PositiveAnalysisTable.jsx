@@ -65,49 +65,55 @@ const PositiveAnalysisTable = () => {
   return (
     <div className="flex flex-col h-full w-full bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
       
-      {/* 1. Exact Custom Header matching the new design */}
-      <div className="bg-gradient-to-r from-[#7CE5B3] to-[#E9FA00] px-5 py-3 flex items-center justify-between shrink-0 border-b border-[#bef264]">
+      {/* 1. Exact Custom Header matching the new design - NOW RESPONSIVE */}
+      <div className="bg-gradient-to-r from-[#7CE5B3] to-[#E9FA00] px-4 sm:px-5 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0 border-b border-[#bef264]">
         
         {/* Title Section */}
-        <div className="flex items-center gap-2 text-[#2A333A] text-[17px] font-semibold tracking-wide">
-          <Pill size={18} className="text-[#2A333A] fill-[#2A333A] -rotate-45" />
-          Injection Coverage Summary
+        <div className="flex items-center gap-2 text-[#2A333A] text-[16px] sm:text-[17px] font-semibold tracking-wide w-full md:w-auto">
+          <Pill size={18} className="text-[#2A333A] fill-[#2A333A] -rotate-45 shrink-0" />
+          <span className="truncate">Injection Coverage Summary</span>
         </div>
 
-        {/* Controls Section - Updated with Date Pills and Graph Button */}
-        <div className="flex items-center gap-2">
+        {/* Controls Section - Flex Wrap & Ordering for Mobile */}
+        <div className="flex flex-wrap items-center justify-start md:justify-end gap-2 w-full md:w-auto">
           
-          {/* White Date Pill: From */}
-          <div className="bg-white px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2 cursor-pointer hover:bg-slate-50">
-            <span className="text-[12px] font-semibold text-slate-500">From:</span>
-            <span className="text-[12px] font-bold text-slate-800">01/01/2026</span>
-            <CalendarDays size={14} className="text-slate-400 ml-1" />
-          </div>
+          {/* Date Pills - Wrapped to stack on mobile */}
+          <div className="flex items-center gap-2 w-full sm:w-auto order-last sm:order-none mt-1 sm:mt-0 flex-1 sm:flex-none">
+            {/* White Date Pill: From */}
+            <div className="bg-white px-2 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center justify-center sm:justify-start gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50 flex-1 sm:flex-none">
+              <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">From:</span>
+              <span className="text-[11px] sm:text-[12px] font-bold text-slate-800 whitespace-nowrap">01/01/2026</span>
+              <CalendarDays size={14} className="text-slate-400 ml-1 hidden sm:block" />
+            </div>
 
-          {/* White Date Pill: To */}
-          <div className="bg-white px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2 cursor-pointer hover:bg-slate-50">
-            <span className="text-[12px] font-semibold text-slate-500">To:</span>
-            <span className="text-[12px] font-bold text-slate-800">02/27/2026</span>
-            <CalendarDays size={14} className="text-slate-400 ml-1" />
+            {/* White Date Pill: To */}
+            <div className="bg-white px-2 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center justify-center sm:justify-start gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50 flex-1 sm:flex-none">
+              <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">To:</span>
+              <span className="text-[11px] sm:text-[12px] font-bold text-slate-800 whitespace-nowrap">02/27/2026</span>
+              <CalendarDays size={14} className="text-slate-400 ml-1 hidden sm:block" />
+            </div>
           </div>
           
-          {/* Black Refresh Square */}
-          <button className="bg-[#1E293B] w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm hover:bg-black transition-all ml-1">
-            <RefreshCw size={15} strokeWidth={2.5} />
-          </button>
+          {/* Action Buttons Wrapper - Pushed right on mobile */}
+          <div className="flex items-center gap-1.5 sm:gap-2 ml-auto sm:ml-0 shrink-0">
+            {/* Black Refresh Square */}
+            <button className="bg-[#1E293B] w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white shadow-sm hover:bg-black transition-all">
+              <RefreshCw size={15} strokeWidth={2.5} />
+            </button>
 
-          {/* UPDATED: White Graph Square Button that opens the Modal */}
-          <button 
-            onClick={() => setIsChartOpen(true)}
-            className="bg-white w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-50 transition-all ml-1"
-          >
-            <BarChart3 size={15} strokeWidth={2.5} />
-          </button>
-          
-          {/* Red Filter Square */}
-          <button className="bg-[#E11D48] w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm hover:bg-rose-700 transition-all">
-            <Filter size={15} strokeWidth={2.5} fill="currentColor" />
-          </button>
+            {/* UPDATED: White Graph Square Button that opens the Modal */}
+            <button 
+              onClick={() => setIsChartOpen(true)}
+              className="bg-white w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-50 transition-all"
+            >
+              <BarChart3 size={15} strokeWidth={2.5} />
+            </button>
+            
+            {/* Red Filter Square */}
+            <button className="bg-[#E11D48] w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white shadow-sm hover:bg-rose-700 transition-all">
+              <Filter size={15} strokeWidth={2.5} fill="currentColor" />
+            </button>
+          </div>
 
         </div>
       </div>
@@ -133,18 +139,18 @@ const PositiveAnalysisTable = () => {
             <GroupPanel visible={true} emptyPanelText="Drag a column header here to group by that column" />
 
             {/* Exact columns matched to the design */}
-            <Column dataField="id" caption="#" width={60} alignment="center" />
+            <Column dataField="id" caption="#" width={50} alignment="center" />
             
             {/* Red Panel Badges */}
             <Column 
               dataField="panel" 
               caption="Panel" 
-              minWidth={200}
+              minWidth={160}
               cellRender={(d) => (
                 <div className="flex items-center">
                   <span className="bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] px-2.5 py-0.5 rounded-md text-[11px] font-bold flex items-center gap-1.5 tracking-tight">
-                    <PlusCircle size={10} className="fill-[#DC2626] text-white" />
-                    {d.value}
+                    <PlusCircle size={10} className="fill-[#DC2626] text-white shrink-0" />
+                    <span className="truncate">{d.value}</span>
                   </span>
                 </div>
               )}
@@ -154,10 +160,10 @@ const PositiveAnalysisTable = () => {
             <Column 
               dataField="ingredient" 
               caption="Ingredient" 
-              minWidth={300}
+              minWidth={200}
               cellRender={(d) => (
-                <div className="flex items-center gap-2.5 text-[#1E40AF] font-bold text-[12px]">
-                  <Syringe size={14} className="text-[#0D9488]" /> {d.value}
+                <div className="flex items-center gap-2.5 text-[#1E40AF] font-bold text-[12px] truncate">
+                  <Syringe size={14} className="text-[#0D9488] shrink-0" /> {d.value}
                 </div>
               )}
             />
@@ -191,8 +197,8 @@ const PositiveAnalysisTable = () => {
         </div>
 
         {/* 3. Footer Timestamp */}
-        <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex justify-end shrink-0">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex justify-center sm:justify-end shrink-0">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center sm:text-right">
             Last updated: 2/27/2026, 4:15:00 PM
           </p>
         </div>

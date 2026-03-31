@@ -98,16 +98,16 @@ const TreatmentTable = () => {
     <div className="flex flex-col h-full w-full bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
       
       {/* --- ULTRA RESPONSIVE HEADER --- */}
-      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 lg:px-5 py-3 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-0 shrink-0 border-b border-[#bef264]">
+      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 sm:px-5 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0 border-b border-[#bef264]">
         
         {/* Title Section matching the image */}
-        <div className="flex items-center gap-2 text-[#2A333A] text-[17px] font-semibold tracking-wide shrink-0">
+        <div className="flex items-center gap-2 text-[#2A333A] text-[17px] font-semibold tracking-wide w-full md:w-auto">
           <ClipboardList size={20} className="text-[#2A333A]" />
           Tx Summary List
         </div>
 
         {/* Controls Section - Intelligent Grid/Flex Wrapping for Mobile */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center justify-start md:justify-end gap-2 w-full md:w-auto">
           
           {/* Blue Plus Circle to open TreatmentForm */}
           <button 
@@ -117,30 +117,27 @@ const TreatmentTable = () => {
             <Plus size={18} strokeWidth={3} />
           </button>
 
-          {/* Date Pills */}
-          <div className="flex items-center gap-2 w-full sm:w-auto order-last sm:order-none mt-1 sm:mt-0 flex-1 sm:flex-none">
-            <div className="bg-white px-3 sm:px-4 py-1.5 rounded-full shadow-sm flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50">
-              <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">From:</span>
-              <span className="text-[11px] sm:text-[12px] font-bold text-slate-800">01/31/2026</span>
-              <CalendarDays size={14} className="text-slate-400 hidden sm:block ml-1" />
-            </div>
+          {/* White Date Pill: From */}
+          <div className="bg-white flex-1 md:flex-none justify-center md:justify-start px-2 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50 md:ml-1 whitespace-nowrap">
+            <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">From:</span>
+            <span className="text-[11px] sm:text-[12px] font-bold text-slate-800">01/31/2026</span>
+            <CalendarDays size={14} className="text-slate-400 hidden sm:block ml-1" />
+          </div>
 
-            <div className="bg-white px-3 sm:px-4 py-1.5 rounded-full shadow-sm flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50">
-              <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">To:</span>
-              <span className="text-[11px] sm:text-[12px] font-bold text-slate-800">03/02/2026</span>
-              <CalendarDays size={14} className="text-slate-400 hidden sm:block ml-1" />
-            </div>
+          {/* White Date Pill: To */}
+          <div className="bg-white flex-1 md:flex-none justify-center md:justify-start px-2 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50 whitespace-nowrap">
+            <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">To:</span>
+            <span className="text-[11px] sm:text-[12px] font-bold text-slate-800">03/02/2026</span>
+            <CalendarDays size={14} className="text-slate-400 hidden sm:block ml-1" />
           </div>
           
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 ml-auto sm:ml-0 shrink-0">
-            <button className="bg-white w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-50 transition-all">
-              <RefreshCw size={15} strokeWidth={2.5} />
-            </button>
-            <button className="bg-[#E11D48] w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm hover:bg-rose-700 transition-all">
-              <Filter size={15} strokeWidth={2.5} fill="currentColor" />
-            </button>
-          </div>
+          <button className="bg-white w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-50 transition-all md:ml-1 shrink-0">
+            <RefreshCw size={15} strokeWidth={2.5} />
+          </button>
+          <button className="bg-[#E11D48] w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm hover:bg-rose-700 transition-all shrink-0">
+            <Filter size={15} strokeWidth={2.5} fill="currentColor" />
+          </button>
 
         </div>
       </div>

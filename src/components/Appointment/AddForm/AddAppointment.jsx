@@ -60,10 +60,11 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
       <div className="bg-white w-full rounded-xl shadow-md border border-slate-200 overflow-hidden relative flex flex-col">
         
         {/* --- HEADER --- */}
-        <div className="bg-[#00A3FF] px-5 py-3.5 flex items-center justify-between shrink-0">
+        {/* Adjusted padding for mobile (px-4 sm:px-5) */}
+        <div className="bg-[#00A3FF] px-4 sm:px-5 py-3 sm:py-3.5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 text-white">
             <CalendarCheck size={20} strokeWidth={2.5} />
-            <h2 className="text-lg font-bold tracking-wide">
+            <h2 className="text-base sm:text-lg font-bold tracking-wide">
               {editData ? 'Edit Appointment' : 'Appointment Registration'}
             </h2>
           </div>
@@ -76,21 +77,22 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
         </div>
 
         {/* --- FORM BODY --- */}
-        <div className="p-6 flex flex-col gap-6">
+        {/* Adjusted padding and gap for mobile */}
+        <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
           
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 pb-2 border-b border-slate-200">
             <div className="flex items-center gap-2 text-slate-800">
               <CheckSquare size={16} className="text-[#00A3FF] fill-[#00A3FF]/10" strokeWidth={2.5} />
               <h3 className="font-bold text-sm">Appt Info</h3>
             </div>
-            <span className="text-xs text-slate-400 font-medium">All fields are required unless noted</span>
+            <span className="text-[11px] sm:text-xs text-slate-400 font-medium">All fields are required unless noted</span>
           </div>
 
-          {/* Form Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-x-5 gap-y-6">
+          {/* Form Grid: 1 col on mobile, 2 on tablet, 12 on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-5 gap-y-4 sm:gap-y-6">
             
             {/* ROW 1 */}
-            <div className="md:col-span-3 flex flex-col gap-1.5">
+            <div className="sm:col-span-2 lg:col-span-3 flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-slate-500">Patient</label>
               <select 
                 value={formData.patient}
@@ -106,7 +108,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
               </select>
             </div>
 
-            <div className="md:col-span-2 flex flex-col gap-1.5">
+            <div className="sm:col-span-1 lg:col-span-2 flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-slate-500">Patient Type</label>
               <div className="relative flex items-center">
                 <Contact size={15} className="absolute left-3 text-slate-400 pointer-events-none" />
@@ -122,7 +124,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
               </div>
             </div>
 
-            <div className="md:col-span-2 flex flex-col gap-1.5">
+            <div className="sm:col-span-1 lg:col-span-2 flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-slate-500">Appt Type</label>
               <div className="relative flex items-center">
                 <FilePlus size={15} className="absolute left-3 text-slate-400 pointer-events-none" />
@@ -139,7 +141,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
               </div>
             </div>
 
-            <div className="md:col-span-3 flex flex-col gap-1.5">
+            <div className="sm:col-span-1 lg:col-span-3 flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-slate-500">DOS</label>
               <input 
                 type="date" 
@@ -149,7 +151,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
               />
             </div>
 
-            <div className="md:col-span-2 flex flex-col gap-1.5">
+            <div className="sm:col-span-1 lg:col-span-2 flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-slate-500">Status</label>
               <div className="relative flex items-center">
                 <Flag size={15} className="absolute left-3 text-slate-400 pointer-events-none" />
@@ -166,7 +168,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
             </div>
 
             {/* ROW 2 */}
-            <div className="md:col-span-3 flex flex-col gap-1.5">
+            <div className="sm:col-span-1 lg:col-span-3 flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-slate-500">Office</label>
               <div className="relative flex items-center">
                 <Building2 size={15} className="absolute left-3 text-slate-400 pointer-events-none" />
@@ -182,7 +184,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
               </div>
             </div>
 
-            <div className="md:col-span-3 flex flex-col gap-1.5">
+            <div className="sm:col-span-1 lg:col-span-3 flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-slate-500">Appt Time</label>
               <input 
                 type="time" 
@@ -192,7 +194,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
               />
             </div>
 
-            <div className="md:col-span-2 flex flex-col gap-2">
+            <div className="sm:col-span-2 lg:col-span-2 flex flex-col gap-2">
               <label className="text-[11px] font-bold text-slate-500">Patient Status</label>
               <label className="relative inline-flex items-center cursor-pointer group w-max mt-0.5">
                 <input 
@@ -207,10 +209,10 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
             </div>
           </div>
 
-          <div className="flex justify-center mt-6 pt-6 border-t border-slate-100">
+          <div className="flex justify-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100">
             <button 
               onClick={handleSave}
-              className="bg-[#00A3FF] hover:opacity-90 text-white font-bold text-sm px-10 py-2.5 rounded-full shadow-md shadow-[#00A3FF]/30 flex items-center gap-2 transition-all active:scale-95"
+              className="w-full sm:w-auto bg-[#00A3FF] hover:opacity-90 text-white font-bold text-sm px-10 py-2.5 rounded-full shadow-md shadow-[#00A3FF]/30 flex items-center justify-center gap-2 transition-all active:scale-95"
             >
               <Save size={16} strokeWidth={2.5} />
               Save
@@ -220,7 +222,6 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
         </div>
       </div>
 
-      {/* Dynamically passing 'Updated' or 'Added' based on editData presence */}
       <SuccessPopup 
         isOpen={showSuccess} 
         onClose={() => setShowSuccess(false)} 

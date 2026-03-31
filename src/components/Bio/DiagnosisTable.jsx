@@ -107,17 +107,17 @@ const DiagnosisTable = () => {
     <div className="flex flex-col h-full w-full bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
       
       {/* Exact Custom Header matching the design - UPDATED FOR MOBILE RESPONSIVENESS */}
-      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 sm:px-5 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 shrink-0 border-b border-[#bef264]">
+      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 sm:px-5 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0 border-b border-[#bef264]">
         
         {/* Title Section */}
-        <div className="flex items-center gap-2 text-[#2A333A] text-[17px] font-semibold tracking-wide">
+        <div className="flex items-center gap-2 text-[#2A333A] text-[17px] font-semibold tracking-wide w-full md:w-auto">
           <ClipboardList size={20} className="text-[#2A333A]" />
           Dx Summary
         </div>
 
-        {/* Controls Section - Now uses flex-wrap so pills stack neatly on mobile */}
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          {/* Blue Plus Circle - Updated with onClick */}
+        {/* Controls Section - Optimized for mobile wrapping and stretching */}
+        <div className="flex flex-wrap items-center justify-start md:justify-end gap-2 w-full md:w-auto">
+          {/* Blue Plus Circle */}
           <button 
             onClick={() => setIsFormOpen(true)}
             className="bg-[#0066FF] w-8 h-8 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-blue-700 transition-all active:scale-95 shrink-0"
@@ -126,21 +126,21 @@ const DiagnosisTable = () => {
           </button>
    
           {/* White Date Pill: From */}
-          <div className="bg-white px-3 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50 sm:ml-1">
+          <div className="bg-white flex-1 md:flex-none justify-center md:justify-start px-2 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50 md:ml-1 whitespace-nowrap">
             <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">From:</span>
             <span className="text-[11px] sm:text-[12px] font-bold text-slate-800">01/31/2026</span>
-            <CalendarDays size={14} className="text-slate-400 ml-1" />
+            <CalendarDays size={14} className="text-slate-400 ml-1 hidden sm:block" />
           </div>
 
           {/* White Date Pill: To */}
-          <div className="bg-white px-3 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50">
+          <div className="bg-white flex-1 md:flex-none justify-center md:justify-start px-2 sm:px-4 py-1.5 rounded-full shadow-sm flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-slate-50 whitespace-nowrap">
             <span className="text-[11px] sm:text-[12px] font-semibold text-slate-500">To:</span>
             <span className="text-[11px] sm:text-[12px] font-bold text-slate-800">03/02/2026</span>
-            <CalendarDays size={14} className="text-slate-400 ml-1" />
+            <CalendarDays size={14} className="text-slate-400 ml-1 hidden sm:block" />
           </div>
           
           {/* White Refresh Square */}
-          <button className="bg-white w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-50 transition-all sm:ml-1 shrink-0">
+          <button className="bg-white w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-50 transition-all md:ml-1 shrink-0">
             <RefreshCw size={15} strokeWidth={2.5} />
           </button>
           

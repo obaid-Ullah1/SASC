@@ -86,7 +86,7 @@ const PatientInjectionsModal = ({ isOpen, onClose, patient, onInjectionClick }) 
                     {/* CLICKABLE INJECTION BADGE */}
                     <button 
                       onClick={() => onInjectionClick(inj)}
-                      className="inline-flex items-center gap-1.5 border border-blue-200 hover:border-[#1877F2] hover:bg-blue-50 rounded-full px-3 py-1 bg-white text-[#1877F2] font-bold text-[11px] shadow-sm transition-all active:scale-95"
+                      className="inline-flex items-center gap-1.5 border border-blue-200 hover:border-[#1877F2] hover:bg-blue-50 rounded-full px-3 py-1 bg-white text-[#1877F2] font-bold text-[11px] shadow-sm transition-all active:scale-95 whitespace-nowrap"
                     >
                       <Pill size={12} className="-rotate-45" /> {inj.name}
                     </button>
@@ -218,41 +218,50 @@ const PTMappingTable = () => {
   return (
     <div className="flex flex-col h-full w-full bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200 relative">
       
-      {/* Exact Custom Header */}
-      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-5 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2 text-[#2A333A] text-[17px] font-semibold tracking-wide">
-          <Pill size={18} className="text-[#2A333A] fill-[#2A333A] -rotate-45" />
+      {/* Exact Custom Header - RESPONSIVE */}
+      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 sm:px-5 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0">
+        
+        {/* Title */}
+        <div className="flex items-center gap-2 text-[#2A333A] text-[16px] sm:text-[17px] font-semibold tracking-wide w-full md:w-auto">
+          <Pill size={18} className="text-[#2A333A] fill-[#2A333A] -rotate-45 shrink-0" />
           Allergy Patient List
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Controls: Wraps cleanly on mobile, inline on desktop */}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          
           {/* ✅ WIRED ADD BUTTON: Opens the TreatmentListForm */}
           <button 
             onClick={() => setShowAddForm(true)}
-            className="bg-[#0066FF] w-8 h-8 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-blue-700 transition-all active:scale-95"
+            className="bg-[#0066FF] w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-blue-700 transition-all active:scale-95 shrink-0"
           >
             <Plus size={18} strokeWidth={3} />
           </button>
           
-          <div className="flex items-center shadow-sm rounded-full bg-white px-4 py-1.5 ml-1">
+          {/* Search Input: Stretches via flex-1 on mobile */}
+          <div className="flex items-center shadow-sm rounded-full bg-white px-3 sm:px-4 py-1.5 flex-1 sm:flex-none">
             <input 
               type="text" 
               placeholder="Search........" 
-              className="w-48 lg:w-64 text-sm border-none outline-none text-slate-700 bg-transparent italic placeholder:text-slate-400" 
+              className="w-full sm:w-48 lg:w-64 text-sm border-none outline-none text-slate-700 bg-transparent italic placeholder:text-slate-400" 
             />
           </div>
           
-          <button className="bg-[#1E293B] w-8 h-8 rounded flex items-center justify-center text-white shadow-sm hover:bg-black transition-all ml-1">
-            <RefreshCw size={15} strokeWidth={2.5} />
-          </button>
-          
-          <button className="bg-[#E11D48] w-8 h-8 rounded flex items-center justify-center text-white shadow-sm hover:bg-rose-700 transition-all">
-            <Filter size={15} strokeWidth={2.5} fill="currentColor" />
-          </button>
+          {/* Grouped Actions: Pushed right on mobile */}
+          <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
+            <button className="bg-[#1E293B] w-[32px] h-[32px] sm:w-8 sm:h-8 rounded flex items-center justify-center text-white shadow-sm hover:bg-black transition-all">
+              <RefreshCw size={15} strokeWidth={2.5} />
+            </button>
+            
+            <button className="bg-[#E11D48] w-[32px] h-[32px] sm:w-8 sm:h-8 rounded flex items-center justify-center text-white shadow-sm hover:bg-rose-700 transition-all">
+              <Filter size={15} strokeWidth={2.5} fill="currentColor" />
+            </button>
 
-          <div className="bg-white px-3 py-1.5 rounded-full shadow-sm flex items-center ml-2">
-            <span className="text-[12px] font-semibold text-slate-800">Total: 509</span>
+            <div className="bg-white px-3 py-1.5 rounded-full shadow-sm flex items-center">
+              <span className="text-[12px] font-semibold text-slate-800">Total: 509</span>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -307,16 +316,16 @@ const PTMappingTable = () => {
             <GroupPanel visible={true} emptyPanelText="Drag a column header here to group by that column" />
 
             <Column dataField="id" caption="#" width={60} alignment="center" allowEditing={false} />
-            <Column dataField="office" caption="Office" width={100} alignment="center" allowEditing={false} />
+            <Column dataField="office" caption="Office" minWidth={100} alignment="center" allowEditing={false} />
             
             <Column 
               dataField="patientNo" 
               caption="Patient No" 
-              width={120}
+              minWidth={120}
               allowEditing={false}
               cellRender={(d) => (
-                <div className="flex items-center gap-2 text-blue-500 font-bold text-[12px]">
-                  <User size={14} className="text-blue-500 fill-current" /> {d.value}
+                <div className="flex items-center gap-2 text-blue-500 font-bold text-[12px] whitespace-nowrap">
+                  <User size={14} className="text-blue-500 fill-current shrink-0" /> {d.value}
                 </div>
               )}
             />
@@ -327,8 +336,8 @@ const PTMappingTable = () => {
               minWidth={200}
               allowEditing={false}
               cellRender={(d) => (
-                <div className="flex items-center gap-2 text-emerald-600 font-bold text-[12px]">
-                  <User size={14} className="text-emerald-500 fill-current" /> {d.value}
+                <div className="flex items-center gap-2 text-emerald-600 font-bold text-[12px] whitespace-nowrap">
+                  <User size={14} className="text-emerald-500 fill-current shrink-0" /> {d.value}
                 </div>
               )}
             />
@@ -336,7 +345,7 @@ const PTMappingTable = () => {
             <Column 
               dataField="patientCode" 
               caption="Patient Code" 
-              width={120}
+              minWidth={120}
               allowEditing={false}
               cellRender={(d) => (
                 <span className="bg-[#00BFFF] text-white px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -345,16 +354,16 @@ const PTMappingTable = () => {
               )}
             />
             
-            <Column dataField="startDate" caption="Start Date" dataType="date" alignment="center" width={120} allowEditing={false} />
-            <Column dataField="authUnit" caption="Auth Unit" alignment="center" width={100} allowEditing={false} cellRender={() => <StatusCircle />} />
-            <Column dataField="paidUnit" caption="Paid Unit" alignment="center" width={100} allowEditing={false} />
-            <Column dataField="balUnit" caption="Bal Unit" alignment="center" width={100} allowEditing={false} />
+            <Column dataField="startDate" caption="Start Date" dataType="date" alignment="center" minWidth={120} allowEditing={false} />
+            <Column dataField="authUnit" caption="Auth Unit" alignment="center" minWidth={100} allowEditing={false} cellRender={() => <StatusCircle />} />
+            <Column dataField="paidUnit" caption="Paid Unit" alignment="center" minWidth={100} allowEditing={false} />
+            <Column dataField="balUnit" caption="Bal Unit" alignment="center" minWidth={100} allowEditing={false} />
             
             <Column 
               dataField="frequency" 
               caption="Freq" 
               alignment="center"
-              width={90}
+              minWidth={120}
             >
               <Lookup dataSource={frequencyOptions} />
             </Column>
@@ -363,7 +372,7 @@ const PTMappingTable = () => {
               dataField="day" 
               caption="Day" 
               alignment="center"
-              width={90}
+              minWidth={120}
             >
               <Lookup dataSource={dayOptions} />
             </Column>
@@ -383,8 +392,9 @@ const PTMappingTable = () => {
           </DataGrid>
         </div>
 
-        <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex justify-end shrink-0">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        {/* Footer - Responsive text alignment */}
+        <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex justify-center sm:justify-end shrink-0">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center sm:text-right">
             Last updated: 2/27/2026, 2:13:05 PM
           </p>
         </div>

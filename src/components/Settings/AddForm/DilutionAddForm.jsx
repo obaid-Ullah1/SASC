@@ -56,12 +56,12 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
     <div className="bg-white border-2 border-sky-200 rounded-lg shadow-lg mb-5 animate-in slide-in-from-top-3 fade-in duration-300 overflow-visible">
       
       {/* 1. LIGHT BLUE FORM HEADER */}
-      <div className="bg-gradient-to-r from-[#e0f2fe] to-[#f0f9ff] px-5 py-2.5 flex items-center justify-between border-b border-sky-200">
+      <div className="bg-gradient-to-r from-[#e0f2fe] to-[#f0f9ff] px-4 sm:px-5 py-2.5 flex items-center justify-between border-b border-sky-200">
         <div className="flex items-center gap-2.5">
-          <div className="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center border border-sky-100">
+          <div className="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center border border-sky-100 shrink-0">
             <Plus size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
           </div>
-          <h3 className="font-bold text-sky-900 text-[13px] tracking-wide uppercase leading-tight">
+          <h3 className="font-bold text-sky-900 text-[12px] sm:text-[13px] tracking-wide uppercase leading-tight">
             Add Dilution Ratio Color
           </h3>
         </div>
@@ -69,19 +69,19 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
         <button 
           type="button" 
           onClick={onClose} 
-          className="bg-white text-rose-500 border border-rose-200 rounded-md hover:bg-rose-500 hover:text-white p-1.5 transition-all shadow-sm"
+          className="bg-white text-rose-500 border border-rose-200 rounded-md hover:bg-rose-500 hover:text-white p-1.5 transition-all shadow-sm shrink-0"
           title="Close Form"
         >
           <X size={14} strokeWidth={3} />
         </button>
       </div>
 
-      {/* 2. FORM BODY */}
-      <form onSubmit={handleSubmit} className="p-5 bg-white/50">
-        <div className="flex items-end gap-4 w-full">
+      {/* 2. FORM BODY - Responsive Flex Stack */}
+      <form onSubmit={handleSubmit} className="p-4 sm:p-5 bg-white/50">
+        <div className="flex flex-col md:flex-row items-start md:items-end gap-4 w-full">
           
           {/* RATIO INPUT (With Blue Icon Block) */}
-          <div className="flex flex-col gap-1.5 flex-1">
+          <div className="flex flex-col gap-1.5 w-full md:flex-1">
             <label className="text-[12px] font-bold text-slate-700">Map Ratio Color <span className="text-rose-500">*</span></label>
             <div className="flex h-[38px] rounded-lg overflow-hidden border-2 border-slate-200 focus-within:border-[#00A3FF] focus-within:ring-4 focus-within:ring-[#00A3FF]/10 transition-all bg-white">
               <div className="bg-[#00A3FF] w-[40px] flex items-center justify-center shrink-0">
@@ -93,19 +93,19 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
                 onChange={(e) => setFormData(prev => ({ ...prev, ratio: e.target.value }))} 
                 required
                 placeholder="e.g. 1:10000"
-                className="flex-1 px-3 text-[13px] font-medium text-slate-700 outline-none placeholder:italic placeholder:text-slate-400 placeholder:font-normal"
+                className="flex-1 px-3 text-[13px] font-medium text-slate-700 outline-none placeholder:italic placeholder:text-slate-400 placeholder:font-normal w-full"
               />
             </div>
           </div>
 
           {/* CUSTOM COLOR DROPDOWN */}
-          <div className="flex flex-col gap-1.5 w-[220px] relative" ref={dropdownRef}>
+          <div className="flex flex-col gap-1.5 w-full md:w-[220px] relative" ref={dropdownRef}>
             <label className="text-[12px] font-bold text-slate-700">Color <span className="text-rose-500">*</span></label>
             
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`flex items-center justify-between h-[38px] px-3 border-2 rounded-lg text-[13px] transition-all bg-white outline-none ${
+              className={`flex w-full items-center justify-between h-[38px] px-3 border-2 rounded-lg text-[13px] transition-all bg-white outline-none ${
                 isDropdownOpen ? 'border-[#00A3FF] ring-4 ring-[#00A3FF]/10' : 'border-slate-200'
               }`}
             >
@@ -139,17 +139,17 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
           </div>
 
           {/* BUTTONS */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0">
             <button 
               type="submit" 
-              className="bg-[#00A3FF] hover:bg-[#008CE6] text-white px-10 h-[38px] rounded-lg text-[13px] font-bold shadow-md transition-all active:scale-95 flex items-center justify-center"
+              className="flex-1 md:flex-none bg-[#00A3FF] hover:bg-[#008CE6] text-white px-8 h-[38px] rounded-lg text-[13px] font-bold shadow-md transition-all active:scale-95 flex items-center justify-center"
             >
               Add
             </button>
             <button 
               type="button" 
               onClick={handleReset}
-              className="bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-600 px-5 h-[38px] rounded-lg text-[13px] font-bold transition-all flex items-center justify-center"
+              className="flex-1 md:flex-none bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-600 px-5 h-[38px] rounded-lg text-[13px] font-bold transition-all flex items-center justify-center"
             >
               Reset
             </button>

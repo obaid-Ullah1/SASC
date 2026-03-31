@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
-import DataGrid, { 
-  Column, 
-  Scrolling, 
-  Pager, 
-  Paging, 
-  SearchPanel, 
-  LoadPanel 
+import DataGrid, {
+  Column,
+  FilterRow,
+  HeaderFilter,
+  GroupPanel,
+  Scrolling,
+  Paging,
+  Pager,
+  SearchPanel,
+  ColumnChooser,
+  Summary,
+  TotalItem,
+  Editing,
+  Lookup,
+  LoadPanel // ✅ ADDED THIS IMPORT TO FIX THE CRASH
 } from 'devextreme-react/data-grid';
 import { Settings2, Plus, RefreshCw, Pencil, Trash2, Search } from 'lucide-react';
 
@@ -82,7 +90,6 @@ const DoseAdjustment = () => {
     </div>
   );
 
-  // Exact same styling from previous tabs for consistency
   const gridClasses = `
     [&_.dx-datagrid-headers]:!bg-[#F1F5F9] 
     [&_.dx-datagrid-headers_td]:!border-b-2
@@ -107,47 +114,47 @@ const DoseAdjustment = () => {
   return (
     <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden">
       
-      {/* 1. THIN GRADIENT HEADER (Exactly matched to your requirements) */}
-      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2 flex items-center justify-between shrink-0 border-b border-[#bef264]">
-        <div className="flex items-center gap-3">
-          <div className="bg-white/40 p-1 rounded-md shadow-sm">
+      {/* THIN GRADIENT HEADER - Responsive Stack & Flex */}
+      <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2 sm:py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0 border-b border-[#bef264]">
+        
+        {/* Title Section */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="bg-white/40 p-1 rounded-md shadow-sm shrink-0">
             <Settings2 size={18} className="text-[#2A333A]" />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h2 className="text-[14px] font-black text-[#2A333A] tracking-tight uppercase">Dose Adjustment Plan</h2>
-              <span className="text-[10px] font-bold text-[#2A333A]/70 bg-white/30 px-2 py-0.5 rounded-full">Total: {totalCount}</span>
+              <span className="text-[10px] font-bold text-[#2A333A]/70 bg-white/30 px-2 py-0.5 rounded-full shrink-0">Total: {totalCount}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Add Button */}
+        {/* Controls Section */}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
           <button 
             onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-            className="bg-[#007BFF] hover:bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95"
+            className="bg-[#007BFF] hover:bg-blue-600 w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 shrink-0"
           >
             <Plus size={18} strokeWidth={3} className={isAddFormOpen ? "rotate-45 transition-transform" : "transition-transform"} />
           </button>
           
-          {/* Custom Search Input */}
-          <div className="relative group">
+          <div className="relative group flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#007BFF] transition-colors" size={14} />
             <input 
               type="text" 
               placeholder="Search plans..." 
-              className="border border-slate-200 rounded-lg pl-9 pr-4 py-1.5 text-[12px] w-48 outline-none focus:border-[#007BFF] focus:ring-2 focus:ring-blue-100 transition-all bg-white/80"
+              className="border border-slate-200 rounded-lg pl-9 pr-4 py-1.5 text-[12px] w-full sm:w-48 outline-none focus:border-[#007BFF] focus:ring-2 focus:ring-blue-100 transition-all bg-white/80"
             />
           </div>
 
-          {/* Refresh Button */}
-          <button className="w-8 h-8 bg-white/40 border border-white/20 rounded-lg flex items-center justify-center text-[#2A333A] hover:bg-white transition-all shadow-sm">
+          <button className="w-[32px] h-[32px] sm:w-8 sm:h-8 bg-white/40 border border-white/20 rounded-lg flex items-center justify-center text-[#2A333A] hover:bg-white transition-all shadow-sm shrink-0">
             <RefreshCw size={14} strokeWidth={2.5} />
           </button>
         </div>
       </div>
 
-      {/* 2. DATAGRID CONTENT */}
+      {/* DATAGRID CONTENT */}
       <div className={`flex-1 overflow-hidden p-3 bg-white custom-footer-grid ${gridClasses}`}>
         
         {/* INJECTED FORM */}
@@ -158,8 +165,8 @@ const DoseAdjustment = () => {
           nextSortOrder={nextSortOrder}
         />
 
-        {/* CSS FOR TOTAL ENTRIES DESIGN */}
-        <style>{`
+        {/* ✅ FIXED CSS INJECTION: Uses dangerouslySetInnerHTML to fix the jsx/global warnings */}
+        <style dangerouslySetInnerHTML={{ __html: `
           .custom-footer-grid .dx-datagrid-pager {
             border-top: 1px solid #e2e8f0 !important;
             padding: 0 !important;
@@ -178,7 +185,7 @@ const DoseAdjustment = () => {
           .custom-footer-grid .dx-pager {
             padding: 10px 16px !important;
           }
-        `}</style>
+        `}} />
 
         <DataGrid
           dataSource={adjustmentData}
@@ -193,11 +200,11 @@ const DoseAdjustment = () => {
         >
           <SearchPanel visible={false} />
           <LoadPanel enabled={true} />
-          <Scrolling mode="standard" />
+          <Scrolling mode="standard" showScrollbar="always" />
           
           <Column dataField="id" caption="# ID" width={80} cssClass="font-bold pl-4" alignment="center" />
-          <Column dataField="allergyType" caption="Allergy Type" width={180} />
-          <Column dataField="planType" caption="Plan Type" />
+          <Column dataField="allergyType" caption="Allergy Type" minWidth={180} />
+          <Column dataField="planType" caption="Plan Type" minWidth={200} />
           <Column dataField="sortOrder" caption="Sort Order" width={120} alignment="center" />
           
           <Column 
@@ -209,7 +216,6 @@ const DoseAdjustment = () => {
             fixedPosition="right" 
           />
 
-          {/* 3. PAGER INTEGRATION */}
           <Paging defaultPageSize={20} />
           <Pager
             visible={true}

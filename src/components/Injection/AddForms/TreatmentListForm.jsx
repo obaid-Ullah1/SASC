@@ -56,14 +56,14 @@ const TreatmentListForm = ({ isOpen, onClose, onSave }) => {
   
   // Custom Adornment Input Component
   const AdornmentInput = ({ placeholder }) => (
-    <div className="flex shadow-sm rounded-lg">
+    <div className="flex shadow-sm rounded-lg min-w-[90px]">
       <input 
         type="number" 
         placeholder={placeholder} 
         defaultValue="0.0"
-        className="w-full border border-slate-300 border-r-0 rounded-l-lg px-3 py-2 text-sm font-medium text-slate-800 focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 outline-none transition-all z-10" 
+        className="w-full min-w-0 border border-slate-300 border-r-0 rounded-l-lg px-2 py-2 text-sm font-medium text-slate-800 focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 outline-none transition-all z-10" 
       />
-      <span className="bg-[#00A3FF] text-white text-xs font-bold px-3 py-2 rounded-r-lg border border-[#00A3FF] flex items-center justify-center shrink-0">
+      <span className="bg-[#00A3FF] text-white text-[10px] sm:text-xs font-bold px-2 py-2 rounded-r-lg border border-[#00A3FF] flex items-center justify-center shrink-0">
         ml
       </span>
     </div>
@@ -72,13 +72,14 @@ const TreatmentListForm = ({ isOpen, onClose, onSave }) => {
   return (
     <div className="w-full shrink-0 animate-in slide-in-from-top-4 duration-300">
       
-      <div className="w-full bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
+      {/* ✅ ADDED max-h-[95vh] sm:max-h-[90vh] to constrain modal height so it doesn't grow off-screen */}
+      <div className="w-full max-h-[95vh] sm:max-h-[90vh] bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
         
-        {/* HEADER: Updated to Lite Sky Blue Theme */}
-        <div className="bg-[#f0f9ff] px-6 py-4 border-b border-sky-200 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5 text-[#00A3FF]">
+        {/* HEADER: Fixed at Top */}
+        <div className="bg-[#f0f9ff] px-4 sm:px-6 py-3 sm:py-4 border-b border-sky-200 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 text-[#00A3FF]">
              <User size={18} className="text-[#00A3FF]" strokeWidth={2.5} />
-             <h2 className="text-[15px] font-bold tracking-wide">Treatment</h2>
+             <h2 className="text-[14px] sm:text-[15px] font-bold tracking-wide">Treatment</h2>
           </div>
           <button 
             onClick={onClose} 
@@ -88,12 +89,12 @@ const TreatmentListForm = ({ isOpen, onClose, onSave }) => {
           </button>
         </div>
 
-        {/* BODY */}
-        <div className="p-5 md:p-6 flex flex-col gap-6 bg-white">
+        {/* ✅ BODY: Added 'flex-1 overflow-y-auto' to enable vertical scrolling for infinite rows */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 md:p-6 flex flex-col gap-4 sm:gap-6 bg-white">
           
           {/* TOP SECTION: PATIENT DETAILS */}
-          <div className="bg-[#f0f9ff] border border-sky-200 rounded-xl p-5 shadow-sm w-full">
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="bg-[#f0f9ff] border border-sky-200 rounded-xl p-4 sm:p-5 shadow-sm w-full shrink-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="col-span-1">
                 <label className={labelClass}>Patient</label>
                 <select 
@@ -153,48 +154,47 @@ const TreatmentListForm = ({ isOpen, onClose, onSave }) => {
           </div>
 
           {/* BOTTOM SECTION: INJECTION DETAILS */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 w-full">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-              <div className="flex items-center gap-2 text-[#00A3FF]">
-                <Syringe size={18} strokeWidth={2.5} />
-                <h3 className="text-sm font-bold tracking-wide">Injection Details</h3>
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[#00A3FF]">
+                <Syringe size={16} className="sm:w-[18px] sm:h-[18px]" strokeWidth={2.5} />
+                <h3 className="text-xs sm:text-sm font-bold tracking-wide">Injection Details</h3>
               </div>
               <button 
                 onClick={handleAddRow}
-                className="flex items-center gap-1.5 bg-[#00A3FF] hover:bg-[#008ce6] text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95"
+                className="flex items-center gap-1.5 bg-[#00A3FF] hover:bg-[#008ce6] text-white px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0"
               >
-                <Plus size={14} strokeWidth={3} /> New Row
+                <Plus size={14} strokeWidth={3} /> <span className="hidden sm:inline">New Row</span><span className="sm:hidden">Add</span>
               </button>
             </div>
 
-            {/* Dynamic Rows Container */}
-            <div className="overflow-x-auto pb-2">
-              <div className="min-w-[1000px] flex flex-col gap-3">
+            {/* Dynamic Rows Container - Horizontally scrollable for small screens */}
+            <div className="overflow-x-auto pb-4 w-full">
+              <div className="min-w-[950px] flex flex-col gap-3">
                 
                 {/* Headers */}
-                <div className="grid grid-cols-[1.5fr_1fr_1fr_0.8fr_1fr_1fr_1fr_1fr_0.8fr_0.2fr] gap-3 px-1">
-                  <span className="text-xs font-bold text-slate-500">Container</span>
-                  <span className="text-xs font-bold text-slate-500">Process</span>
-                  <span className="text-xs font-bold text-slate-500">Rule</span>
-                  <span className="text-xs font-bold text-slate-500">M Type</span>
-                  <span className="text-xs font-bold text-slate-500">Qty</span>
-                  <span className="text-xs font-bold text-slate-500">Allergen</span>
-                  <span className="text-xs font-bold text-slate-500">Diluent</span>
-                  <span className="text-xs font-bold text-slate-500">PD Vol</span>
-                  <span className="text-xs font-bold text-slate-500">Unit</span>
+                <div className="grid grid-cols-[1.5fr_1fr_1fr_0.8fr_1fr_1fr_1fr_1fr_0.8fr_0.2fr] gap-2 sm:gap-3 px-1">
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Container</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Process</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Rule</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">M Type</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Qty</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Allergen</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Diluent</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">PD Vol</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Unit</span>
                   <span></span>
                 </div>
 
                 {/* Rows mapping */}
                 {rows.map((row) => (
-                  <div key={row.id} className="grid grid-cols-[1.5fr_1fr_1fr_0.8fr_1fr_1fr_1fr_1fr_0.8fr_0.2fr] gap-3 items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm hover:border-[#00A3FF]/30 transition-colors">
+                  <div key={row.id} className="grid grid-cols-[1.5fr_1fr_1fr_0.8fr_1fr_1fr_1fr_1fr_0.8fr_0.2fr] gap-2 sm:gap-3 items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm hover:border-[#00A3FF]/30 transition-colors">
                     
                     <select className={selectClass} style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")` }}>
                       <option>Select container...</option>
                       <option>Vial 1</option>
                     </select>
 
-                    {/* ✅ Process Dropdown: Controls the Rule Dropdown */}
                     <select 
                       value={row.process || "Select"}
                       onChange={(e) => handleProcessChange(row.id, e.target.value)}
@@ -206,7 +206,6 @@ const TreatmentListForm = ({ isOpen, onClose, onSave }) => {
                       <option value="Manual">Manual</option>
                     </select>
 
-                    {/* ✅ Rule Dropdown: Disabled and styled when Process is Manual */}
                     <select 
                       disabled={row.process === 'Manual'}
                       className={`${selectClass} ${row.process === 'Manual' ? '!bg-slate-100 opacity-60 !cursor-not-allowed' : ''}`} 
@@ -232,7 +231,7 @@ const TreatmentListForm = ({ isOpen, onClose, onSave }) => {
                     <button 
                       onClick={() => handleRemoveRow(row.id)}
                       disabled={rows.length === 1}
-                      className="flex justify-center items-center w-6 h-6 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 disabled:opacity-30 transition-all mx-auto"
+                      className="flex justify-center items-center w-6 h-6 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 disabled:opacity-30 transition-all mx-auto shrink-0"
                     >
                       <X size={16} strokeWidth={3} />
                     </button>
@@ -245,19 +244,18 @@ const TreatmentListForm = ({ isOpen, onClose, onSave }) => {
 
         </div>
 
-        {/* FOOTER */}
-        <div className="bg-slate-50 px-6 py-4 flex justify-end items-center border-t border-slate-200 gap-3 shrink-0 rounded-b-xl">
+        {/* FOOTER: Fixed at Bottom */}
+        <div className="bg-slate-50 px-4 sm:px-6 py-3 sm:py-4 flex justify-between sm:justify-end items-center border-t border-slate-200 gap-2 sm:gap-3 shrink-0">
            <button 
              onClick={onClose} 
-             className="flex items-center gap-1.5 px-5 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold text-sm hover:bg-white hover:text-slate-800 transition-all shadow-sm active:scale-95"
+             className="flex-1 sm:flex-none flex justify-center items-center gap-1.5 px-4 sm:px-5 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold text-xs sm:text-sm hover:bg-white hover:text-slate-800 transition-all shadow-sm active:scale-95"
            >
              <XCircle size={16} /> Cancel
            </button>
            
-           {/* Button color updated to Sky Blue */}
            <button 
              onClick={handleSaveClick} 
-             className="flex items-center gap-1.5 px-6 py-2 rounded-lg bg-[#00A3FF] text-white font-bold text-sm hover:bg-[#008fdf] shadow-md transition-all active:scale-95"
+             className="flex-1 sm:flex-none flex justify-center items-center gap-1.5 px-4 sm:px-6 py-2 rounded-lg bg-[#00A3FF] text-white font-bold text-xs sm:text-sm hover:bg-[#008fdf] shadow-md transition-all active:scale-95"
            >
              <Save size={16} /> Save
            </button>

@@ -230,13 +230,33 @@ const AppointmentTable = () => {
 
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
           <div className={`flex-1 overflow-hidden relative ${gridTailwindClasses}`}>
+            
+            {/* Added custom style to tighten padding for specific compact feel */}
+            <style>{`
+              .dx-datagrid-fixed-column { 
+                border-left: 1px solid #e2e8f0 !important; 
+              }
+              .dx-datagrid-table .dx-row > td {
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+              }
+              .dx-datagrid-headers .dx-row > td {
+                padding-top: 8px !important;
+                padding-bottom: 8px !important;
+              }
+              .dx-data-row > td {
+                padding-top: 6px !important;
+                padding-bottom: 6px !important;
+              }
+            `}</style>
+
             <DataGrid
               dataSource={apptData}
               height="100%"
               showBorders={true}
               rowAlternationEnabled={true}
               columnAutoWidth={true}
-              wordWrapEnabled={true} // ✅ Forces text to wrap onto multiple lines
+              wordWrapEnabled={true} // ✅ Shifts text onto multiple lines on shrink
               allowColumnResizing={true}
               columnResizingMode="widget"
               showRowLines={true}
@@ -249,21 +269,32 @@ const AppointmentTable = () => {
               <HeaderFilter visible={true} />
               <GroupPanel visible={true} emptyPanelText="Drag a column header here to group by that column" />
 
-              {/* ✅ Removed strict minWidths so columns can squish and text can wrap on narrow screens */}
-              <Column dataField="id" caption="ID" width={60} alignment="center" />
+              {/* ✅ Removed strict minWidths so columns can squish and wrap on narrow screens */}
+              <Column dataField="id" caption="ID" width={50} alignment="center" />
               <Column dataField="fullName" caption="Full Name" />
               <Column dataField="patientNo" caption="Patient No" alignment="center" cellRender={patientNoRender} />
               <Column dataField="patientType" caption="Patient Type" />
               <Column dataField="status" caption="Status" alignment="center" cellRender={statusRender} />
               <Column dataField="apptType" caption="Appt Type" />
               <Column dataField="office" caption="Office" />
-              <Column dataField="verification" caption="Verification" alignment="center" cellRender={verificationRender} />
+              <Column dataField="verification" caption="Verif" width={60} alignment="center" cellRender={verificationRender} />
               <Column dataField="dos" caption="DoS" dataType="date" alignment="center" />
-              <Column dataField="time" caption="Time" />
-              <Column dataField="ptCode" caption="PT Code" />
-              <Column dataField="nextDos" caption="Next DoS" dataType="date" />
+              <Column dataField="time" caption="Time" alignment="center" />
+              <Column dataField="ptCode" caption="PT Code" alignment="center" />
+              <Column dataField="nextDos" caption="Next DoS" dataType="date" alignment="center" />
               <Column dataField="inActive" caption="In Active" alignment="center" cellRender={activeRender} />
-              <Column caption="Actions" alignment="center" cellRender={actionsRender} allowFiltering={false} allowSorting={false} />
+              
+              {/* ✅ Fixed Actions column to the right side */}
+              <Column 
+                caption="Actions" 
+                width={120} 
+                alignment="center" 
+                cellRender={actionsRender} 
+                allowFiltering={false} 
+                allowSorting={false} 
+                fixed={true} 
+                fixedPosition="right" 
+              />
 
               <Summary>
                 <TotalItem column="id" summaryType="count" displayFormat="Total: {0}" />
