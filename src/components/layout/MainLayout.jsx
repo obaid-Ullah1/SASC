@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../navigation/Sidebar";
-import { LogOut, UserCircle, Palette, Check, Menu, Lock, Info } from "lucide-react";
+import { LogOut, UserCircle, Palette, Check, Menu, Lock, Info, X } from "lucide-react";
 import GlobalNotesDrawer from "../global/GlobalNotesDrawer";
 
 const MainLayout = ({
@@ -14,11 +14,9 @@ const MainLayout = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showThemeMenu, setShowThemeMenu] = useState(false);
 
-  // States for the two different drawers
   const [showMyNotes, setShowMyNotes] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
-  // Responsive sidebar handling
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -27,28 +25,23 @@ const MainLayout = ({
         setIsSidebarOpen(true);
       }
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
-  };
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden relative">
       
-      {/* 1. INSTRUCTIONS DRAWER (Left Side) */}
+      {/* DRAWERS */}
       <GlobalNotesDrawer 
         isOpen={showInstructions}
         onClose={() => setShowInstructions(false)}
         side="left"
         themeGradient="linear-gradient(to right, #1e293b, #0f172a)" 
       />
-
-      {/* 2. PERSONAL NOTES DRAWER (Right Side Only) */}
       <GlobalNotesDrawer 
         isOpen={showMyNotes}
         onClose={() => setShowMyNotes(false)}
@@ -56,7 +49,7 @@ const MainLayout = ({
         themeGradient="linear-gradient(to right, #10b981, #059669)" 
       />
 
-      {/* 3. SIDEBAR */}
+      {/* SIDEBAR */}
       <aside
         className={`
           fixed lg:relative inset-y-0 left-0 z-50
@@ -66,79 +59,77 @@ const MainLayout = ({
         `}
       >
         <div className="h-full overflow-hidden">
-          <Sidebar
-            activeColor={themeColor}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
+          <Sidebar activeColor={themeColor} activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </aside>
 
-      {/* 4. MOBILE OVERLAY */}
+      {/* MOBILE OVERLAY */}
       <div
         onClick={toggleSidebar}
-        className={`
-          fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40
-          transition-opacity duration-500
-          ${isSidebarOpen ? "opacity-100 visible lg:hidden" : "opacity-0 invisible"}
-        `}
+        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 transition-opacity duration-500 ${isSidebarOpen ? "opacity-100 visible lg:hidden" : "opacity-0 invisible"}`}
       />
 
-      {/* 5. MAIN CONTENT WRAPPER */}
+      {/* MAIN CONTENT WRAPPER */}
       <div className="flex-1 flex flex-col min-w-0 h-full">
         
-        {/* NAVBAR */}
+        {/* ========================================================= */}
+        {/* RESPONSIVE NAVBAR (HEADER)                                */}
+        {/* ========================================================= */}
         <header
-          className={`h-16 ${themeColor} flex items-center justify-between px-4 lg:px-8 text-white shadow-lg z-30 transition-all duration-300`}
+          className={`h-16 ${themeColor} flex items-center justify-between px-2 sm:px-4 lg:px-8 text-white shadow-lg z-30 transition-all duration-300 shrink-0`}
         >
-          <div className="flex items-center gap-4">
+          {/* Left Side: Toggle & Logo */}
+          <div className="flex items-center gap-1 sm:gap-4">
             <button
               onClick={toggleSidebar}
-              className="p-2 hover:bg-white/10 rounded-xl transition-all active:scale-90"
+              className="p-2 hover:bg-white/10 rounded-xl transition-all active:scale-90 shrink-0"
             >
               <Menu size={22} />
             </button>
 
-            <div className="flex flex-col">
-              <span className="font-black text-lg tracking-tighter uppercase italic leading-none">
-                SAASC<span className="text-white/60 font-light text-sm ml-1">ERP</span>
+            <div className="flex flex-col select-none">
+              <span className="font-black text-sm sm:text-base md:text-lg tracking-tighter uppercase italic leading-none">
+                SAASC<span className="text-white/60 font-light text-[10px] sm:text-xs ml-0.5">ERP</span>
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-4">
+          {/* Right Side: Actions & Profile */}
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
             
-            {/* --- INSTRUCTIONS BUTTON --- */}
+            {/* INSTRUCTIONS */}
             <button 
               onClick={() => setShowInstructions(true)}
-              className="relative flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/40 border border-blue-200/30 backdrop-blur-md text-white rounded-xl shadow-sm transition-all active:scale-95 group"
+              className="flex items-center gap-2 p-2 md:px-3 md:py-1.5 bg-blue-500/20 hover:bg-blue-500/40 border border-blue-200/30 backdrop-blur-md text-white rounded-lg sm:rounded-xl transition-all active:scale-95 group"
+              title="Instructions"
             >
-              <Info size={16} className="text-blue-100 group-hover:rotate-12 transition-transform" />
-              <span className="text-[12px] font-bold tracking-wide hidden lg:block">Instructions</span>
+              <Info size={18} className="text-blue-100 group-hover:rotate-12 transition-transform" />
+              <span className="text-[11px] font-bold tracking-wide hidden lg:block">Instructions</span>
             </button>
 
-            {/* --- MY NOTES BUTTON --- */}
+            {/* MY NOTES */}
             <button 
               onClick={() => setShowMyNotes(true)}
-              className="relative flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-200/30 backdrop-blur-md text-white rounded-xl shadow-sm transition-all active:scale-95 group"
+              className="flex items-center gap-2 p-2 md:px-3 md:py-1.5 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-200/30 backdrop-blur-md text-white rounded-lg sm:rounded-xl transition-all active:scale-95 group"
+              title="My Notes"
             >
-              <Lock size={16} className="text-emerald-100 group-hover:-rotate-12 transition-transform" />
-              <span className="text-[12px] font-bold tracking-wide hidden lg:block">My Notes</span>
+              <Lock size={18} className="text-emerald-100 group-hover:-rotate-12 transition-transform" />
+              <span className="text-[11px] font-bold tracking-wide hidden lg:block">My Notes</span>
             </button>
 
-            <div className="h-6 w-[1px] bg-white/20 mx-2" />
+            <div className="h-6 w-[1px] bg-white/20 mx-0.5" />
 
             {/* THEME SELECTOR */}
             <div className="relative">
               <button
                 onClick={() => setShowThemeMenu(!showThemeMenu)}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/20 transition-colors"
+                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl border border-white/20 transition-colors"
               >
-                <Palette size={20} />
+                <Palette size={18} sm:size={20} />
               </button>
 
               {showThemeMenu && (
-                <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-50">
+                <div className="absolute right-0 mt-3 w-44 sm:w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-50">
                   {themeOptions.map((option) => (
                     <button
                       key={option.bg}
@@ -149,10 +140,10 @@ const MainLayout = ({
                       className={`flex items-center justify-between w-full p-2 rounded-xl ${option.hover}`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full ${option.bg} border-2 border-white shadow-sm`}></div>
-                        <span className="text-sm font-semibold text-slate-700">{option.name}</span>
+                        <div className={`w-5 h-5 rounded-full ${option.bg} border-2 border-white shadow-sm`}></div>
+                        <span className="text-xs sm:text-sm font-semibold text-slate-700">{option.name}</span>
                       </div>
-                      {themeColor === option.bg && <Check size={16} className={option.text} />}
+                      {themeColor === option.bg && <Check size={14} className={option.text} />}
                     </button>
                   ))}
                 </div>
@@ -160,20 +151,20 @@ const MainLayout = ({
             </div>
 
             {/* USER PROFILE & LOGOUT */}
-            <div className="flex items-center gap-3 pl-4 border-l border-white/20">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/40">
+            <div className="flex items-center gap-1 sm:gap-3 pl-1 sm:pl-4 border-l border-white/20">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/40 shrink-0">
                 <UserCircle size={20} />
               </div>
-              <button className="p-2 hover:bg-red-500 rounded-xl transition-all group">
+              <button className="p-2 hover:bg-red-500 rounded-lg sm:rounded-xl transition-all group shrink-0">
                 <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
         </header>
 
-        {/* PAGE CONTENT CONTAINER */}
-        <main className="flex-1 min-h-0 overflow-hidden p-6">
-          <div className="h-full w-full bg-white/40 rounded-[2rem] border border-white shadow-inner">
+        {/* MAIN PAGE AREA */}
+        <main className="flex-1 min-h-0 overflow-hidden p-3 sm:p-4 md:p-6">
+          <div className="h-full w-full bg-white/40 rounded-2xl sm:rounded-[2rem] border border-white shadow-inner overflow-hidden">
             {children}
           </div>
         </main>
