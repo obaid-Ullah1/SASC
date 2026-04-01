@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, RotateCcw, FileText } from 'lucide-react';
+import { X, Plus, RotateCcw, FileText, Pencil } from 'lucide-react';
 
-const AdjustmentAddForm = ({ isOpen, onClose, onAdd, nextSortOrder }) => {
+const AdjustmentAddForm = ({ isOpen, onClose, onAdd, onUpdate, editingItem, nextSortOrder }) => {
   const initialState = {
     type: '',
     plan: '',
@@ -9,11 +9,28 @@ const AdjustmentAddForm = ({ isOpen, onClose, onAdd, nextSortOrder }) => {
   };
 
   const [formData, setFormData] = useState(initialState);
+  const isEditing = !!editingItem;
 
-  // Keep sort order updated if parent changes it
+  // Watch for changes in editingItem to populate or reset the form
   useEffect(() => {
-    setFormData(prev => ({ ...prev, sortOrder: nextSortOrder }));
-  }, [nextSortOrder]);
+    if (isOpen) {
+      if (editingItem) {
+        // Map table data keys back to form state keys
+        setFormData({
+          type: editingItem.allergyType || '',
+          plan: editingItem.planType || '',
+          sortOrder: editingItem.sortOrder || ''
+        });
+      } else {
+        // Reset for new entry
+        setFormData({
+          type: '',
+          plan: '',
+          sortOrder: nextSortOrder || ''
+        });
+      }
+    }
+  }, [editingItem, isOpen, nextSortOrder]);
 
   if (!isOpen) return null;
 
@@ -24,13 +41,25 @@ const AdjustmentAddForm = ({ isOpen, onClose, onAdd, nextSortOrder }) => {
 
   const handleReset = (e) => {
     e.preventDefault();
-    setFormData({ ...initialState, sortOrder: nextSortOrder });
+    if (isEditing) {
+      // Revert to original item values
+      setFormData({
+        type: editingItem.allergyType,
+        plan: editingItem.planType,
+        sortOrder: editingItem.sortOrder
+      });
+    } else {
+      setFormData({ ...initialState, sortOrder: nextSortOrder });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(formData);
-    setFormData({ ...initialState, sortOrder: nextSortOrder + 1 });
+    if (isEditing) {
+      onUpdate(formData);
+    } else {
+      onAdd(formData);
+    }
   };
 
   return (
@@ -40,11 +69,15 @@ const AdjustmentAddForm = ({ isOpen, onClose, onAdd, nextSortOrder }) => {
       <div className="bg-gradient-to-r from-[#e0f2fe] to-[#f0f9ff] px-4 sm:px-5 py-2.5 flex items-center justify-between border-b border-sky-200">
         <div className="flex items-center gap-2.5">
           <div className="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center border border-sky-100 shrink-0">
-            <Plus size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            {isEditing ? (
+              <Pencil size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            ) : (
+              <Plus size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            )}
           </div>
           <div className="flex flex-col">
             <h3 className="font-bold text-sky-900 text-[12px] sm:text-[13px] tracking-wide uppercase leading-tight">
-              Add Adjustment Dose Plan
+              {isEditing ? 'Update Adjustment Dose Plan' : 'Add Adjustment Dose Plan'}
             </h3>
           </div>
         </div>
@@ -59,9 +92,8 @@ const AdjustmentAddForm = ({ isOpen, onClose, onAdd, nextSortOrder }) => {
         </button>
       </div>
 
-      {/* 2. FORM BODY (Responsive Flex Layout) */}
+      {/* 2. FORM BODY */}
       <form onSubmit={handleSubmit} className="p-4 sm:p-5 bg-white/50">
-        {/* Changed to flex-col on mobile, flex-row on md+ */}
         <div className="flex flex-col md:flex-row items-start md:items-end gap-4">
           
           {/* TYPE FIELD */}
@@ -80,7 +112,7 @@ const AdjustmentAddForm = ({ isOpen, onClose, onAdd, nextSortOrder }) => {
             </select>
           </div>
 
-          {/* DOSE PLAN FIELD (With Blue Icon Block) */}
+          {/* DOSE PLAN FIELD */}
           <div className="flex flex-col gap-1.5 w-full md:flex-1">
             <label className="text-[12px] font-bold text-slate-700">Adjustment Dose Plan <span className="text-rose-500">*</span></label>
             <div className="flex h-[38px] rounded-lg overflow-hidden border-2 border-slate-200 focus-within:border-[#00A3FF] focus-within:ring-4 focus-within:ring-[#00A3FF]/10 transition-all bg-white">
@@ -121,14 +153,14 @@ const AdjustmentAddForm = ({ isOpen, onClose, onAdd, nextSortOrder }) => {
               type="submit" 
               className="flex-1 md:flex-none bg-[#00A3FF] hover:bg-[#008CE6] text-white px-8 h-[38px] rounded-lg text-[13px] font-bold shadow-md transition-all active:scale-95 flex items-center justify-center"
             >
-              Add
+              {isEditing ? 'Update' : 'Add'}
             </button>
             <button 
               type="button" 
               onClick={handleReset}
               className="flex-1 md:flex-none bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-600 px-5 h-[38px] rounded-lg text-[13px] font-bold transition-all flex items-center justify-center"
             >
-              Reset
+              {isEditing ? 'Revert' : 'Reset'}
             </button>
           </div>
 

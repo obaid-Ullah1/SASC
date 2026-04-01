@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Plus, Beaker, ChevronDown } from 'lucide-react';
+import { X, Plus, Beaker, ChevronDown, Pencil, Save } from 'lucide-react';
 
-const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
+const DilutionAddForm = ({ isOpen, onClose, onAdd, onUpdate, editingItem }) => {
   const [formData, setFormData] = useState({ ratio: '', color: null });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  
+  const isEditing = !!editingItem;
 
   // Pre-defined colors matching your screenshot
   const colorOptions = [
@@ -17,6 +19,20 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
     { name: 'Magenta', hex: '#EC4899' },
     { name: 'Blue', hex: '#3B82F6' }
   ];
+
+  // Logic to populate form when editing or reset when adding fresh
+  useEffect(() => {
+    if (isOpen) {
+      if (editingItem) {
+        setFormData({
+          ratio: editingItem.ratio,
+          color: { name: editingItem.colorName, hex: editingItem.hex }
+        });
+      } else {
+        setFormData({ ratio: '', color: null });
+      }
+    }
+  }, [editingItem, isOpen]);
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -33,7 +49,15 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
 
   const handleReset = (e) => {
     e?.preventDefault();
-    setFormData({ ratio: '', color: null });
+    if (isEditing) {
+      // Revert to original values
+      setFormData({
+        ratio: editingItem.ratio,
+        color: { name: editingItem.colorName, hex: editingItem.hex }
+      });
+    } else {
+      setFormData({ ratio: '', color: null });
+    }
     setIsDropdownOpen(false);
   };
 
@@ -43,8 +67,12 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
       alert("Please select a color.");
       return;
     }
-    onAdd(formData);
-    handleReset();
+    
+    if (isEditing) {
+      onUpdate(formData);
+    } else {
+      onAdd(formData);
+    }
   };
 
   const selectColor = (color) => {
@@ -59,10 +87,14 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
       <div className="bg-gradient-to-r from-[#e0f2fe] to-[#f0f9ff] px-4 sm:px-5 py-2.5 flex items-center justify-between border-b border-sky-200">
         <div className="flex items-center gap-2.5">
           <div className="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center border border-sky-100 shrink-0">
-            <Plus size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            {isEditing ? (
+              <Pencil size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            ) : (
+              <Plus size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            )}
           </div>
           <h3 className="font-bold text-sky-900 text-[12px] sm:text-[13px] tracking-wide uppercase leading-tight">
-            Add Dilution Ratio Color
+            {isEditing ? 'Update Dilution Ratio Color' : 'Add Dilution Ratio Color'}
           </h3>
         </div>
         
@@ -80,7 +112,7 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
       <form onSubmit={handleSubmit} className="p-4 sm:p-5 bg-white/50">
         <div className="flex flex-col md:flex-row items-start md:items-end gap-4 w-full">
           
-          {/* RATIO INPUT (With Blue Icon Block) */}
+          {/* RATIO INPUT */}
           <div className="flex flex-col gap-1.5 w-full md:flex-1">
             <label className="text-[12px] font-bold text-slate-700">Map Ratio Color <span className="text-rose-500">*</span></label>
             <div className="flex h-[38px] rounded-lg overflow-hidden border-2 border-slate-200 focus-within:border-[#00A3FF] focus-within:ring-4 focus-within:ring-[#00A3FF]/10 transition-all bg-white">
@@ -144,14 +176,14 @@ const DilutionAddForm = ({ isOpen, onClose, onAdd }) => {
               type="submit" 
               className="flex-1 md:flex-none bg-[#00A3FF] hover:bg-[#008CE6] text-white px-8 h-[38px] rounded-lg text-[13px] font-bold shadow-md transition-all active:scale-95 flex items-center justify-center"
             >
-              Add
+              {isEditing ? 'Update' : 'Add'}
             </button>
             <button 
               type="button" 
               onClick={handleReset}
               className="flex-1 md:flex-none bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-600 px-5 h-[38px] rounded-lg text-[13px] font-bold transition-all flex items-center justify-center"
             >
-              Reset
+              {isEditing ? 'Revert' : 'Reset'}
             </button>
           </div>
 

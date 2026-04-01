@@ -10,9 +10,17 @@ import { List, Plus, RefreshCw, Pencil, Search, Filter, Tag, Settings, CheckCirc
 // Import your new form component
 import AddInjName from './AddForm/AddInjName';
 
+// Import Global Success Popup
+import SuccessPopup from '../global/SuccessPopup';
+
 const InjType = () => {
-  // State to control form visibility
+  // --- STATES ---
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null); // Tracks row being edited
+
+  // Success Popup States
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successType, setSuccessType] = useState('');
 
   // Sample data state
   const [tableData, setTableData] = useState([
@@ -24,15 +32,36 @@ const InjType = () => {
     { id: 2010, typeName: 'Average', code: 'AVG', isCat: true },
   ]);
 
-  // Function to add new data from the form to the grid
+  // --- HELPERS ---
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingItem(null);
+  };
+
+  const triggerSuccess = (type) => {
+    setSuccessType(type);
+    setIsSuccessOpen(true);
+    setTimeout(() => setIsSuccessOpen(false), 1500);
+  };
+
+  // --- ACTIONS ---
   const handleAddNewData = (newData) => {
     const nextId = tableData.length > 0 
       ? Math.max(...tableData.map(item => item.id)) + 1 
       : 1;
     
     const entryWithId = { id: nextId, ...newData };
-    setTableData([entryWithId, ...tableData]); // Add new record to the top
-    setIsFormOpen(false); // Close form after saving
+    setTableData([entryWithId, ...tableData]);
+    handleCloseForm();
+    triggerSuccess('Added');
+  };
+
+  const handleUpdateData = (formData) => {
+    setTableData(tableData.map(item => 
+      item.id === editingItem.id ? { ...item, ...formData } : item
+    ));
+    handleCloseForm();
+    triggerSuccess('Updated');
   };
 
   // --- CELL RENDERERS ---
@@ -48,9 +77,13 @@ const InjType = () => {
     </div>
   );
 
-  const actionCellRender = () => (
+  const actionCellRender = (data) => (
     <div className="flex items-center justify-center gap-1.5 h-full">
       <button 
+        onClick={() => {
+          setEditingItem(data.data);
+          setIsFormOpen(true);
+        }}
         className="w-6 h-6 rounded border border-blue-200 text-[#007BFF] flex items-center justify-center hover:bg-[#007BFF] hover:text-white transition-all shadow-sm active:scale-95"
         title="Edit"
       >
@@ -100,30 +133,30 @@ const InjType = () => {
   `;
 
   return (
-    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-md border border-slate-300 overflow-hidden">
+    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-md border border-slate-300 overflow-hidden relative">
       
-      {/* 1. HEADER - Responsive Flex Wrap & Stack applied */}
+      {/* 1. HEADER */}
       <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2.5 sm:py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 shrink-0 border-b border-[#bef264]">
-        
-        {/* Title Section */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <List size={18} className="text-[#2A333A] shrink-0" />
           <h2 className="text-[14px] sm:text-[15px] font-black text-[#2A333A] tracking-wide">Inj Type List</h2>
         </div>
 
-        {/* Controls Section - Wraps on mobile, stretches search bar */}
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
-          
-          {/* Add/Close Toggle Button */}
           <button 
-            onClick={() => setIsFormOpen(!isFormOpen)}
+            onClick={() => {
+              if (isFormOpen) handleCloseForm();
+              else {
+                setEditingItem(null); // Fresh Add
+                setIsFormOpen(true);
+              }
+            }}
             className={`${isFormOpen ? 'bg-rose-500' : 'bg-[#007BFF]'} hover:opacity-90 w-[28px] h-[28px] sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 shrink-0`}
             title={isFormOpen ? "Close Form" : "Add New Type"}
           >
             {isFormOpen ? <X size={16} strokeWidth={3} /> : <Plus size={16} strokeWidth={3} />}
           </button>
           
-          {/* Search Bar - flex-1 on mobile so it fills the row */}
           <div className="relative group flex-1 sm:flex-none">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#007BFF] transition-colors" size={13} />
             <input 
@@ -140,23 +173,23 @@ const InjType = () => {
           <button className="w-[28px] h-[28px] sm:w-7 sm:h-7 bg-rose-600 border border-rose-700 rounded flex items-center justify-center text-white hover:bg-rose-700 transition-all shadow-sm shrink-0">
             <Filter size={13} strokeWidth={2.5} />
           </button>
-
         </div>
       </div>
 
       {/* 2. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col overflow-hidden p-3 gap-3">
         
-        {/* ADD FORM SECTION (Conditionally Rendered) */}
+        {/* ADD/EDIT FORM SECTION */}
         {isFormOpen && (
           <AddInjName 
             isOpen={isFormOpen} 
-            onClose={() => setIsFormOpen(false)} 
+            onClose={handleCloseForm} 
             onAdd={handleAddNewData} 
+            onUpdate={handleUpdateData}
+            editingItem={editingItem}
           />
         )}
 
-        {/* DATAGRID TABLE */}
         <div className={`flex-1 overflow-hidden bg-white border border-slate-200 rounded-lg shadow-inner ${gridClasses}`}>
           <DataGrid
             dataSource={tableData}
@@ -188,6 +221,14 @@ const InjType = () => {
           </DataGrid>
         </div>
       </div>
+
+      {/* SUCCESS POPUP */}
+      <SuccessPopup
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        type={successType}
+      />
+
     </div>
   );
 };

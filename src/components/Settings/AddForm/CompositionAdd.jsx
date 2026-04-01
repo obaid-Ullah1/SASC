@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Pill, Paperclip, X, ChevronDown } from 'lucide-react';
+import { Pill, Paperclip, X, ChevronDown, Pencil, Save } from 'lucide-react';
 import AttachmentModal from './AttachmentModal';
 
 // --- DATA LISTS ---
@@ -13,8 +13,9 @@ const INJECTIONS_LIST = [
 ];
 
 const CATEGORIES_LIST = [
-  "Allergen", "Glycerine", "bio Logical", "preservative", 
-  "Diluent", "injections", "Chemicals"
+  "TREE MIX 1", "TREE MIX 2", "GRASS MIX", "WEED MIX", "MOLD MIX", 
+  "STD MIX 1", "STD MIX 2", "STD MIX 3", "STD MIX 4", "AIT MIX 1", 
+  "AIT MIX 2", "AIT MIX 3", "AIT MIX 4", "CUSTOM Mix 1", "CUSTOM 1"
 ];
 
 const SUB_CATEGORIES_LIST = ["Sub Category 1", "Sub Category 2", "Sub Category 3"];
@@ -24,7 +25,7 @@ const INGREDIENTS_LIST = [
   "Box Elder", "Cat", "Cedar, Mountain", "Cocklebur", "Diluent"
 ];
 
-const CompositionAdd = ({ onClose, onAdd }) => {
+const CompositionAdd = ({ onClose, onAdd, onUpdate, editingItem }) => {
   // Form State
   const [selectedInjection, setSelectedInjection] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -36,6 +37,28 @@ const CompositionAdd = ({ onClose, onAdd }) => {
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false);
   const [isIngredientsOpen, setIsIngredientsOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const isEditing = !!editingItem;
+
+  // POPULATE FORM ON EDIT
+  useEffect(() => {
+    if (editingItem) {
+      // Map the detail row data back to the form fields
+      setSelectedInjection(editingItem.data.ingredient || "");
+      setSelectedCategory(editingItem.mixName || "");
+      // Other fields can be reset or mapped if they exist in your data structure
+      setSelectedSubCategory("");
+      setSelectedType("");
+      setSelectedIngredients([]);
+    } else {
+      // Clear form for fresh Add
+      setSelectedInjection("");
+      setSelectedCategory("");
+      setSelectedSubCategory("");
+      setSelectedType("");
+      setSelectedIngredients([]);
+    }
+  }, [editingItem]);
 
   // Close multi-select when clicking outside
   useEffect(() => {
@@ -63,14 +86,19 @@ const CompositionAdd = ({ onClose, onAdd }) => {
       return;
     }
     
-    // Pass all form data back to parent component
-    onAdd({ 
+    const formData = { 
       injection: selectedInjection, 
       category: selectedCategory,
       subCategory: selectedSubCategory,
       type: selectedType,
       ingredients: selectedIngredients
-    });
+    };
+
+    if (isEditing) {
+      onUpdate(formData);
+    } else {
+      onAdd(formData);
+    }
   };
 
   return (
@@ -81,22 +109,28 @@ const CompositionAdd = ({ onClose, onAdd }) => {
         <div className="bg-gradient-to-r from-[#e0f2fe] to-[#f0f9ff] px-5 py-3 flex items-center justify-between border-b border-sky-200">
           <div className="flex items-center gap-2.5">
             <div className="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center border border-sky-100">
-              <Pill size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+              {isEditing ? (
+                <Pencil size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+              ) : (
+                <Pill size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+              )}
             </div>
             <h3 className="font-black text-[#00A3FF] text-[14px] tracking-wide uppercase leading-tight">
-              Manage Composition
+              {isEditing ? 'Update Composition' : 'Manage Composition'}
             </h3>
           </div>
           
           <div className="flex items-center gap-3">
-            <button 
-              type="button"
-              onClick={() => setIsAttachmentModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-white border border-[#00A3FF] text-[#00A3FF] rounded-full text-[11px] font-black uppercase tracking-wider hover:bg-sky-50 transition-all shadow-sm"
-            >
-              <Paperclip size={14} strokeWidth={2.5} />
-              Attachment
-            </button>
+            {!isEditing && (
+              <button 
+                type="button"
+                onClick={() => setIsAttachmentModalOpen(true)}
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-white border border-[#00A3FF] text-[#00A3FF] rounded-full text-[11px] font-black uppercase tracking-wider hover:bg-sky-50 transition-all shadow-sm"
+              >
+                <Paperclip size={14} strokeWidth={2.5} />
+                Attachment
+              </button>
+            )}
             <button 
               type="button" 
               onClick={onClose} 
@@ -111,16 +145,15 @@ const CompositionAdd = ({ onClose, onAdd }) => {
         <form onSubmit={handleSubmit} className="p-5 bg-slate-50/50">
           <div className="flex flex-col gap-5">
             
-            {/* ROW 1: FIELDS */}
+            {/* FIELDS */}
             <div className="flex flex-wrap md:flex-nowrap items-start gap-4 w-full">
               
-              {/* Injection Dropdown */}
               <div className="w-full md:w-48 flex flex-col gap-1.5 shrink-0">
                 <label className="text-[12px] font-black text-[#1e293b] ml-1 tracking-wide">Injection</label>
                 <select 
                   value={selectedInjection}
                   onChange={(e) => setSelectedInjection(e.target.value)}
-                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 transition-all bg-white shadow-sm appearance-none cursor-pointer"
+                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 transition-all bg-white shadow-sm appearance-none cursor-pointer"
                   style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                 >
                   <option value="">-- Select --</option>
@@ -128,13 +161,12 @@ const CompositionAdd = ({ onClose, onAdd }) => {
                 </select>
               </div>
 
-              {/* Category Dropdown */}
               <div className="w-full md:w-48 flex flex-col gap-1.5 shrink-0">
-                <label className="text-[12px] font-black text-[#1e293b] ml-1 tracking-wide">Category</label>
+                <label className="text-[12px] font-black text-[#1e293b] ml-1 tracking-wide">Category (Mix)</label>
                 <select 
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 transition-all bg-white shadow-sm appearance-none cursor-pointer"
+                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 transition-all bg-white shadow-sm appearance-none cursor-pointer"
                   style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                 >
                   <option value="">-- Select Category --</option>
@@ -142,30 +174,28 @@ const CompositionAdd = ({ onClose, onAdd }) => {
                 </select>
               </div>
 
-              {/* Sub Category Dropdown */}
               <div className="w-full md:w-48 flex flex-col gap-1.5 shrink-0">
                 <label className="text-[12px] font-black text-[#1e293b] ml-1 tracking-wide">Sub Category</label>
                 <select 
                   value={selectedSubCategory}
                   onChange={(e) => setSelectedSubCategory(e.target.value)}
-                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 transition-all bg-white shadow-sm appearance-none cursor-pointer"
+                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 transition-all bg-white shadow-sm appearance-none cursor-pointer"
                   style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                 >
-                  <option value="">-- Select Sub Category --</option>
+                  <option value="">-- Select --</option>
                   {SUB_CATEGORIES_LIST.map((sub) => <option key={sub} value={sub}>{sub}</option>)}
                 </select>
               </div>
 
-              {/* Type Dropdown */}
               <div className="w-full md:w-48 flex flex-col gap-1.5 shrink-0">
                 <label className="text-[12px] font-black text-[#1e293b] ml-1 tracking-wide">Type</label>
                 <select 
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 focus:ring-[#00A3FF]/20 transition-all bg-white shadow-sm appearance-none cursor-pointer"
+                  className="w-full h-[38px] border border-slate-300 rounded-lg px-3 text-[13px] font-semibold text-slate-700 outline-none focus:border-[#00A3FF] focus:ring-2 transition-all bg-white shadow-sm appearance-none cursor-pointer"
                   style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                 >
-                  <option value="">-- Select Type --</option>
+                  <option value="">-- Select --</option>
                   {TYPES_LIST.map((type) => <option key={type} value={type}>{type}</option>)}
                 </select>
               </div>
@@ -180,7 +210,7 @@ const CompositionAdd = ({ onClose, onAdd }) => {
                   >
                     <div className="flex flex-wrap gap-1 flex-1 truncate">
                       {selectedIngredients.length === 0 ? (
-                        <span className="text-slate-400 font-normal">Select one or more ingredients...</span>
+                        <span className="text-slate-400 font-normal">Select ingredients...</span>
                       ) : (
                         <span className="text-slate-700 truncate">{selectedIngredients.join(", ")}</span>
                       )}
@@ -188,7 +218,6 @@ const CompositionAdd = ({ onClose, onAdd }) => {
                     <ChevronDown size={16} className="text-slate-400 shrink-0 ml-2" />
                   </div>
 
-                  {/* Multi-Select Dropdown Menu */}
                   {isIngredientsOpen && (
                     <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-56 overflow-y-auto">
                       <div className="p-1 flex flex-col">
@@ -211,13 +240,14 @@ const CompositionAdd = ({ onClose, onAdd }) => {
 
             </div>
 
-            {/* ROW 2: ADD BUTTON */}
+            {/* ACTION BUTTON */}
             <div>
               <button
                 type="submit"
-                className="bg-[#198754] hover:bg-[#157347] text-white h-[38px] px-6 rounded-md text-[13px] font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                className={`${isEditing ? 'bg-[#00A3FF] hover:bg-[#008fdf]' : 'bg-[#198754] hover:bg-[#157347]'} text-white h-[38px] px-8 rounded-md text-[13px] font-black uppercase shadow-md transition-all active:scale-95 flex items-center justify-center gap-2`}
               >
-                + Add
+                {isEditing ? <Save size={14} /> : <Plus size={16} strokeWidth={3} />}
+                {isEditing ? 'Save Changes' : 'Add To List'}
               </button>
             </div>
 

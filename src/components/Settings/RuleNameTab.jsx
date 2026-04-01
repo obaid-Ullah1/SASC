@@ -2,13 +2,24 @@ import React, { useState } from 'react';
 import DataGrid, { Column, Scrolling } from 'devextreme-react/data-grid';
 import { List, HelpCircle, Plus, Pencil, Trash2, Settings } from 'lucide-react';
 
-// Import the new inline form
+// 1. Import the Form and Global Popups (Fixed Relative Paths)
 import RulesAddForm from './AddForm/RulesAddForm';
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
 const RuleNameTab = () => {
+  // Form & Editing State
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null); 
 
-  // Default data in ascending order
+  // Global Popup State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successType, setSuccessType] = useState(''); // 'Added', 'Updated', or 'Deleted'
+
+  // Default Table Data
   const [tableData, setTableData] = useState([
     { id: '1003', ruleName: 'SAER-1' },
     { id: '1004', ruleName: 'SAER-2' },
@@ -16,37 +27,73 @@ const RuleNameTab = () => {
     { id: '1006', ruleName: 'Tets' },
   ]);
 
-  // HANDLER UPDATED: Now adds to the bottom of the list
+  const handleCloseForm = () => {
+    setIsAddFormOpen(false);
+    setEditingItem(null);
+  };
+
+  // --- TRIGGER SUCCESS POPUP HELPER ---
+  const triggerSuccess = (type) => {
+    setSuccessType(type);
+    setIsSuccessOpen(true);
+    // Auto-close after 1.5 seconds (optional: remove if your SuccessPopup component handles this internally)
+    setTimeout(() => setIsSuccessOpen(false), 1500);
+  };
+
+  // --- ADD ACTION ---
   const handleAddNewRule = (newRuleName) => {
     const nextId = tableData.length > 0 
       ? Math.max(...tableData.map(r => parseInt(r.id))) + 1 
       : 1000;
 
-    const newEntry = {
-      id: nextId.toString(),
-      ruleName: newRuleName
-    };
-
-    // Use [...tableData, newEntry] to show the new record at the bottom
+    const newEntry = { id: nextId.toString(), ruleName: newRuleName };
     setTableData([...tableData, newEntry]);
-    setIsAddFormOpen(false); 
+    
+    handleCloseForm(); 
+    triggerSuccess('Added'); // Show Success Popup
   };
 
-  // REDUCED BUTTON SIZES TO FIT THIN ROWS
+  // --- UPDATE ACTION ---
+  const handleUpdateRule = (updatedRuleName) => {
+    setTableData(tableData.map(item => 
+      item.id === editingItem.id ? { ...item, ruleName: updatedRuleName } : item
+    ));
+    
+    handleCloseForm();
+    triggerSuccess('Updated'); // Show Success Popup
+  };
+
+  // --- DELETE ACTIONS ---
+  const handleDeleteClick = (rowData) => {
+    setItemToDelete(rowData); // Store the row data
+    setIsConfirmOpen(true);   // Open Confirm Popup
+  };
+
+  const handleConfirmDelete = () => {
+    setTableData(prev => prev.filter(item => item.id !== itemToDelete.id));
+    
+    setIsConfirmOpen(false);
+    setItemToDelete(null);
+    triggerSuccess('Deleted'); // Show Success Popup
+  };
+
+  // Action Cell Renderer
   const actionCellRender = (data) => {
     return (
       <div className="flex items-center justify-center gap-1.5 h-full">
         <button 
-          className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white transition-all shadow-sm"
+          onClick={() => {
+            setEditingItem(data.data);
+            setIsAddFormOpen(true);
+          }}
+          className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white transition-all shadow-sm active:scale-95"
           title="Edit"
         >
           <Pencil size={11} strokeWidth={3} />
         </button>
         <button 
-          onClick={() => {
-            setTableData(prev => prev.filter(item => item.id !== data.data.id));
-          }}
-          className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+          onClick={() => handleDeleteClick(data.data)} // Wired to Confirm Popup
+          className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-95"
           title="Delete"
         >
           <Trash2 size={11} strokeWidth={3} />
@@ -55,6 +102,7 @@ const RuleNameTab = () => {
     );
   };
 
+  // Column Headers
   const headerIdRender = () => <div className="font-bold text-slate-700 text-[12px] uppercase tracking-wider text-center w-full"># ID</div>;
   const headerRuleNameRender = () => (
     <div className="flex items-center gap-2 font-bold text-slate-700 text-[12px] uppercase tracking-wider">
@@ -67,7 +115,6 @@ const RuleNameTab = () => {
     </div>
   );
 
-  // UPDATED CSS: MATCHING ALL OTHER TABS EXACTLY
   const gridClasses = `
     [&_.dx-datagrid-header-panel]:!hidden 
     [&_.dx-datagrid-headers]:!bg-[#F1F5F9] 
@@ -75,12 +122,9 @@ const RuleNameTab = () => {
     [&_.dx-datagrid-headers_td]:!border-slate-300
     [&_.dx-datagrid-headers_td]:!py-2
     [&_.dx-row-alt>td]:!bg-[#F8FAFC]
-    
-    /* ULTRA THIN ROWS & PERFECT CENTERING */
     [&_.dx-data-row>td]:!py-0.5
     [&_.dx-data-row>td]:!align-middle
     [&_.dx-data-row]:!h-[28px]
-    
     [&_.dx-data-row>td]:!text-slate-700
     [&_.dx-data-row>td]:!font-medium
     [&_.dx-data-row>td]:!text-[11.5px]
@@ -90,9 +134,9 @@ const RuleNameTab = () => {
   `;
 
   return (
-    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-md border border-slate-300 overflow-hidden">
+    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-md border border-slate-300 overflow-hidden relative">
       
-      {/* 1. CUSTOM GRADIENT HEADER */}
+      {/* HEADER */}
       <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-5 py-2.5 flex items-center justify-between shrink-0 border-b border-[#bef264]">
         <div className="flex items-center gap-3">
           <div className="bg-white/40 p-1.5 rounded-lg shadow-sm">
@@ -108,14 +152,21 @@ const RuleNameTab = () => {
         </button>
       </div>
 
-      {/* 2. MODERN ACTION BAR */}
+      {/* ACTION BAR */}
       <div className="flex items-center justify-between px-5 py-3 bg-white border-b-2 border-slate-200 shrink-0">
         <div className="text-[12px] font-bold text-slate-500 border border-slate-200 bg-slate-50 px-3 py-1.5 rounded-full">
           Total Rules: <span className="text-[#00A3FF] text-[13px]">{tableData.length}</span>
         </div>
         
         <button 
-          onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+          onClick={() => {
+            if (isAddFormOpen) {
+              handleCloseForm();
+            } else {
+              setEditingItem(null); 
+              setIsAddFormOpen(true);
+            }
+          }}
           className={`${isAddFormOpen ? 'bg-slate-700 hover:bg-slate-800' : 'bg-[#00A3FF] hover:bg-[#008CE6]'} px-4 py-2 rounded-lg flex items-center gap-2 text-white text-[13px] font-bold shadow-md hover:shadow-lg transition-all active:scale-95`}
         >
           <Plus size={16} strokeWidth={3} className={isAddFormOpen ? "rotate-45 transition-transform" : "transition-transform"} /> 
@@ -123,20 +174,22 @@ const RuleNameTab = () => {
         </button>
       </div>
 
-      {/* 3. TABLE AREA (Includes Inline Form) */}
+      {/* TABLE AREA */}
       <div className={`flex-1 overflow-hidden bg-white p-3 flex flex-col ${gridClasses}`}>
         
         <RulesAddForm 
           isOpen={isAddFormOpen} 
-          onClose={() => setIsAddFormOpen(false)} 
+          onClose={handleCloseForm} 
           onAdd={handleAddNewRule} 
+          onUpdate={handleUpdateRule}
+          editingItem={editingItem}
         />
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden border border-slate-200 rounded-lg">
           <DataGrid
             dataSource={tableData}
             height="100%"
-            showBorders={true}
+            showBorders={false}
             showColumnLines={true}
             showRowLines={true}
             rowAlternationEnabled={true}
@@ -144,26 +197,32 @@ const RuleNameTab = () => {
           >
             <Scrolling mode="standard" showScrollbar="always" />
             
-            <Column 
-              dataField="id" 
-              headerCellRender={headerIdRender} 
-              width={120} 
-              alignment="center"
-            />
-            <Column 
-              dataField="ruleName" 
-              headerCellRender={headerRuleNameRender} 
-            />
-            <Column 
-              caption="Action" 
-              headerCellRender={headerActionRender} 
-              cellRender={actionCellRender} 
-              width={160} 
-              alignment="center"
-            />
+            <Column dataField="id" headerCellRender={headerIdRender} width={120} alignment="center" />
+            <Column dataField="ruleName" headerCellRender={headerRuleNameRender} />
+            <Column caption="Action" headerCellRender={headerActionRender} cellRender={actionCellRender} width={160} alignment="center" />
           </DataGrid>
         </div>
       </div>
+
+      {/* ==========================================
+          GLOBAL POPUPS MOUNTED HERE
+      ========================================== */}
+      
+      {/* 1. Confirm Delete Popup */}
+      <ConfirmPopup 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Rule"
+        message={`Are you sure you want to delete "${itemToDelete?.ruleName}"? This action cannot be undone.`}
+      />
+
+      {/* 2. Success Alert Popup */}
+      <SuccessPopup
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        type={successType} // Passes 'Added', 'Updated', or 'Deleted' dynamically
+      />
 
     </div>
   );

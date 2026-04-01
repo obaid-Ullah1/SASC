@@ -12,15 +12,25 @@ import { List, Plus, RefreshCw, Pencil, Trash2, Search, Filter, Settings, CheckC
 // Import the new Add form
 import AddInjectionName from './AddForm/AddInjectionName'; 
 
+// ✅ IMPORT GLOBAL POPUPS
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
+
 const InjName = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null); // Track which row is being edited
+  const [editingItem, setEditingItem] = useState(null); 
+
+  // ✅ GLOBAL POPUP STATES
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successType, setSuccessType] = useState(''); // 'Added', 'Updated', or 'Deleted'
 
   // Sample data matching your screenshot
   const [tableData, setTableData] = useState([
     { id: 1, allergen: 'Standard', injName: 'TREE MIX 1', compName: 'SA', isActive: true, isApproved: true },
     { id: 2, allergen: 'Standard', injName: 'TREE MIX 2', compName: 'SA', isActive: true, isApproved: true },
-    { id: 3, allergen: 'Standard', injName: 'GRASS MIX', compName: 'SA', isActive: false, isApproved: true }, // Set to false to see the red badge
+    { id: 3, allergen: 'Standard', injName: 'GRASS MIX', compName: 'SA', isActive: false, isApproved: true }, 
     { id: 4, allergen: 'Standard', injName: 'WEED MIX', compName: 'SA', isActive: true, isApproved: true },
     { id: 5, allergen: 'Standard', injName: 'MOLD MIX', compName: 'SA', isActive: true, isApproved: true },
     { id: 6, allergen: 'Standard', injName: 'STD MIX 1', compName: 'SA', isActive: true, isApproved: true },
@@ -28,13 +38,19 @@ const InjName = () => {
     { id: 1017, allergen: 'Custom', injName: 'CUSTOM Mix 1', compName: 'SA', isActive: true, isApproved: true },
   ]);
 
-  // Handle closing form and resetting edit state
+  // --- HELPERS ---
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setEditingItem(null);
   };
 
-  // Handler to push new data to the grid
+  const triggerSuccess = (type) => {
+    setSuccessType(type);
+    setIsSuccessOpen(true);
+    setTimeout(() => setIsSuccessOpen(false), 1500);
+  };
+
+  // --- CRUD ACTIONS ---
   const handleAddNewData = (formData) => {
     const nextId = tableData.length > 0 ? Math.max(...tableData.map(item => item.id)) + 1 : 1000;
     const newEntry = {
@@ -47,20 +63,28 @@ const InjName = () => {
     };
     setTableData([newEntry, ...tableData]); 
     handleCloseForm(); 
+    triggerSuccess('Added'); // ✅ Trigger Success
   };
 
-  // Handler to update existing row
   const handleUpdateData = (updatedRow) => {
     setTableData(tableData.map(row => row.id === updatedRow.id ? updatedRow : row));
     handleCloseForm();
+    triggerSuccess('Updated'); // ✅ Trigger Success
   };
 
-  // Handler to delete row
-  const handleDelete = (id) => {
-    setTableData(tableData.filter(row => row.id !== id));
+  // --- DELETE LOGIC WITH CONFIRMATION ---
+  const handleDeleteClick = (rowData) => {
+    setItemToDelete(rowData);
+    setIsConfirmOpen(true);
   };
 
-  // Handler to open edit form
+  const handleConfirmDelete = () => {
+    setTableData(tableData.filter(row => row.id !== itemToDelete.id));
+    setIsConfirmOpen(false);
+    setItemToDelete(null);
+    triggerSuccess('Deleted'); // ✅ Trigger Success
+  };
+
   const handleEditClick = (rowData) => {
     setEditingItem(rowData);
     setIsFormOpen(true);
@@ -104,7 +128,7 @@ const InjName = () => {
         <Pencil size={11} strokeWidth={3} />
       </button>
       <button 
-        onClick={() => handleDelete(data.data.id)}
+        onClick={() => handleDeleteClick(data.data)} // ✅ Wired to Popup
         className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-95"
       >
         <Trash2 size={11} strokeWidth={3} />
@@ -119,7 +143,11 @@ const InjName = () => {
   const headerCompRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[11px] uppercase tracking-wider w-full"><Pencil size={13} className="text-[#00A3FF]" /> COMP NAME</div>;
   const headerActiveRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[11px] uppercase tracking-wider w-full"><CheckCircle2 size={13} className="text-[#16A34A]" /> ACTIVE</div>;
   const headerApprovedRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[11px] uppercase tracking-wider w-full"><ShieldCheck size={13} className="text-[#16A34A]" /> APPROVED</div>;
-  const headerActionRender = () => <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[11px] uppercase tracking-wider w-full"><Settings size={13} className="text-[#EAB308]" /> ACTIONS</div>;
+  const headerActionRender = () => (
+    <div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 text-[11px] uppercase tracking-wider w-full">
+      <Settings size={13} className="text-[#EAB308]" /> ACTIONS
+    </div>
+  );
 
   const gridClasses = `
     [&_.dx-datagrid-headers]:!bg-[#F1F5F9] 
@@ -140,21 +168,16 @@ const InjName = () => {
   `;
 
   return (
-    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden">
+    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden relative">
       
-      {/* HEADER - Applied Responsive Stack & Flex */}
+      {/* HEADER */}
       <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 shrink-0 border-b border-[#bef264]">
-        
-        {/* Title Section */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <List size={18} className="text-[#2A333A] shrink-0" />
           <h2 className="text-[14px] sm:text-[15px] font-black text-[#2A333A] tracking-wide">Inj Name List</h2>
         </div>
 
-        {/* Controls Section - Wraps on mobile, stretches search bar */}
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
-          
-          {/* Toggle Add Form Button */}
           <button 
             onClick={() => {
               if (isFormOpen) handleCloseForm();
@@ -166,7 +189,6 @@ const InjName = () => {
             {isFormOpen ? <X size={16} strokeWidth={3} /> : <Plus size={16} strokeWidth={3} />}
           </button>
           
-          {/* Search Bar - Flex-1 on mobile */}
           <div className="relative group flex-1 sm:flex-none">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#007BFF] transition-colors" size={13} />
             <input 
@@ -183,13 +205,11 @@ const InjName = () => {
           <button className="w-[32px] h-[32px] sm:w-8 sm:h-8 bg-rose-600 border border-rose-700 rounded flex items-center justify-center text-white hover:bg-rose-700 transition-all shadow-sm shrink-0">
             <Filter size={14} strokeWidth={2.5} />
           </button>
-
         </div>
       </div>
 
       <div className={`flex-1 overflow-hidden p-3 bg-white custom-footer-grid ${gridClasses} flex flex-col gap-3`}>
         
-        {/* RENDER ADD/EDIT FORM */}
         <AddInjectionName 
           isOpen={isFormOpen}
           onClose={handleCloseForm}
@@ -198,7 +218,6 @@ const InjName = () => {
           editingItem={editingItem}
         />
 
-        {/* TOTAL ENTRIES DESIGN - React Strict Compliance */}
         <style dangerouslySetInnerHTML={{ __html: `
           .custom-footer-grid .dx-datagrid-pager {
             border-top: 1px solid #e2e8f0 !important;
@@ -264,6 +283,22 @@ const InjName = () => {
           </DataGrid>
         </div>
       </div>
+
+      {/* ✅ GLOBAL POPUPS MOUNTED HERE */}
+      <ConfirmPopup 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Injection Name"
+        message={`Are you sure you want to delete "${itemToDelete?.injName}"? This action cannot be undone.`}
+      />
+
+      <SuccessPopup
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        type={successType}
+      />
+
     </div>
   );
 };

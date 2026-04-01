@@ -1,23 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { X, PlusCircle, Save } from 'lucide-react';
 
-const RulesAddForm = ({ isOpen, onClose, onAdd, initialValue = '', isEditing = false }) => {
-  const [inputValue, setInputValue] = useState(initialValue);
+const RulesAddForm = ({ isOpen, onClose, onAdd, onUpdate, editingItem }) => {
+  const [inputValue, setInputValue] = useState('');
 
-  // Sync input value when initialValue changes (for editing)
+  // Automatically populate the input field if an item is passed in for editing
+  // Also clear the field if the form is opened for a fresh "Add"
   useEffect(() => {
-    setInputValue(initialValue);
-  }, [initialValue]);
+    if (editingItem) {
+      setInputValue(editingItem.ruleName);
+    } else {
+      setInputValue('');
+    }
+  }, [editingItem, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      onAdd(inputValue.trim());
+      // Route the submission to the correct parent function based on the mode
+      if (editingItem) {
+        onUpdate(inputValue.trim());
+      } else {
+        onAdd(inputValue.trim());
+      }
       setInputValue(''); 
     }
   };
+
+  // Determine if we are in edit mode based on whether an item was passed in
+  const isEditing = !!editingItem;
 
   return (
     <div className="bg-white border-2 border-sky-200 rounded-lg shadow-lg mb-5 animate-in slide-in-from-top-3 fade-in duration-300 overflow-hidden">

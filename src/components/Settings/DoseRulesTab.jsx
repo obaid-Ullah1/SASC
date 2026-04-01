@@ -12,8 +12,20 @@ import { Syringe, Plus, RefreshCw, Pencil, Trash2, Search } from 'lucide-react';
 // Import your custom Light Blue form component
 import DoseAddForm from './AddForm/DoseAddForm';
 
+// Import Global Popups
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
+
 const DoseRulesTab = () => {
+  // Form & Editing State
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  // Global Popup State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successType, setSuccessType] = useState(''); // 'Added', 'Updated', or 'Deleted'
 
   const [scheduleData, setScheduleData] = useState(
     Array.from({ length: 36 }, (_, i) => ({
@@ -28,6 +40,20 @@ const DoseRulesTab = () => {
     }))
   );
 
+  // Safely close form
+  const handleCloseForm = () => {
+    setIsAddFormOpen(false);
+    setEditingItem(null);
+  };
+
+  // Trigger Success Popup
+  const triggerSuccess = (type) => {
+    setSuccessType(type);
+    setIsSuccessOpen(true);
+    setTimeout(() => setIsSuccessOpen(false), 1500);
+  };
+
+  // --- ADD ACTION ---
   const handleAddNewRow = (formData) => {
     const newId = scheduleData.length > 0 ? Math.max(...scheduleData.map(d => d.id)) + 1 : 1;
     
@@ -43,10 +69,42 @@ const DoseRulesTab = () => {
     };
 
     setScheduleData([...scheduleData, newEntry]);
-    setIsAddFormOpen(false);
+    handleCloseForm();
+    triggerSuccess('Added');
   };
 
-  // Cell Renderers - UPDATED FOR PERFECT VERTICAL CENTERING
+  // --- UPDATE ACTION ---
+  const handleUpdateRow = (formData) => {
+    const updatedEntry = {
+      id: editingItem.id, // retain original ID
+      order: parseInt(formData.displayOrder) || editingItem.order,
+      rule: formData.rule,
+      vialDilution: formData.vialDilution,
+      doseMl: formData.doseMl,
+      escalation: formData.escalationMethod === 'Multiply (x)' ? 'Multiply' : formData.escalationMethod,
+      value: formData.finalDoseMl || '—',
+      notes: formData.notes || ''
+    };
+
+    setScheduleData(scheduleData.map(item => item.id === editingItem.id ? updatedEntry : item));
+    handleCloseForm();
+    triggerSuccess('Updated');
+  };
+
+  // --- DELETE ACTIONS ---
+  const handleDeleteClick = (rowData) => {
+    setItemToDelete(rowData);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setScheduleData(prev => prev.filter(item => item.id !== itemToDelete.id));
+    setIsConfirmOpen(false);
+    setItemToDelete(null);
+    triggerSuccess('Deleted');
+  };
+
+  // Cell Renderers
   const dilutionCellRender = (data) => (
     <span className="text-[#FF4D94] font-bold tracking-tight">{data.value}</span>
   );
@@ -59,19 +117,28 @@ const DoseRulesTab = () => {
     </div>
   );
 
-  // REDUCED ICON SIZES (w-6 h-6 and icon size 11)
+  // REDUCED ICON SIZES WIRED TO ACTIONS
   const actionCellRender = (data) => (
     <div className="flex items-center justify-center gap-1.5 h-full">
-      <button className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white transition-all shadow-sm">
+      <button 
+        onClick={() => {
+          setEditingItem(data.data);
+          setIsAddFormOpen(true);
+        }}
+        className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white transition-all shadow-sm active:scale-95"
+      >
         <Pencil size={11} strokeWidth={3} />
       </button>
-      <button className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+      <button 
+        onClick={() => handleDeleteClick(data.data)}
+        className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-95"
+      >
         <Trash2 size={11} strokeWidth={3} />
       </button>
     </div>
   );
 
-  // Styling overrides - PERFECT CENTERING & THIN ROWS
+  // Styling overrides
   const gridClasses = `
     [&_.dx-datagrid-headers]:!bg-[#F1F5F9] 
     [&_.dx-datagrid-headers_td]:!border-b-2
@@ -94,7 +161,7 @@ const DoseRulesTab = () => {
   `;
 
   return (
-    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden">
+    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden relative">
       
       {/* 1. THIN GRADIENT HEADER - RESPONSIVE */}
       <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2 sm:py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0 border-b border-[#bef264]">
@@ -112,12 +179,19 @@ const DoseRulesTab = () => {
           </div>
         </div>
 
-        {/* Controls Section - Wraps on mobile, stretches search bar */}
+        {/* Controls Section */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
           
           <button 
-            onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-            className="bg-[#007BFF] hover:bg-blue-600 w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 shrink-0"
+            onClick={() => {
+              if (isAddFormOpen) {
+                handleCloseForm();
+              } else {
+                setEditingItem(null);
+                setIsAddFormOpen(true);
+              }
+            }}
+            className={`${isAddFormOpen ? 'bg-slate-700 hover:bg-slate-800' : 'bg-[#007BFF] hover:bg-blue-600'} w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 shrink-0`}
           >
             <Plus size={18} strokeWidth={3} className={isAddFormOpen ? "rotate-45 transition-transform" : "transition-transform"} />
           </button>
@@ -144,12 +218,14 @@ const DoseRulesTab = () => {
         {/* INJECTED THE FORM HERE */}
         <DoseAddForm 
           isOpen={isAddFormOpen} 
-          onClose={() => setIsAddFormOpen(false)} 
+          onClose={handleCloseForm} 
           onAdd={handleAddNewRow} 
+          onUpdate={handleUpdateRow}
+          editingItem={editingItem}
         />
         
-        {/* MODIFICATION: TOTAL ENTRIES DESIGN */}
-        <style>{`
+        {/* TOTAL ENTRIES DESIGN */}
+        <style dangerouslySetInnerHTML={{__html: `
           .custom-footer-grid .dx-datagrid-pager {
             border-top: 1px solid #e2e8f0 !important;
             padding: 0 !important;
@@ -168,7 +244,7 @@ const DoseRulesTab = () => {
           .custom-footer-grid .dx-pager {
             padding: 10px 16px !important;
           }
-        `}</style>
+        `}} />
 
         <DataGrid
           dataSource={scheduleData}
@@ -211,7 +287,6 @@ const DoseRulesTab = () => {
             fixedPosition="right" 
           />
 
-          {/* 3. PAGER INTEGRATION */}
           <Paging defaultPageSize={20} />
           <Pager
             visible={true}
@@ -224,6 +299,23 @@ const DoseRulesTab = () => {
         </DataGrid>
       </div>
       
+      {/* ==========================================
+          GLOBAL POPUPS MOUNTED HERE
+      ========================================== */}
+      <ConfirmPopup 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Schedule Row"
+        message={`Are you sure you want to delete row #${itemToDelete?.id}? This action cannot be undone.`}
+      />
+
+      <SuccessPopup
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        type={successType}
+      />
+
     </div>
   );
 };

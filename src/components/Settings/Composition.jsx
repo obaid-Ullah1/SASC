@@ -13,10 +13,12 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
-// 1. Import your custom Add Form component
+// 1. Import your custom components
 import CompositionAdd from './AddForm/CompositionAdd';
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
-// --- INITIAL DATA DICTIONARY ---
+// --- DATA DICTIONARY ---
 const initialAuthenticMixData = {
   "TREE MIX 1": [
     { ingredient: "Acacia", scientific: "Acacia Dealbata" }, { ingredient: "Alder, Red", scientific: "Alder Rubra" },
@@ -72,28 +74,19 @@ const initialAuthenticMixData = {
   "Test1": [ { ingredient: "SAG1-01/26/A", scientific: "" }, { ingredient: "SAG1-01/26/B", scientific: "" } ]
 };
 
-// Modified to accept a dynamic dataStore
-const getIngredients = (mixName, count, dataStore) => {
-  const currentMix = dataStore[mixName];
-  if (currentMix && currentMix.length > 0) {
-    return currentMix.map((item, i) => ({
-      id: i + 1,
-      ingredient: item.ingredient,
-      scientific: item.scientific,
-      percentage: Number((100 / currentMix.length).toFixed(2)),
-    }));
-  }
-  return Array.from({ length: count }, (_, i) => ({
+const getIngredients = (mixName, dataStore) => {
+  const currentMix = dataStore[mixName] || [];
+  return currentMix.map((item, i) => ({
     id: i + 1,
-    ingredient: `Generic Ingredient ${i + 1}`,
-    scientific: `Generic Scientific ${i + 1}`,
-    percentage: count > 0 ? Number((100 / count).toFixed(2)) : 0,
+    ingredient: item.ingredient,
+    scientific: item.scientific,
+    percentage: Number((100 / currentMix.length).toFixed(2)),
   }));
 };
 
 
 // ==============================================================================
-// 🌟 STATIC RENDERERS (Prevents React infinite loops)
+// 🌟 STATIC RENDERERS
 // ==============================================================================
 
 const renderMasterRow = (cell) => {
@@ -129,26 +122,14 @@ const renderDetailPercentage = (cell) => (
     {Math.round(cell.value || 0)}
   </div>
 );
-const renderDetailAction = () => (
-  <div className="flex gap-2 justify-center">
-    <button className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm">
-      <Edit2 size={14} strokeWidth={2.5} />
-    </button>
-    <button className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 shadow-sm">
-      <Trash2 size={14} strokeWidth={2.5} />
-    </button>
-  </div>
-);
 
 
 // ==============================================================================
-// INNER GRID COMPONENT (With its own Headers Forced ON)
+// INNER GRID COMPONENT
 // ==============================================================================
-const DetailTemplate = React.memo(({ detailProps, mixDataStore }) => {
-  const mix = detailProps.data;
-  
-  // Memoize data to recalculate immediately when an item is added
-  const detailData = useMemo(() => getIngredients(mix.injName, mix.itemsCount, mixDataStore), [mix.injName, mix.itemsCount, mixDataStore]);
+const DetailTemplate = React.memo(({ detailProps, mixDataStore, onEdit, onDelete }) => {
+  const mixName = detailProps.data.injName;
+  const detailData = useMemo(() => getIngredients(mixName, mixDataStore), [mixName, mixDataStore]);
 
   return (
     <div className="px-6 py-3 bg-[#F8FAFC]">
@@ -157,7 +138,7 @@ const DetailTemplate = React.memo(({ detailProps, mixDataStore }) => {
           dataSource={detailData}
           keyExpr="id"
           showBorders={false}
-          showColumnHeaders={true} /* CRITICAL FIX: Forces inner headers to show */
+          showColumnHeaders={true}
           showColumnLines={true}
           showRowLines={true}
           rowAlternationEnabled={true}
@@ -165,19 +146,35 @@ const DetailTemplate = React.memo(({ detailProps, mixDataStore }) => {
           columnAutoWidth={true}
           className="internal-grid"
         >
-          {/* THESE COLUMNS SHOW HEADERS INDIVIDUALLY FOR EACH DROPDOWN */}
           <Column dataField="id" caption="#" width={70} alignment="center" cellRender={renderDetailId} />
           <Column dataField="ingredient" caption="INGREDIENT" cellRender={renderDetailIngredient} />
           <Column dataField="scientific" caption="SCIENTIFIC NAME" cellRender={renderDetailScientific} />
           <Column dataField="percentage" caption="%" width={100} alignment="center" cellRender={renderDetailPercentage} />
-          <Column caption="ACTIONS" width={120} alignment="center" cellRender={renderDetailAction} />
+          
+          <Column 
+            caption="ACTIONS" 
+            width={120} 
+            alignment="center" 
+            cellRender={(cell) => (
+              <div className="flex gap-2 justify-center">
+                <button 
+                  onClick={() => onEdit(cell.data, mixName)}
+                  className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm"
+                >
+                  <Edit2 size={14} strokeWidth={2.5} />
+                </button>
+                <button 
+                  onClick={() => onDelete(cell.data, mixName)}
+                  className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 shadow-sm"
+                >
+                  <Trash2 size={14} strokeWidth={2.5} />
+                </button>
+              </div>
+            )} 
+          />
           
           <Summary>
-            <TotalItem 
-              column="percentage" 
-              summaryType="sum" 
-              displayFormat="Total: {0}%" 
-            />
+            <TotalItem column="percentage" summaryType="sum" displayFormat="Total: {0}%" />
           </Summary>
         </DataGrid>
       </div>
@@ -192,8 +189,15 @@ const DetailTemplate = React.memo(({ detailProps, mixDataStore }) => {
 const Composition = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
-  // Application State for Data (Allows live updating)
+  // Global Popup State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successType, setSuccessType] = useState('');
+
+  // Live Data State
   const [mixData, setMixData] = useState(initialAuthenticMixData);
   const [mixDefinitions, setMixDefinitions] = useState([
     { injName: "TREE MIX 1", itemsCount: 10, isVerified: true, isApproved: true },
@@ -224,34 +228,65 @@ const Composition = () => {
     { injName: "SAG1-01/26/D", itemsCount: 3, isVerified: false, isApproved: false }
   ]);
 
-  // Handle Adding New Data from the CompositionAdd component
-  const handleAddData = useCallback((data) => {
-    const { injection, category } = data; // Assumes your CompositionAdd emits an object: { injection: '...', category: '...' }
-    if (!injection || !category) return;
+  // --- HELPERS ---
+  const handleCloseForm = () => {
+    setIsAddFormVisible(false);
+    setEditingItem(null);
+  };
 
-    // 1. Add ingredient to the specific mix
+  const triggerSuccess = (type) => {
+    setSuccessType(type);
+    setIsSuccessOpen(true);
+    setTimeout(() => setIsSuccessOpen(false), 1500);
+  };
+
+  // --- CRUD ACTIONS ---
+  const handleAddData = useCallback((data) => {
+    const { injection, category } = data;
     setMixData(prev => {
       const currentList = prev[category] || [];
-      return {
-        ...prev,
-        [category]: [...currentList, { ingredient: injection, scientific: "—", percentage: 0 }] // Percentage recalculates automatically
-      };
+      return { ...prev, [category]: [...currentList, { ingredient: injection, scientific: "—" }] };
     });
-
-    // 2. Update the master definition count
-    setMixDefinitions(prev => {
-      const exists = prev.find(m => m.injName === category);
-      if (exists) {
-        return prev.map(m => m.injName === category ? { ...m, itemsCount: m.itemsCount + 1 } : m);
-      } else {
-        return [{ injName: category, itemsCount: 1, isVerified: false, isApproved: false }, ...prev];
-      }
-    });
-
-    setIsAddFormVisible(false); // Close form on success
+    setMixDefinitions(prev => prev.map(m => m.injName === category ? { ...m, itemsCount: m.itemsCount + 1 } : m));
+    handleCloseForm();
+    triggerSuccess('Added');
   }, []);
 
+  const handleUpdateData = useCallback((formData) => {
+    const { injection, category } = formData;
+    setMixData(prev => {
+      const list = prev[editingItem.mixName] || [];
+      const updatedList = list.map((item, idx) => idx === editingItem.data.id - 1 ? { ...item, ingredient: injection } : item);
+      return { ...prev, [editingItem.mixName]: updatedList };
+    });
+    handleCloseForm();
+    triggerSuccess('Updated');
+  }, [editingItem]);
 
+  const handleEditClick = useCallback((rowData, mixName) => {
+    setEditingItem({ data: rowData, mixName });
+    setIsAddFormVisible(true);
+  }, []);
+
+  const handleDeleteClick = useCallback((rowData, mixName) => {
+    setItemToDelete({ data: rowData, mixName });
+    setIsConfirmOpen(true);
+  }, []);
+
+  const handleConfirmDelete = () => {
+    const { data, mixName } = itemToDelete;
+    setMixData(prev => {
+      const list = prev[mixName] || [];
+      const newList = list.filter((_, idx) => idx !== data.id - 1);
+      return { ...prev, [mixName]: newList };
+    });
+    setMixDefinitions(prev => prev.map(m => m.injName === mixName ? { ...m, itemsCount: m.itemsCount - 1 } : m));
+    setIsConfirmOpen(false);
+    setItemToDelete(null);
+    triggerSuccess('Deleted');
+  };
+
+  // --- SEARCH & EXPANSION ---
   const filteredMixes = useMemo(() => {
     return mixDefinitions.filter(mix => mix.injName.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, mixDefinitions]);
@@ -259,71 +294,52 @@ const Composition = () => {
   const handleRowClick = useCallback((e) => {
     if (e.rowType === 'data') {
       const isExpanded = e.component.isRowExpanded(e.key);
-      if (isExpanded) {
-        e.component.collapseRow(e.key);
-      } else {
-        e.component.expandRow(e.key);
-      }
+      if (isExpanded) e.component.collapseRow(e.key);
+      else e.component.expandRow(e.key);
     }
   }, []);
 
-
-  // --- EXPORT LOGIC (Updated to pull from live state + PDF Borders/Colors) ---
+  // --- EXPORT LOGIC ---
   const handleExportPdf = () => {
     const doc = new jsPDF();
     let finalY = 30;
     doc.setFontSize(16).setFont("helvetica", "bold").text("Sierra Allergy & Immunology", 14, 15);
-    doc.setFontSize(12).setFont("helvetica", "normal").text("Allergy Injection Composition Summary", 14, 22);
-
     filteredMixes.forEach((mix) => {
-      const ingredients = getIngredients(mix.injName, mix.itemsCount, mixData);
-      if (finalY > 250) { doc.addPage(); finalY = 20; }
+      const ingredients = getIngredients(mix.injName, mixData);
+      if (finalY > 240) { doc.addPage(); finalY = 20; }
       doc.setFontSize(12).setFont("helvetica", "bold").text(`${mix.injName} (${mix.itemsCount} items)`, 14, finalY + 10);
-      
       autoTable(doc, {
         startY: finalY + 14,
         head: [["#", "Ingredient", "Scientific Name", "%"]],
         body: ingredients.map(ing => [ing.id.toString(), ing.ingredient, ing.scientific, ing.percentage]),
-        theme: "grid", // <-- CHANGED: Uses grid theme for borders
-        styles: { 
-          fontSize: 10, 
-          cellPadding: 3, 
-          lineColor: [210, 214, 220], // Slate border color
-          lineWidth: 0.1 
-        },
-        headStyles: { 
-          fillColor: [0, 163, 255], // <-- CHANGED: Brand Blue Background
-          textColor: [255, 255, 255], // White text
-          fontStyle: "bold" 
-        },
+        theme: "grid",
+        headStyles: { fillColor: [0, 163, 255] },
       });
       finalY = doc.lastAutoTable.finalY + 10;
     });
-    doc.save("Injection_Composition_Summary.pdf");
+    doc.save("Injection_Composition.pdf");
   };
 
   const handleExportExcel = () => {
     const wb = XLSX.utils.book_new();
-    const wsData = [["Sierra Allergy & Immunology"], ["Allergy Injection Composition Summary"], []];
+    const wsData = [["Sierra Allergy & Immunology"], []];
     filteredMixes.forEach((mix) => {
-      const ingredients = getIngredients(mix.injName, mix.itemsCount, mixData);
+      const ingredients = getIngredients(mix.injName, mixData);
       wsData.push([`${mix.injName} (${mix.itemsCount} items)`]);
       wsData.push(["#", "Ingredient", "Scientific Name", "%"]);
       ingredients.forEach(ing => wsData.push([ing.id, ing.ingredient, ing.scientific, ing.percentage]));
-      wsData.push(["", "", "Total:", "100.00%"]);
       wsData.push([]); 
     });
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws["!cols"] = [{ wch: 5 }, { wch: 30 }, { wch: 40 }, { wch: 10 }];
     XLSX.utils.book_append_sheet(wb, ws, "Compositions");
-    XLSX.writeFile(wb, "Injection_Composition_Summary.xlsx");
+    XLSX.writeFile(wb, "Injection_Composition.xlsx");
   };
 
 
   return (
-    <div className="h-full w-full flex flex-col bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 overflow-hidden">
+    <div className="h-full w-full flex flex-col bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden relative">
       
-      {/* HEADER SECTION - UPDATED TO PROVIDED CODE */}
+      {/* HEADER */}
       <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2.5 flex items-center justify-between shrink-0 border-b border-[#bef264]">
         <div className="flex items-center gap-2">
           <List size={18} className="text-[#2A333A]" />
@@ -331,11 +347,9 @@ const Composition = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Toggle Add Form Button */}
           <button 
-            onClick={() => setIsAddFormVisible(!isAddFormVisible)}
-            className={`${isAddFormVisible ? 'bg-rose-500 hover:bg-rose-600' : 'bg-[#007BFF] hover:bg-[#0056b3]'} w-7 h-7 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95`}
-            title={isAddFormVisible ? "Close Form" : "Add New Mix"}
+            onClick={() => { if(isAddFormVisible) handleCloseForm(); else setIsAddFormVisible(true); }}
+            className={`${isAddFormVisible ? 'bg-rose-500' : 'bg-[#007BFF]'} w-7 h-7 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95`}
           >
             {isAddFormVisible ? <X size={16} strokeWidth={3} /> : <Plus size={16} strokeWidth={3} />}
           </button>
@@ -343,54 +357,41 @@ const Composition = () => {
           <div className="relative group">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#007BFF] transition-colors" size={13} />
             <input 
-              type="text" 
-              placeholder="Search..." 
-              value={searchTerm}
+              type="text" placeholder="Search..." value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-white/60 rounded-md pl-8 pr-3 py-1 text-[12px] w-40 outline-none focus:border-[#007BFF] focus:ring-2 focus:ring-blue-100 transition-all bg-white/90"
+              className="border border-white/60 rounded-md pl-8 pr-3 py-1 text-[12px] w-40 outline-none focus:border-[#007BFF] bg-white/90"
             />
           </div>
 
-          <div className="w-px h-5 bg-black/10 mx-0.5"></div>
-
-          {/* Export to Excel */}
-          <button onClick={handleExportExcel} className="w-7 h-7 bg-[#16A34A] border border-[#15803D] rounded flex items-center justify-center text-white hover:bg-[#15803D] transition-all shadow-sm" title="Export to Excel">
+          <button onClick={handleExportExcel} className="w-7 h-7 bg-[#16A34A] border border-[#15803D] rounded flex items-center justify-center text-white hover:bg-[#15803D] shadow-sm">
             <FileSpreadsheet size={13} strokeWidth={2.5} />
           </button>
-          
-          {/* Export to PDF */}
-          <button onClick={handleExportPdf} className="w-7 h-7 bg-[#DC2626] border border-[#B91C1C] rounded flex items-center justify-center text-white hover:bg-[#B91C1C] transition-all shadow-sm" title="Export to PDF">
+          <button onClick={handleExportPdf} className="w-7 h-7 bg-[#DC2626] border border-[#B91C1C] rounded flex items-center justify-center text-white hover:bg-[#B91C1C] shadow-sm">
             <FileText size={13} strokeWidth={2.5} />
           </button>
         </div>
       </div>
 
-      {/* RENDER THE EXTERNAL ADD FORM WHEN "+" IS CLICKED */}
+      {/* ADD/EDIT FORM */}
       {isAddFormVisible && (
         <div className="border-b border-slate-200 bg-slate-50 relative z-10">
-           {/* Make sure your CompositionAdd component calls the 'onAdd' prop 
-             with an object like: { injection: "Acacia", category: "TREE MIX 1" } 
-           */}
            <CompositionAdd 
-              onClose={() => setIsAddFormVisible(false)} 
+              onClose={handleCloseForm} 
               onAdd={handleAddData} 
+              onUpdate={handleUpdateData}
+              editingItem={editingItem}
            />
         </div>
       )}
 
-      {/* DEVEXTREME CSS OVERRIDES */}
+      {/* DEVEXTREME CSS */}
       <style>{`
-        /* OUTER MASTER GRID CSS */
-        .master-grid .dx-datagrid-headers { display: none !important; } /* HIDES ONLY MASTER HEADERS */
-        .master-grid .dx-data-row { cursor: pointer; transition: all 0.2s; }
-        .master-grid .dx-data-row > td { padding: 4px 8px !important; border: none !important; vertical-align: middle !important; background-color: transparent !important; }
-        .master-grid .dx-master-detail-row > td { padding: 0 !important; border: none !important; background-color: transparent !important;}
-        
-        /* INNER DETAIL GRID CSS (Headers forced ON for dropdowns) */
-        .internal-grid .dx-datagrid-headers { display: block !important; background-color: #F8FAFC !important; border-bottom: 1px solid #E2E8F0 !important; }
-        .internal-grid .dx-header-row > td { padding: 12px 14px !important; font-size: 11px !important; font-weight: 700 !important; color: #64748B !important; text-transform: uppercase !important; border-right: 1px solid #E2E8F0 !important; }
-        .internal-grid .dx-data-row > td { padding: 6px 14px !important; vertical-align: middle !important; border-right: 1px solid #E2E8F0 !important; border-bottom: 1px solid #E2E8F0 !important; }
-        .internal-grid .dx-header-row > td:last-child, .internal-grid .dx-data-row > td:last-child { border-right: none !important; }
+        .master-grid .dx-datagrid-headers { display: none !important; }
+        .master-grid .dx-data-row { cursor: pointer; }
+        .master-grid .dx-data-row > td { padding: 4px 8px !important; border: none !important; }
+        .internal-grid .dx-datagrid-headers { display: block !important; background-color: #F8FAFC !important; }
+        .internal-grid .dx-header-row > td { padding: 10px 14px !important; font-size: 11px !important; font-weight: 700 !important; color: #64748B !important; text-transform: uppercase !important; border-right: 1px solid #E2E8F0 !important; }
+        .internal-grid .dx-data-row > td { padding: 6px 14px !important; border-right: 1px solid #E2E8F0 !important; border-bottom: 1px solid #E2E8F0 !important; }
         .internal-grid .dx-datagrid-summary-item { font-size: 13px !important; font-weight: bold !important; color: #16A34A !important; }
       `}</style>
 
@@ -400,7 +401,7 @@ const Composition = () => {
           dataSource={filteredMixes}
           keyExpr="injName"
           showBorders={false}
-          showColumnHeaders={false} // Hides outer master headers ONLY
+          showColumnHeaders={false}
           columnAutoWidth={true}
           height="100%"
           width="100%"
@@ -408,22 +409,37 @@ const Composition = () => {
           onRowClick={handleRowClick}
         >
           <Scrolling mode="standard" showScrollbar="always" />
-          
           <MasterDetail
             enabled={true}
-            // Passing the live 'mixData' state down to the template securely
-            render={(detailProps) => <DetailTemplate detailProps={detailProps} mixDataStore={mixData} />} 
+            render={(props) => (
+              <DetailTemplate 
+                detailProps={props} 
+                mixDataStore={mixData} 
+                onEdit={handleEditClick}
+                onDelete={handleDeleteClick}
+              />
+            )} 
           />
-
-          <Column 
-            dataField="injName" 
-            cellRender={renderMasterRow} 
-          />
-
+          <Column dataField="injName" cellRender={renderMasterRow} />
           <Paging defaultPageSize={50} />
-          <Pager visible={true} showPageSizeSelector={true} allowedPageSizes={[50, 100]} showInfo={true} showNavigationButtons={true} />
+          <Pager visible={true} showPageSizeSelector={true} allowedPageSizes={[50, 100]} showInfo={true} />
         </DataGrid>
       </div>
+
+      {/* GLOBAL POPUPS */}
+      <ConfirmPopup 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Remove Ingredient"
+        message={`Remove "${itemToDelete?.data?.ingredient}" from "${itemToDelete?.mixName}"?`}
+      />
+
+      <SuccessPopup
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        type={successType}
+      />
 
     </div>
   );

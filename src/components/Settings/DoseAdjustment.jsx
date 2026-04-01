@@ -13,20 +13,31 @@ import DataGrid, {
   TotalItem,
   Editing,
   Lookup,
-  LoadPanel // ✅ ADDED THIS IMPORT TO FIX THE CRASH
+  LoadPanel 
 } from 'devextreme-react/data-grid';
 import { Settings2, Plus, RefreshCw, Pencil, Trash2, Search } from 'lucide-react';
 
-// Import the new form component
+// Import the form component
 import AdjustmentAddForm from './AddForm/AdjustmentAddForm';
+
+// ✅ IMPORT GLOBAL POPUPS
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
 const DoseAdjustment = () => {
   // Navigation / Pagination state
   const [pageSize, setPageSize] = useState(20);
   const [pageIndex, setPageIndex] = useState(0);
 
-  // Form visibility state
+  // Form visibility & Editing state
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  // ✅ GLOBAL POPUP STATES
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successType, setSuccessType] = useState(''); // 'Added', 'Updated', or 'Deleted'
 
   // Stateful data
   const [adjustmentData, setAdjustmentData] = useState([
@@ -47,10 +58,7 @@ const DoseAdjustment = () => {
     { id: 2009, allergyType: 'Allergy', planType: 'Change Frequency', sortOrder: 15 },
   ]);
 
-  // Dynamic Footer Calculations
   const totalCount = adjustmentData.length;
-  const startEntry = totalCount === 0 ? 0 : (pageIndex * pageSize) + 1;
-  const endEntry = Math.min((pageIndex + 1) * pageSize, totalCount);
 
   // Compute the next automatic Sort Order
   const nextSortOrder = adjustmentData.length > 0 
@@ -63,28 +71,73 @@ const DoseAdjustment = () => {
     if (e.name === 'paging.pageIndex') setPageIndex(e.value);
   };
 
-  // Add new row function
+  // Close Form helper
+  const handleCloseForm = () => {
+    setIsAddFormOpen(false);
+    setEditingItem(null);
+  };
+
+  // Trigger Success Popup helper
+  const triggerSuccess = (type) => {
+    setSuccessType(type);
+    setIsSuccessOpen(true);
+    setTimeout(() => setIsSuccessOpen(false), 1500);
+  };
+
+  // --- ADD ACTION ---
   const handleAddNewRow = (formData) => {
     const newId = adjustmentData.length > 0 ? Math.max(...adjustmentData.map(d => d.id)) + 1 : 1;
-    
     const newEntry = {
       id: newId,
       allergyType: formData.type,
       planType: formData.plan,
       sortOrder: parseInt(formData.sortOrder) || nextSortOrder
     };
-
     setAdjustmentData([...adjustmentData, newEntry]);
-    setIsAddFormOpen(false);
+    handleCloseForm();
+    triggerSuccess('Added');
+  };
+
+  // --- UPDATE ACTION ---
+  const handleUpdateRow = (formData) => {
+    setAdjustmentData(adjustmentData.map(item => 
+      item.id === editingItem.id 
+        ? { ...item, allergyType: formData.type, planType: formData.plan, sortOrder: parseInt(formData.sortOrder) } 
+        : item
+    ));
+    handleCloseForm();
+    triggerSuccess('Updated');
+  };
+
+  // --- DELETE ACTIONS ---
+  const handleDeleteClick = (rowData) => {
+    setItemToDelete(rowData);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setAdjustmentData(prev => prev.filter(item => item.id !== itemToDelete.id));
+    setIsConfirmOpen(false);
+    setItemToDelete(null);
+    triggerSuccess('Deleted');
   };
 
   // Action Buttons Renderer
   const actionCellRender = (data) => (
     <div className="flex items-center justify-center gap-1.5 h-full">
-      <button className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white transition-all shadow-sm">
+      <button 
+        onClick={() => {
+          setEditingItem(data.data);
+          setIsAddFormOpen(true);
+        }}
+        className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white transition-all shadow-sm active:scale-95"
+      >
         <Pencil size={11} strokeWidth={3} />
       </button>
-      <button className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+      <button 
+        onClick={() => handleDeleteClick(data.data)}
+        className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-95"
+      >
         <Trash2 size={11} strokeWidth={3} />
       </button>
     </div>
@@ -99,12 +152,9 @@ const DoseAdjustment = () => {
     [&_.dx-datagrid-text-content]:!font-bold
     [&_.dx-datagrid-text-content]:!text-[12px]
     [&_.dx-row-alt>td]:!bg-[#F8FAFC]
-    
-    /* THIN ROWS EXACTLY LIKE DOSE RULES TAB */
     [&_.dx-data-row>td]:!py-1
     [&_.dx-data-row>td]:!align-middle
     [&_.dx-data-row]:!h-[32px]
-    
     [&_.dx-data-row>td]:!text-slate-700
     [&_.dx-data-row>td]:!text-[12px]
     [&_.dx-data-row>td]:!font-medium
@@ -112,12 +162,10 @@ const DoseAdjustment = () => {
   `;
 
   return (
-    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden">
+    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden relative">
       
-      {/* THIN GRADIENT HEADER - Responsive Stack & Flex */}
+      {/* THIN GRADIENT HEADER */}
       <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2 sm:py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0 border-b border-[#bef264]">
-        
-        {/* Title Section */}
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="bg-white/40 p-1 rounded-md shadow-sm shrink-0">
             <Settings2 size={18} className="text-[#2A333A]" />
@@ -130,11 +178,16 @@ const DoseAdjustment = () => {
           </div>
         </div>
 
-        {/* Controls Section */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
           <button 
-            onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-            className="bg-[#007BFF] hover:bg-blue-600 w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 shrink-0"
+            onClick={() => {
+              if (isAddFormOpen) handleCloseForm();
+              else {
+                setEditingItem(null);
+                setIsAddFormOpen(true);
+              }
+            }}
+            className={`${isAddFormOpen ? 'bg-slate-700 hover:bg-slate-800' : 'bg-[#007BFF] hover:bg-blue-600'} w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 shrink-0`}
           >
             <Plus size={18} strokeWidth={3} className={isAddFormOpen ? "rotate-45 transition-transform" : "transition-transform"} />
           </button>
@@ -157,15 +210,15 @@ const DoseAdjustment = () => {
       {/* DATAGRID CONTENT */}
       <div className={`flex-1 overflow-hidden p-3 bg-white custom-footer-grid ${gridClasses}`}>
         
-        {/* INJECTED FORM */}
         <AdjustmentAddForm 
           isOpen={isAddFormOpen} 
-          onClose={() => setIsAddFormOpen(false)} 
+          onClose={handleCloseForm} 
           onAdd={handleAddNewRow}
+          onUpdate={handleUpdateRow}
+          editingItem={editingItem}
           nextSortOrder={nextSortOrder}
         />
 
-        {/* ✅ FIXED CSS INJECTION: Uses dangerouslySetInnerHTML to fix the jsx/global warnings */}
         <style dangerouslySetInnerHTML={{ __html: `
           .custom-footer-grid .dx-datagrid-pager {
             border-top: 1px solid #e2e8f0 !important;
@@ -227,6 +280,21 @@ const DoseAdjustment = () => {
           />
         </DataGrid>
       </div>
+
+      {/* ✅ GLOBAL POPUPS MOUNTED HERE */}
+      <ConfirmPopup 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Plan"
+        message={`Are you sure you want to delete "${itemToDelete?.planType}"? This action cannot be undone.`}
+      />
+
+      <SuccessPopup
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        type={successType}
+      />
       
     </div>
   );

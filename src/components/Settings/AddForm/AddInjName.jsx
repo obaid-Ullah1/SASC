@@ -1,20 +1,41 @@
-import React, { useState } from 'react';
-import { X, PlusCircle, Save, Tag, Code } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, PlusCircle, Save, Tag, Code, Pencil } from 'lucide-react';
 
-const AddInjName = ({ isOpen, onClose, onAdd }) => {
+const AddInjName = ({ isOpen, onClose, onAdd, onUpdate, editingItem }) => {
   const [formData, setFormData] = useState({
     typeName: '',
     code: '',
     isCat: true
   });
 
+  const isEditing = !!editingItem;
+
+  // Sync form state when editingItem changes or form opens
+  useEffect(() => {
+    if (isOpen) {
+      if (editingItem) {
+        setFormData({
+          typeName: editingItem.typeName || '',
+          code: editingItem.code || '',
+          isCat: editingItem.isCat ?? true
+        });
+      } else {
+        // Reset for a fresh Add
+        setFormData({ typeName: '', code: '', isCat: true });
+      }
+    }
+  }, [editingItem, isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.typeName.trim() && formData.code.trim()) {
-      onAdd(formData);
-      setFormData({ typeName: '', code: '', isCat: true });
+      if (isEditing) {
+        onUpdate(formData);
+      } else {
+        onAdd(formData);
+      }
     }
   };
 
@@ -25,10 +46,14 @@ const AddInjName = ({ isOpen, onClose, onAdd }) => {
       <div className="bg-gradient-to-r from-[#e0f2fe] to-[#f0f9ff] px-5 py-2.5 flex items-center justify-between border-b border-sky-200">
         <div className="flex items-center gap-2.5">
           <div className="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center border border-sky-100">
-            <PlusCircle size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            {isEditing ? (
+              <Pencil size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            ) : (
+              <PlusCircle size={16} className="text-[#00A3FF]" strokeWidth={2.5} />
+            )}
           </div>
           <h3 className="font-bold text-sky-900 text-[13px] tracking-wide uppercase leading-tight">
-            Create New Injection Type
+            {isEditing ? 'Update Injection Type' : 'Create New Injection Type'}
           </h3>
         </div>
         <button 
@@ -87,12 +112,12 @@ const AddInjName = ({ isOpen, onClose, onAdd }) => {
             </label>
           </div>
 
-          {/* FIXED SAVE BUTTON: Removed flex-1, added fixed width */}
+          {/* SAVE BUTTON */}
           <button
             type="submit"
             className="bg-[#00A3FF] hover:bg-[#008CE6] text-white h-[40px] w-40 rounded-lg text-[12px] font-black uppercase tracking-wider shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 shrink-0"
           >
-            <Save size={14} strokeWidth={3} /> Save Type
+            <Save size={14} strokeWidth={3} /> {isEditing ? 'Update Type' : 'Save Type'}
           </button>
 
         </div>

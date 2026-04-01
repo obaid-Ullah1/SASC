@@ -57,10 +57,10 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
   return (
     <div className="w-full shrink-0 animate-in fade-in slide-in-from-top-4 duration-300 z-10">
       
-      <div className="bg-white w-full rounded-xl shadow-md border border-slate-200 overflow-hidden relative flex flex-col">
+      {/* ADDED: max-h-[90vh] to keep it on screen, flex-col to enable scrolling middle */}
+      <div className="bg-white w-full max-h-[90vh] rounded-xl shadow-md border border-slate-200 overflow-hidden relative flex flex-col">
         
-        {/* --- HEADER --- */}
-        {/* Adjusted padding for mobile (px-4 sm:px-5) */}
+        {/* --- HEADER (Fixed at top) --- */}
         <div className="bg-[#00A3FF] px-4 sm:px-5 py-3 sm:py-3.5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 text-white">
             <CalendarCheck size={20} strokeWidth={2.5} />
@@ -76,9 +76,9 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
           </button>
         </div>
 
-        {/* --- FORM BODY --- */}
-        {/* Adjusted padding and gap for mobile */}
-        <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
+        {/* --- FORM BODY (Scrollable) --- */}
+        {/* ADDED: flex-1 overflow-y-auto to allow scrolling on small phones */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 bg-white">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 pb-2 border-b border-slate-200">
             <div className="flex items-center gap-2 text-slate-800">
@@ -88,7 +88,7 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
             <span className="text-[11px] sm:text-xs text-slate-400 font-medium">All fields are required unless noted</span>
           </div>
 
-          {/* Form Grid: 1 col on mobile, 2 on tablet, 12 on desktop */}
+          {/* Form Grid: Perfectly responsive via grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-5 gap-y-4 sm:gap-y-6">
             
             {/* ROW 1 */}
@@ -208,18 +208,20 @@ const AddAppointment = ({ isOpen, onClose, editData }) => {
               </label>
             </div>
           </div>
-
-          <div className="flex justify-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100">
-            <button 
-              onClick={handleSave}
-              className="w-full sm:w-auto bg-[#00A3FF] hover:opacity-90 text-white font-bold text-sm px-10 py-2.5 rounded-full shadow-md shadow-[#00A3FF]/30 flex items-center justify-center gap-2 transition-all active:scale-95"
-            >
-              <Save size={16} strokeWidth={2.5} />
-              Save
-            </button>
-          </div>
-
         </div>
+
+        {/* --- FOOTER (Fixed at bottom) --- */}
+        {/* ADDED: shrink-0 to prevent it from collapsing out of view */}
+        <div className="shrink-0 p-4 sm:px-6 sm:py-5 border-t border-slate-100 bg-white flex justify-center sm:justify-end mt-auto">
+          <button 
+            onClick={handleSave}
+            className="w-full sm:w-auto bg-[#00A3FF] hover:opacity-90 text-white font-bold text-sm px-10 py-2.5 rounded-full shadow-md shadow-[#00A3FF]/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+          >
+            <Save size={16} strokeWidth={2.5} />
+            Save
+          </button>
+        </div>
+
       </div>
 
       <SuccessPopup 

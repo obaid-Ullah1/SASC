@@ -15,7 +15,7 @@ import DataGrid, {
   Lookup
 } from 'devextreme-react/data-grid';
 import { 
-  Plus, RefreshCw, Filter, User, Pill, X, Droplet, Layers, IdCard, XCircle
+  Plus, RefreshCw, Filter, User, Pill, X, Droplet, Layers, IdCard, XCircle, Link
 } from 'lucide-react';
 
 // ✅ IMPORT THE BARCODE DETAILS MODAL
@@ -24,17 +24,20 @@ import InjCourseBarcode from '../Injection/AddForms/InjCourseBarcode';
 // ✅ IMPORT THE TREATMENT LIST FORM
 import TreatmentListForm from '../Injection/AddForms/TreatmentListForm';
 
+// ✅ IMPORT THE NEW INJECTION CHART SHELL
+import  InjectionChart from '../Injection/AddForms/InjectionChart';
+
 // ==========================================
 // MODAL 1: Patient Injections List
 // ==========================================
-const PatientInjectionsModal = ({ isOpen, onClose, patient, onInjectionClick }) => {
+const PatientInjectionsModal = ({ isOpen, onClose, patient, onInjectionClick, onPatientNameClick }) => {
   if (!isOpen || !patient) return null;
 
   // Mock data for the injections list
   const injections = [
-    { id: 1, name: "AIT MIX 1-11/25-01", qty: 7.75, unit: 30 },
-    { id: 2, name: "AIT MIX 2-11/25-01", qty: 7.75, unit: 30 },
-    { id: 3, name: "AIT MIX 4-11/25-01", qty: 7.75, unit: 30 },
+    { id: 1, name: "AIT MIX 1", qty: 7.75, unit: 30 },
+    { id: 2, name: "AIT MIX 2", qty: 7.75, unit: 30 },
+    { id: 3, name: "AIT MIX 4", qty: 7.75, unit: 30 },
   ];
 
   const totalQty = injections.reduce((acc, curr) => acc + curr.qty, 0).toFixed(2);
@@ -46,15 +49,18 @@ const PatientInjectionsModal = ({ isOpen, onClose, patient, onInjectionClick }) 
         
         <div className="bg-[#1877F2] text-white px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-[16px] tracking-wide">
-            <Pill size={18} strokeWidth={2.5} className="-rotate-45" /> Patient Injections
+            {/* Updated icon to match the link icon in your screenshot */}
+            <Link size={18} strokeWidth={2.5} className="rotate-45" /> Patient Injections
           </div>
           <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
             <X size={20} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {/* Added overflow-x-auto for mobile responsiveness */}
+        <div className="overflow-x-auto bg-white">
+          {/* min-w-[700px] ensures the table doesn't squish on small phones, it will scroll instead */}
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-[#F8FAFC] border-b border-slate-200 text-[12px] font-bold text-slate-500">
                 <th className="py-3 px-4 w-12 text-center">#</th>
@@ -68,39 +74,47 @@ const PatientInjectionsModal = ({ isOpen, onClose, patient, onInjectionClick }) 
             <tbody className="text-[13px]">
               {injections.map((inj, index) => (
                 <tr key={inj.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 text-center text-slate-600">{index + 1}</td>
+                  <td className="py-3.5 px-4 text-center font-semibold text-slate-500">{index + 1}</td>
                   
-                  <td className="py-3 px-4 border-l border-slate-100">
-                    <div className="flex items-center gap-2 font-bold text-slate-700">
-                      <IdCard size={14} className="text-[#1877F2]" /> {patient.patientNo}
+                  {/* EXACT MATCH to Screenshot: Blue icon, Dark text */}
+                  <td className="py-3.5 px-4 border-l border-slate-100">
+                    <div className="flex items-center gap-2 font-bold text-slate-800">
+                      <IdCard size={16} className="text-[#1877F2]" /> {patient.patientNo}
                     </div>
                   </td>
                   
-                  <td className="py-3 px-4 border-l border-slate-100">
-                    <div className="flex items-center gap-2 font-bold text-slate-700">
-                      <User size={14} className="text-emerald-600" strokeWidth={3} /> {patient.fullName}
-                    </div>
-                  </td>
-                  
-                  <td className="py-3 px-4 border-l border-slate-100">
-                    {/* CLICKABLE INJECTION BADGE */}
+                  {/* EXACT MATCH to Screenshot: Green icon, Dark text (Clickable) */}
+                  <td className="py-3.5 px-4 border-l border-slate-100">
                     <button 
-                      onClick={() => onInjectionClick(inj)}
-                      className="inline-flex items-center gap-1.5 border border-blue-200 hover:border-[#1877F2] hover:bg-blue-50 rounded-full px-3 py-1 bg-white text-[#1877F2] font-bold text-[11px] shadow-sm transition-all active:scale-95 whitespace-nowrap"
+                      onClick={() => onPatientNameClick(patient)}
+                      className="flex items-center gap-2 font-bold text-slate-800 hover:text-[#1877F2] transition-colors w-full text-left active:scale-[0.98]"
+                      title="View Injection Chart"
                     >
-                      <Pill size={12} className="-rotate-45" /> {inj.name}
+                      <User size={16} className="text-[#10B981]" strokeWidth={2.5} /> {patient.fullName}
                     </button>
                   </td>
                   
-                  <td className="py-3 px-4 border-l border-slate-100 text-center">
-                    <span className="inline-flex items-center justify-center gap-1.5 border border-slate-200 rounded-full px-4 py-1 bg-white text-[#1877F2] font-bold text-[12px] shadow-sm min-w-[80px]">
-                      <Droplet size={12} className="fill-[#1877F2]" /> {inj.qty}
+                  {/* Clickable Injection Badge */}
+                  <td className="py-3.5 px-4 border-l border-slate-100">
+                    <button 
+                      onClick={() => onInjectionClick(inj)}
+                      className="inline-flex items-center gap-1.5 border border-[#cbe0fb] hover:border-[#1877F2] hover:bg-blue-50 rounded-full px-4 py-1.5 bg-white text-[#1877F2] font-bold text-[12px] shadow-sm transition-all active:scale-95 whitespace-nowrap"
+                    >
+                      <Pill size={14} className="-rotate-45" /> {inj.name}
+                    </button>
+                  </td>
+                  
+                  {/* EXACT MATCH to Screenshot: White Pill, Gray/Blue border, Blue Text */}
+                  <td className="py-3.5 px-4 border-l border-slate-100 text-center">
+                    <span className="inline-flex items-center justify-center gap-1.5 border border-slate-200 rounded-full px-4 py-1.5 bg-white text-[#1877F2] font-bold text-[12px] shadow-sm min-w-[80px]">
+                      <Droplet size={14} className="fill-[#1877F2]" /> {inj.qty}
                     </span>
                   </td>
                   
-                  <td className="py-3 px-4 border-l border-slate-100 text-center">
-                    <span className="inline-flex items-center justify-center gap-1.5 border border-slate-200 rounded-full px-4 py-1 bg-white text-emerald-600 font-bold text-[12px] shadow-sm min-w-[80px]">
-                      <Layers size={12} className="fill-emerald-600" /> {inj.unit}
+                  {/* EXACT MATCH to Screenshot: White Pill, Gray/Green border, Green Text */}
+                  <td className="py-3.5 px-4 border-l border-slate-100 text-center">
+                    <span className="inline-flex items-center justify-center gap-1.5 border border-slate-200 rounded-full px-4 py-1.5 bg-white text-[#10B981] font-bold text-[12px] shadow-sm min-w-[80px]">
+                      <Layers size={14} className="fill-[#10B981]" /> {inj.unit}
                     </span>
                   </td>
                 </tr>
@@ -148,17 +162,20 @@ const PTMappingTable = () => {
   // ✅ MODAL STATES
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedInjection, setSelectedInjection] = useState(null);
   
-  // ✅ NEW: Add Form State
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // ✅ NEW: Chart Form State
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
   const [mappingData] = useState(Array.from({ length: 25 }, (_, i) => ({
     id: i === 0 ? 1 : i === 1 ? 321 : 6 + i,
     office: "",
     patientNo: 108 + i,
-    fullName: i % 2 === 0 ? "Test , Leope" : "Aragon , Jean",
+    fullName: i % 2 === 0 ? "Alcaraz Magan, Sandra" : "Aragon Louis , Jean",
     patientCode: i % 2 === 0 ? "LTE" : "JAR",
     startDate: "03/22/2024",
     authUnit: "active",
@@ -186,6 +203,11 @@ const PTMappingTable = () => {
   const handleOpenInjectionDetails = (injection) => {
     setSelectedInjection(injection);
     setIsDetailsModalOpen(true);
+  };
+
+  // CLICK HANDLER FOR PATIENT NAME IN MODAL
+  const handleOpenChartModal = () => {
+    setIsChartModalOpen(true);
   };
 
   const gridTailwindClasses = `
@@ -227,10 +249,8 @@ const PTMappingTable = () => {
           Allergy Patient List
         </div>
 
-        {/* Controls: Wraps cleanly on mobile, inline on desktop */}
+        {/* Controls */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          
-          {/* ✅ WIRED ADD BUTTON: Opens the TreatmentListForm */}
           <button 
             onClick={() => setShowAddForm(true)}
             className="bg-[#0066FF] w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-blue-700 transition-all active:scale-95 shrink-0"
@@ -238,7 +258,6 @@ const PTMappingTable = () => {
             <Plus size={18} strokeWidth={3} />
           </button>
           
-          {/* Search Input: Stretches via flex-1 on mobile */}
           <div className="flex items-center shadow-sm rounded-full bg-white px-3 sm:px-4 py-1.5 flex-1 sm:flex-none">
             <input 
               type="text" 
@@ -247,7 +266,6 @@ const PTMappingTable = () => {
             />
           </div>
           
-          {/* Grouped Actions: Pushed right on mobile */}
           <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
             <button className="bg-[#1E293B] w-[32px] h-[32px] sm:w-8 sm:h-8 rounded flex items-center justify-center text-white shadow-sm hover:bg-black transition-all">
               <RefreshCw size={15} strokeWidth={2.5} />
@@ -261,7 +279,6 @@ const PTMappingTable = () => {
               <span className="text-[12px] font-semibold text-slate-800">Total: 509</span>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -277,6 +294,7 @@ const PTMappingTable = () => {
         onClose={() => setIsPatientModalOpen(false)}
         patient={selectedPatient}
         onInjectionClick={handleOpenInjectionDetails}
+        onPatientNameClick={handleOpenChartModal} // WIRED UP HERE
       />
 
       {/* MODAL 2: Injection Course Details */}
@@ -285,6 +303,13 @@ const PTMappingTable = () => {
         onClose={() => setIsDetailsModalOpen(false)}
         patient={selectedPatient}
         injection={selectedInjection}
+      />
+
+      {/* ✅ MODAL 3: Injection Chart */}
+      <InjectionChart 
+        isOpen={isChartModalOpen}
+        onClose={() => setIsChartModalOpen(false)}
+        patient={selectedPatient}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
@@ -298,16 +323,9 @@ const PTMappingTable = () => {
             columnAutoWidth={true}
             showRowLines={true}
             hoverStateEnabled={true}
-            onRowDblClick={handleRowDblClick} // TRIGGER ON DOUBLE CLICK
+            onRowDblClick={handleRowDblClick}
           >
-            {/* ENABLE EDITING */}
-            <Editing 
-              mode="cell" 
-              allowUpdating={true} 
-              selectTextOnEditStart={true} 
-              startEditAction="click" 
-            />
-
+            <Editing mode="cell" allowUpdating={true} selectTextOnEditStart={true} startEditAction="click" />
             <Scrolling mode="standard" showScrollbar="always" />
             <SearchPanel visible={true} width={250} placeholder="Search..." />
             <ColumnChooser enabled={true} mode="select" />
@@ -359,21 +377,11 @@ const PTMappingTable = () => {
             <Column dataField="paidUnit" caption="Paid Unit" alignment="center" minWidth={100} allowEditing={false} />
             <Column dataField="balUnit" caption="Bal Unit" alignment="center" minWidth={100} allowEditing={false} />
             
-            <Column 
-              dataField="frequency" 
-              caption="Freq" 
-              alignment="center"
-              minWidth={120}
-            >
+            <Column dataField="frequency" caption="Freq" alignment="center" minWidth={120}>
               <Lookup dataSource={frequencyOptions} />
             </Column>
             
-            <Column 
-              dataField="day" 
-              caption="Day" 
-              alignment="center"
-              minWidth={120}
-            >
+            <Column dataField="day" caption="Day" alignment="center" minWidth={120}>
               <Lookup dataSource={dayOptions} />
             </Column>
 
@@ -382,17 +390,10 @@ const PTMappingTable = () => {
             </Summary>
 
             <Paging defaultPageSize={10} />
-            <Pager 
-              visible={true} 
-              showInfo={true} 
-              displayMode="full" 
-              showPageSizeSelector={true} 
-              allowedPageSizes={[10, 20, 50, 100]} 
-            />
+            <Pager visible={true} showInfo={true} displayMode="full" showPageSizeSelector={true} allowedPageSizes={[10, 20, 50, 100]} />
           </DataGrid>
         </div>
 
-        {/* Footer - Responsive text alignment */}
         <div className="bg-[#F8FAFC] border-t border-slate-200 px-4 py-2 flex justify-center sm:justify-end shrink-0">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center sm:text-right">
             Last updated: 2/27/2026, 2:13:05 PM

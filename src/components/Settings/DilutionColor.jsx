@@ -9,13 +9,26 @@ import DataGrid, {
 } from 'devextreme-react/data-grid';
 import { Layers, Plus, RefreshCw, Pencil, Trash2, Search } from 'lucide-react';
 
-// Import the new form component
+// Import the form component
 import DilutionAddForm from './AddForm/DilutionAddForm';
+
+// ✅ IMPORT GLOBAL POPUPS
+import ConfirmPopup from '../global/ConfirmPopup';
+import SuccessPopup from '../global/SuccessPopup';
 
 const DilutionColor = () => {
   const [pageSize, setPageSize] = useState(20);
   const [pageIndex, setPageIndex] = useState(0);
+  
+  // Form & Editing state
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  // ✅ GLOBAL POPUP STATES
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successType, setSuccessType] = useState(''); // 'Added', 'Updated', or 'Deleted'
 
   const [colorData, setColorData] = useState([
     { id: 1, ratio: '1:100000', colorName: 'Grey', hex: '#9CA3AF' },
@@ -27,27 +40,61 @@ const DilutionColor = () => {
   ]);
 
   const totalCount = colorData.length;
-  const startEntry = totalCount === 0 ? 0 : (pageIndex * pageSize) + 1;
-  const endEntry = Math.min((pageIndex + 1) * pageSize, totalCount);
 
   const handleOptionChanged = (e) => {
     if (e.name === 'paging.pageSize') setPageSize(e.value);
     if (e.name === 'paging.pageIndex') setPageIndex(e.value);
   };
 
-  // Process data from the form
+  // Helper to close form and reset edit state
+  const handleCloseForm = () => {
+    setIsAddFormOpen(false);
+    setEditingItem(null);
+  };
+
+  // Helper to trigger success message
+  const triggerSuccess = (type) => {
+    setSuccessType(type);
+    setIsSuccessOpen(true);
+    setTimeout(() => setIsSuccessOpen(false), 1500);
+  };
+
+  // --- ADD ACTION ---
   const handleAddNewRow = (formData) => {
     const newId = colorData.length > 0 ? Math.max(...colorData.map(d => d.id)) + 1 : 1;
-    
     const newEntry = {
       id: newId,
       ratio: formData.ratio,
       colorName: formData.color.name,
       hex: formData.color.hex
     };
-
     setColorData([...colorData, newEntry]);
-    setIsAddFormOpen(false); 
+    handleCloseForm();
+    triggerSuccess('Added');
+  };
+
+  // --- UPDATE ACTION ---
+  const handleUpdateRow = (formData) => {
+    setColorData(colorData.map(item => 
+      item.id === editingItem.id 
+        ? { ...item, ratio: formData.ratio, colorName: formData.color.name, hex: formData.color.hex } 
+        : item
+    ));
+    handleCloseForm();
+    triggerSuccess('Updated');
+  };
+
+  // --- DELETE ACTIONS ---
+  const handleDeleteClick = (rowData) => {
+    setItemToDelete(rowData);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setColorData(prev => prev.filter(item => item.id !== itemToDelete.id));
+    setIsConfirmOpen(false);
+    setItemToDelete(null);
+    triggerSuccess('Deleted');
   };
 
   const colorIndicatorRender = (data) => (
@@ -60,12 +107,24 @@ const DilutionColor = () => {
     </div>
   );
 
+  // REDUCED ICON SIZES WIRED TO ACTIONS
   const actionCellRender = (data) => (
     <div className="flex items-center justify-center gap-1.5 h-full">
-      <button className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white hover:scale-110 active:scale-95 transition-all shadow-sm">
+      <button 
+        onClick={() => {
+          setEditingItem(data.data);
+          setIsAddFormOpen(true);
+        }}
+        className="w-6 h-6 rounded border border-blue-200 text-[#00A3FF] flex items-center justify-center hover:bg-[#00A3FF] hover:text-white hover:scale-110 active:scale-95 transition-all shadow-sm"
+        title="Edit"
+      >
         <Pencil size={11} strokeWidth={3} />
       </button>
-      <button className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white hover:scale-110 active:scale-95 transition-all shadow-sm">
+      <button 
+        onClick={() => handleDeleteClick(data.data)}
+        className="w-6 h-6 rounded border border-rose-200 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white hover:scale-110 active:scale-95 transition-all shadow-sm"
+        title="Delete"
+      >
         <Trash2 size={11} strokeWidth={3} />
       </button>
     </div>
@@ -90,12 +149,10 @@ const DilutionColor = () => {
   `;
 
   return (
-    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden">
+    <div className="bg-white flex flex-col h-full w-full rounded-xl shadow-lg border border-slate-300 overflow-hidden relative">
       
-      {/* 1. HEADER - Responsive Stack & Flex */}
+      {/* 1. HEADER */}
       <div className="bg-gradient-to-r from-[#76E0C2] to-[#E2FB46] px-4 py-2 sm:py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 shrink-0 border-b border-[#bef264]">
-        
-        {/* Title Section */}
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="bg-white/40 p-1 rounded-md shadow-sm shrink-0">
             <Layers size={18} className="text-[#2A333A]" />
@@ -108,12 +165,17 @@ const DilutionColor = () => {
           </div>
         </div>
 
-        {/* Controls Section - Wraps on mobile, stretches search bar */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
           <button 
-            onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+            onClick={() => {
+              if (isAddFormOpen) handleCloseForm();
+              else {
+                setEditingItem(null);
+                setIsAddFormOpen(true);
+              }
+            }}
             className="bg-[#007BFF] hover:bg-blue-600 w-[32px] h-[32px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 shrink-0"
-            title="Add New Row"
+            title={isAddFormOpen ? "Close Form" : "Add New Row"}
           >
             <Plus size={18} strokeWidth={3} className={isAddFormOpen ? "rotate-45 transition-transform" : "transition-transform"} />
           </button>
@@ -136,14 +198,14 @@ const DilutionColor = () => {
       {/* 2. DATAGRID CONTENT */}
       <div className={`flex-1 overflow-hidden p-3 bg-white custom-footer-grid ${gridClasses}`}>
         
-        {/* INJECTED THE CUSTOM FORM HERE */}
         <DilutionAddForm 
           isOpen={isAddFormOpen} 
-          onClose={() => setIsAddFormOpen(false)} 
+          onClose={handleCloseForm} 
           onAdd={handleAddNewRow} 
+          onUpdate={handleUpdateRow}
+          editingItem={editingItem}
         />
 
-        {/* ✅ FIXED CSS INJECTION to prevent React Warnings */}
         <style dangerouslySetInnerHTML={{ __html: `
           .custom-footer-grid .dx-datagrid-pager {
             border-top: 1px solid #e2e8f0 !important;
@@ -211,6 +273,21 @@ const DilutionColor = () => {
           />
         </DataGrid>
       </div>
+
+      {/* ✅ GLOBAL POPUPS MOUNTED HERE */}
+      <ConfirmPopup 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Ratio"
+        message={`Are you sure you want to delete the "${itemToDelete?.ratio}" ratio? This action cannot be undone.`}
+      />
+
+      <SuccessPopup
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        type={successType}
+      />
       
     </div>
   );

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { X, Save, RotateCcw, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Save, RotateCcw, Plus, Pencil } from 'lucide-react';
 
-const DoseAddForm = ({ isOpen, onClose, onAdd }) => {
+const DoseAddForm = ({ isOpen, onClose, onAdd, onUpdate, editingItem }) => {
   const initialState = {
     rule: '',
     vialDilution: '',
@@ -15,6 +15,32 @@ const DoseAddForm = ({ isOpen, onClose, onAdd }) => {
   };
 
   const [formData, setFormData] = useState(initialState);
+  const isEditing = !!editingItem;
+
+  // Sync input values when editingItem changes or form opens
+  useEffect(() => {
+    if (isOpen && editingItem) {
+      // Map the table row data back to the form state
+      setFormData({
+        rule: editingItem.rule || '',
+        vialDilution: editingItem.vialDilution || '',
+        // The table mock data might not store ratio/vol escalation, so fallback to empty strings
+        ratioEscalation: editingItem.ratioEscalation || '', 
+        doseMl: editingItem.doseMl || '',
+        // Map 'Value' column back to finalDoseMl
+        finalDoseMl: editingItem.value && editingItem.value !== '—' ? editingItem.value : '',
+        // Map 'Multiply' back to 'Multiply (x)' for the select dropdown
+        escalationMethod: editingItem.escalation === 'Multiply' ? 'Multiply (x)' : (editingItem.escalation || 'Multiply (x)'),
+        volEscalation: editingItem.volEscalation || '',
+        displayOrder: editingItem.order ? editingItem.order.toString() : '',
+        notes: editingItem.notes || ''
+      });
+    } else if (isOpen && !editingItem) {
+      // Reset form if opening for a fresh Add
+      setFormData(initialState);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editingItem]);
 
   if (!isOpen) return null;
 
@@ -30,28 +56,34 @@ const DoseAddForm = ({ isOpen, onClose, onAdd }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(formData);
+    if (isEditing) {
+      onUpdate(formData);
+    } else {
+      onAdd(formData);
+    }
     setFormData(initialState);
   };
 
   return (
-    // 1. THE BREAKOUT WRAPPER: This forces the form completely out of the grid and covers the whole screen.
+    // 1. THE BREAKOUT WRAPPER
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
       
-      {/* 2. THE FORM CONTAINER: Fixed max-width so it looks great on desktop, and max-height so it doesn't overflow the screen */}
+      {/* 2. THE FORM CONTAINER */}
       <div className="w-full max-w-4xl flex flex-col max-h-[90vh] bg-white border border-sky-200 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden relative">
         
         {/* HEADER: Pinned to the top */}
         <div className="shrink-0 z-10 bg-gradient-to-r from-[#e0f2fe] to-[#f0f9ff] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-b border-sky-200">
           <div className="flex items-center gap-3">
             <div className="bg-white p-1.5 sm:p-2 rounded-lg shadow-sm flex items-center justify-center border border-sky-100 shrink-0">
-              <Plus size={18} className="text-[#00A3FF]" strokeWidth={2.5} />
+              {isEditing ? <Pencil size={18} className="text-[#00A3FF]" strokeWidth={2.5} /> : <Plus size={18} className="text-[#00A3FF]" strokeWidth={2.5} />}
             </div>
             <div className="flex flex-col">
               <h3 className="font-bold text-sky-900 text-[14px] sm:text-[15px] tracking-wide uppercase leading-tight">
-                Add New Row
+                {isEditing ? 'Update Schedule Row' : 'Add New Row'}
               </h3>
-              <span className="text-[11px] sm:text-[12px] text-sky-600 font-medium italic">Enter details for the new dose schedule</span>
+              <span className="text-[11px] sm:text-[12px] text-sky-600 font-medium italic">
+                {isEditing ? 'Modify details for the selected dose schedule' : 'Enter details for the new dose schedule'}
+              </span>
             </div>
           </div>
           
@@ -175,7 +207,7 @@ const DoseAddForm = ({ isOpen, onClose, onAdd }) => {
               type="submit" 
               className="w-full sm:w-auto justify-center bg-[#00A3FF] hover:bg-[#008CE6] text-white px-8 h-[42px] rounded-md flex items-center gap-2 text-[14px] font-bold shadow-md transition-all active:scale-95 shrink-0"
             >
-              <Save size={16} strokeWidth={2.5} /> Save Details
+              <Save size={16} strokeWidth={2.5} /> {isEditing ? 'Update Details' : 'Save Details'}
             </button>
           </div>
 
