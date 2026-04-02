@@ -10,7 +10,7 @@ import DataGrid, {
 import { Edit2, Trash2, Tag, Biohazard, Check } from 'lucide-react';
 
 import TableHeader from '../../../TableHeader'; 
-import Confirmpopup from '../../../global/Confirmpopup';
+import Confirmpopup from '../../../global/ConfirmPopup';
 import SuccessPopup from '../../../global/SuccessPopup';
 
 import CategoryResultAddForm from './AddForms/CategoryResultAddForm';

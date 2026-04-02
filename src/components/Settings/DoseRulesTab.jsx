@@ -213,7 +213,7 @@ const DoseRulesTab = () => {
       </div>
 
       {/* 2. DATAGRID CONTENT */}
-      <div className={`flex-1 overflow-hidden p-3 bg-white custom-footer-grid ${gridClasses}`}>
+      <div className={`flex-1 overflow-hidden p-0 bg-white custom-footer-grid ${gridClasses}`}>
         
         {/* INJECTED THE FORM HERE */}
         <DoseAddForm 

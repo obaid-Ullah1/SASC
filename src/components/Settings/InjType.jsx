@@ -177,7 +177,7 @@ const InjType = () => {
       </div>
 
       {/* 2. MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col overflow-hidden p-3 gap-3">
+      <div className="flex-1 flex flex-col overflow-hidden p-0 gap-3">
         
         {/* ADD/EDIT FORM SECTION */}
         {isFormOpen && (

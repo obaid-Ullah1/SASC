@@ -33,13 +33,13 @@ const MOCK_SUGGESTIONS = [
     subtitle: 'Coverage Classification',
     theme: 'bg-emerald-50 border-emerald-300 text-emerald-900',
     badge: 'border-emerald-400 text-emerald-700',
-    groupActive: false, 
+    groupActive: true, 
     ingredients: [
-      { id: 11, group: 'Group1', name: 'Firebush/Kochia', panel: 'Extract Weed (W1)', patients: 402, coverage: '13.46%', active: false },
-      { id: 12, group: 'Group1', name: 'Plantain, English', panel: 'Extract Weed (W1)', patients: 401, coverage: '15.53%', active: false },
-      { id: 13, group: 'Group1', name: 'Box Elder', panel: 'Extract Tree (T1)', patients: 393, coverage: '17.56%', active: false },
-      { id: 14, group: 'Group1', name: 'Gs Birch Mix', panel: 'Extract Tree (T1)', patients: 390, coverage: '19.58%', active: false },
-      { id: 15, group: 'Group1', name: 'Pigweed, Rough', panel: 'Extract Weed (W1)', patients: 389, coverage: '21.59%', active: false },
+      { id: 11, group: 'Group1', name: 'Firebush/Kochia', panel: 'Extract Weed (W1)', patients: 402, coverage: '13.46%', active: true },
+      { id: 12, group: 'Group1', name: 'Plantain, English', panel: 'Extract Weed (W1)', patients: 401, coverage: '15.53%', active: true },
+      { id: 13, group: 'Group1', name: 'Box Elder', panel: 'Extract Tree (T1)', patients: 393, coverage: '17.56%', active: true },
+      { id: 14, group: 'Group1', name: 'Gs Birch Mix', panel: 'Extract Tree (T1)', patients: 390, coverage: '19.58%', active: true },
+      { id: 15, group: 'Group1', name: 'Pigweed, Rough', panel: 'Extract Weed (W1)', patients: 389, coverage: '21.59%', active: true },
     ]
   },
   {
@@ -48,18 +48,18 @@ const MOCK_SUGGESTIONS = [
     subtitle: 'Coverage Classification',
     theme: 'bg-orange-50 border-orange-300 text-orange-900',
     badge: 'border-orange-400 text-orange-700',
-    groupActive: false, 
+    groupActive: true, 
     ingredients: [
-      { id: 21, group: 'Group1', name: 'Histamine', panel: 'Extract Tree (T1)', patients: 498, coverage: '2.57%', active: false },
-      { id: 22, group: 'Group1', name: 'Allermed Bermuda', panel: 'Extract Grass (G1)', patients: 448, coverage: '4.89%', active: false },
-      { id: 23, group: 'Group1', name: 'Acacia', panel: 'Extract Tree (T1)', patients: 433, coverage: '7.12%', active: false },
-      { id: 24, group: 'Group1', name: 'Alder, Red', panel: 'Extract Tree (T1)', patients: 414, coverage: '9.26%', active: false },
-      { id: 25, group: 'Group1', name: 'Perennial Rye', panel: 'Extract Grass (G1)', patients: 412, coverage: '11.39%', active: false },
-      { id: 26, group: 'Group1', name: 'Firebush/Kochia', panel: 'Extract Weed (W1)', patients: 402, coverage: '13.46%', active: false },
-      { id: 27, group: 'Group1', name: 'Plantain, English', panel: 'Extract Weed (W1)', patients: 401, coverage: '15.53%', active: false },
-      { id: 28, group: 'Group1', name: 'Box Elder', panel: 'Extract Tree (T1)', patients: 393, coverage: '17.56%', active: false },
-      { id: 29, group: 'Group1', name: 'Gs Birch Mix', panel: 'Extract Tree (T1)', patients: 390, coverage: '19.58%', active: false },
-      { id: 30, group: 'Group1', name: 'Pigweed, Rough', panel: 'Extract Weed (W1)', patients: 389, coverage: '21.59%', active: false },
+      { id: 21, group: 'Group1', name: 'Histamine', panel: 'Extract Tree (T1)', patients: 498, coverage: '2.57%', active: true },
+      { id: 22, group: 'Group1', name: 'Allermed Bermuda', panel: 'Extract Grass (G1)', patients: 448, coverage: '4.89%', active: true },
+      { id: 23, group: 'Group1', name: 'Acacia', panel: 'Extract Tree (T1)', patients: 433, coverage: '7.12%', active: true },
+      { id: 24, group: 'Group1', name: 'Alder, Red', panel: 'Extract Tree (T1)', patients: 414, coverage: '9.26%', active: true },
+      { id: 25, group: 'Group1', name: 'Perennial Rye', panel: 'Extract Grass (G1)', patients: 412, coverage: '11.39%', active: true },
+      { id: 26, group: 'Group1', name: 'Firebush/Kochia', panel: 'Extract Weed (W1)', patients: 402, coverage: '13.46%', active: true },
+      { id: 27, group: 'Group1', name: 'Plantain, English', panel: 'Extract Weed (W1)', patients: 401, coverage: '15.53%', active: true },
+      { id: 28, group: 'Group1', name: 'Box Elder', panel: 'Extract Tree (T1)', patients: 393, coverage: '17.56%', active: true },
+      { id: 29, group: 'Group1', name: 'Gs Birch Mix', panel: 'Extract Tree (T1)', patients: 390, coverage: '19.58%', active: true },
+      { id: 30, group: 'Group1', name: 'Pigweed, Rough', panel: 'Extract Weed (W1)', patients: 389, coverage: '21.59%', active: true },
     ]
   }
 ];
@@ -93,15 +93,14 @@ const InjNameRecipe = ({ onCancel, onSaveComplete }) => {
     }));
   };
 
+  // UPDATED: Now only toggles the header group active state without affecting ingredients
   const toggleGroupActive = (e, groupId) => {
     e.stopPropagation();
     setRecipeData(prevData => prevData.map(group => {
       if (group.id !== groupId) return group;
-      const newGroupActiveState = !group.groupActive;
       return {
         ...group,
-        groupActive: newGroupActiveState,
-        ingredients: group.ingredients.map(ing => ({ ...ing, active: newGroupActiveState }))
+        groupActive: !group.groupActive
       };
     }));
   };

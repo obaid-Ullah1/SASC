@@ -50,7 +50,7 @@ const SkinTesting = () => {
 
   return (
     /* Changed p-0 to px-5 pt-2 pb-8 to bring the content down and give room at the bottom */
-    <div className="w-full h-full flex flex-col bg-[#f8fafc] px-0 pt-0 pb-10 overflow-hidden min-h-screen">
+    <div className="w-full h-full flex flex-col bg-[#f8fafc] px-0 pt-0 pb-14 overflow-hidden min-h-screen">
       
       {/* Navigation Tabs - Added my-4 for better vertical centering */}
       <div className="flex flex-wrap justify-center gap-2 my-4 shrink-0 bg-white p-0 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto">

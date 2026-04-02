@@ -9,7 +9,7 @@ import DataGrid, {
 import { Edit2, Trash2, Beaker } from 'lucide-react';
 
 import TableHeader from '../../../TableHeader'; 
-import Confirmpopup from '../../../global/Confirmpopup';
+import ConfirmPopup from '../../../global/ConfirmPopup';
 import SuccessPopup from '../../../global/SuccessPopup';
 
 // IMPORT THE REUSABLE SHARED FORM
@@ -224,7 +224,7 @@ const CategoryGrid = () => {
       </div>
 
       {/* Global Popups */}
-      <Confirmpopup 
+      <ConfirmPopup 
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleConfirmDelete}

@@ -5,12 +5,19 @@ import InventoryHeader from "../../components/TableHeader";
 import InventoryGrid from "../../components/inventory/InventoryGrid";
 import InventoryAddForm from "../../components/inventory/AddForms/InventoryAddForm"; 
 import CheckedInForm from "../../components/inventory/AddForms/CheckedInForm"; // The QA check form
-import Confirmpopup from "../../components/global/ConfirmPopup";
+import ConfirmPopup from "../../components/global/ConfirmPopup";
 import SuccessPopup from "../../components/global/SuccessPopup";
+import ReferenceLog from "../../components/inventory/AddForms/RefrenceLog";
 
 const generateInventoryData = () => {
   const data = [];
   for (let i = 1; i <= 35; i++) {
+    // Generate dates to test the runtime status logic
+    const testDate = new Date();
+    if (i % 3 === 0) testDate.setDate(testDate.getDate() - 10); // Expired
+    else if (i % 2 === 0) testDate.setDate(testDate.getDate() + 15); // Expiring Soon
+    else testDate.setDate(testDate.getDate() + 100); // Active
+
     data.push({
       id: i,
       inv: "Allergen",
@@ -19,7 +26,7 @@ const generateInventoryData = () => {
       purchaseOrder: "PO-" + i,
       purchaseDate: new Date(),
       doM: new Date(),
-      doE: new Date(),
+      doE: testDate, // Testing expiry logic
       lotNo: "LOT-" + i,
       batchNo: "BATCH-" + i,
       code: "CID",
@@ -32,7 +39,7 @@ const generateInventoryData = () => {
       minStock: 2,
       cost: 164.15,
       spu: 3.28,
-      checkedOn: null, // Stay empty as per your requirement
+      checkedOn: null, 
       status: "In Stock",
       supplier: "STALLERGENES GREER",
     });
@@ -48,6 +55,10 @@ const InventoryPage = () => {
   const [isCheckFormOpen, setIsCheckFormOpen] = useState(false);
   const [editingData, setEditingData] = useState(null);
   const [checkRowData, setCheckRowData] = useState(null);
+
+  // --- REFERENCE LOG STATES ---
+  const [isRefLogOpen, setIsRefLogOpen] = useState(false);
+  const [selectedItemForLog, setSelectedItemForLog] = useState(null);
 
   // --- POPUP STATES ---
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -74,6 +85,24 @@ const InventoryPage = () => {
   const handleDeleteClick = (rowData) => {
     setItemToDelete(rowData);
     setShowDeleteConfirm(true);
+  };
+
+  // Triggered when double-clicking the name in the grid
+  const handleNameDoubleClick = (rowData) => {
+    // We package the specific data needed for the Reference Log
+    // Formatting the 'doE' to a string standard for the log component
+    const logData = [
+      {
+        id: rowData.id,
+        refNo: rowData.purchaseOrder || '-',
+        saRef: `SAI-${rowData.id.toString().padStart(3, '0')}`,
+        createdOn: new Date(rowData.purchaseDate).toLocaleDateString(),
+        expiryDate: new Date(rowData.doE).toLocaleDateString(), 
+      }
+    ];
+
+    setSelectedItemForLog(logData);
+    setIsRefLogOpen(true);
   };
 
   const handleConfirmDelete = () => {
@@ -117,7 +146,7 @@ const InventoryPage = () => {
         totalUsed: 0,
         spu: 0,
         supplier: "In-House",
-        checkedOn: null // Keep empty as per your logic
+        checkedOn: null 
       };
       setInventory([newItem, ...inventory]);
       setSuccessMessage("New inventory item added!");
@@ -129,7 +158,6 @@ const InventoryPage = () => {
   };
 
   const handleSaveCheckDetails = (checkData) => {
-    // Logic for saving the double-click form details
     setIsCheckFormOpen(false);
     setSuccessMessage("Check details updated successfully!");
     setShowSuccess(true);
@@ -138,13 +166,7 @@ const InventoryPage = () => {
   return (
     <div className="h-screen w-full bg-[#f8fafc] flex flex-col overflow-hidden font-sans">
       
-      {/* TIGHTENED LAYOUT:
-        - px-2: Small margin on sides
-        - pt-4: Space from top
-        - pb-4: Essential "Bumper" to show pagination
-        - gap-2: Tighter space between form and grid
-      */}
-      <div className="flex-1 flex flex-col min-h-0 px-0 pt-0 pb-22 gap-2">
+      <div className="flex-1 flex flex-col min-h-0 px-0 pt-0 pb-27 gap-2">
         
         {/* ADD/EDIT FORM */}
         {isAddFormOpen && (
@@ -159,7 +181,7 @@ const InventoryPage = () => {
         )}
 
         {/* MAIN GRID CARD */}
-        <div className="flex-1 flex flex-col min-h-0 w-full bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-200 overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 w-full bg-white rounded-sm shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-200 overflow-hidden">
           
           <div className="shrink-0">
             <InventoryHeader
@@ -174,7 +196,8 @@ const InventoryPage = () => {
               data={inventory} 
               onEdit={handleEditClick}
               onDelete={handleDeleteClick}
-              onCheckUpdate={handleCheckUpdateClick} // Double-click trigger
+              onCheckUpdate={handleCheckUpdateClick} 
+              onNameDoubleClick={handleNameDoubleClick} // Passed new handler
             />
           </div>
           
@@ -189,8 +212,15 @@ const InventoryPage = () => {
         rowData={checkRowData}
       />
 
+      {/* POPUP: REFERENCE LOG FORM (Double Click on Name) */}
+      <ReferenceLog 
+        isOpen={isRefLogOpen}
+        onClose={() => setIsRefLogOpen(false)}
+        logs={selectedItemForLog} // Passes the mapped data with the DOE included
+      />
+
       {/* GLOBAL POPUPS */}
-      <Confirmpopup 
+      <ConfirmPopup 
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleConfirmDelete}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  X, Calendar, User, Package, Save, RotateCcw, Info, ClipboardCheck 
+  X, Calendar, User, Package, Save, RotateCcw, Info, ClipboardCheck, Hash 
 } from 'lucide-react';
 import { DateBox, TextBox, TextArea } from 'devextreme-react';
 
@@ -28,143 +28,152 @@ const CheckedInForm = ({ isOpen, onClose, onSave, rowData }) => {
 
   if (!isOpen) return null;
 
-  // --- Theme Classes based on your "Popping Blue" style ---
-  const labelClasses = "flex items-center gap-2 text-[11px] font-extrabold text-[#00A3FF] uppercase tracking-widest mb-2 block ml-1";
+  // --- Professional SaaS Label Styling ---
+  const labelClasses = "flex items-center gap-1.5 text-[13px] font-medium text-slate-700 mb-1.5 ml-0.5";
+  const iconClasses = "text-slate-400";
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200 antialiased">
       
-      {/* Main Container: Popping Border and Shadow */}
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,163,255,0.15)] border-2 border-[#00A3FF]/20 overflow-hidden animate-in zoom-in-95 duration-300 font-sans">
+      {/* Main Container: Clean, subtle shadow, soft rounded corners */}
+      <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 font-sans flex flex-col max-h-[95vh]">
         
-        {/* HEADER: Popping Blue Style */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#00A3FF]/15 border-b border-[#00A3FF]/20">
+        {/* HEADER: Light Sky Blue Gradient */}
+        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-sky-100 to-white border-b border-sky-200 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#00A3FF] rounded-xl shadow-lg shadow-[#00A3FF]/30">
-              <ClipboardCheck size={20} className="text-white" />
+            <div className="p-2 bg-white text-[#00A3FF] rounded-lg shadow-sm border border-sky-100">
+              <ClipboardCheck size={20} strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="text-[16px] font-black text-slate-800 tracking-tight">
-                Update Check Details
+              <h3 className="text-[16px] font-semibold text-slate-800 leading-tight">
+                Quality Assurance Check
               </h3>
-              <p className="text-[11px] text-[#00A3FF] font-bold uppercase tracking-[0.2em]">
-                Quality Assurance
+              <p className="text-[13px] text-slate-500 mt-0.5">
+                Update inventory verification details
               </p>
             </div>
           </div>
           
           <button 
             onClick={onClose}
-            className="p-1.5 bg-[#ef4444] text-white rounded-lg hover:bg-red-600 transition-all shadow-md active:scale-90"
+            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
           >
-            <X size={18} strokeWidth={3} />
+            <X size={20} strokeWidth={2.5} />
           </button>
         </div>
 
-        {/* FORM BODY */}
-        <div className="p-8 bg-gradient-to-b from-white to-slate-50/50 space-y-6">
+        {/* FORM BODY: Scrollable if needed */}
+        <div className="p-6 bg-slate-50/50 overflow-y-auto flex-1">
           
-          {/* Item Badge Section */}
-          <div className="flex items-center justify-between bg-white border-2 border-slate-100 p-4 rounded-xl shadow-sm">
-            <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-[#00A3FF]">
+          {/* Item Summary Card */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-xl shadow-sm mb-6 gap-4">
+            <div className="flex items-center gap-3.5">
+               <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center text-slate-500 shrink-0">
                   <Package size={20} />
                </div>
-               <div>
-                  <h4 className="text-[14px] font-black text-slate-800 leading-none">{rowData?.name || 'Inventory Item'}</h4>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Lot: {rowData?.lotNo || 'N/A'}</span>
+               <div className="flex flex-col">
+                  <h4 className="text-[14px] font-semibold text-slate-800">{rowData?.name || 'Inventory Item Name'}</h4>
+                  <div className="flex items-center gap-3 text-[12px] text-slate-500 mt-1">
+                    <span className="flex items-center gap-1"><Hash size={12} /> Lot: {rowData?.lotNo || 'N/A'}</span>
+                  </div>
                </div>
             </div>
-            <div className="bg-[#00A3FF] text-white px-3 py-1 rounded-full text-[10px] font-black tracking-tighter">
-              ID: {rowData?.id}
+            {/* Crisp Light Green ID Box */}
+            <div className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-md text-[12px] font-bold flex items-center gap-1.5 w-fit shrink-0 shadow-sm">
+              ID: {rowData?.id || '---'}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-            <div className="group">
-              <label className={labelClasses}><Calendar size={14}/> Checked On</label>
-              <DateBox value={formData.checkedOn} type="date" height={42} className="check-input" />
+          {/* Form Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+            <div>
+              <label className={labelClasses}><Calendar size={16} className={iconClasses} /> Checked On</label>
+              <DateBox value={formData.checkedOn} type="date" height={38} className="dx-custom-input" />
             </div>
-            <div className="group">
-              <label className={labelClasses}><User size={14}/> Checked By</label>
-              <TextBox value={formData.checkedBy} placeholder="Technician Name" height={42} className="check-input" />
+            
+            <div>
+              <label className={labelClasses}><User size={16} className={iconClasses} /> Checked By</label>
+              <TextBox value={formData.checkedBy} placeholder="Technician Name" height={38} className="dx-custom-input" />
             </div>
-            <div className="group">
-              <label className={labelClasses}><RotateCcw size={14}/> Days Until Next</label>
-              <TextBox placeholder="e.g. 30" height={42} className="check-input" />
+            
+            <div>
+              <label className={labelClasses}><RotateCcw size={16} className={iconClasses} /> Days Until Next</label>
+              <TextBox placeholder="e.g. 30" height={38} className="dx-custom-input" />
             </div>
-            <div className="group">
-              <label className={labelClasses}><Calendar size={14}/> Next Check On</label>
-              <DateBox placeholder="mm/dd/yyyy" height={42} className="check-input" />
+            
+            <div>
+              <label className={labelClasses}><Calendar size={16} className={iconClasses} /> Next Check On</label>
+              <DateBox placeholder="mm/dd/yyyy" height={38} className="dx-custom-input" />
             </div>
-            <div className="group col-span-2">
-              <label className={labelClasses}><Package size={14}/> Current Stock Level</label>
-              <TextBox value={formData.currentStock} placeholder="Confirm current stock..." height={42} className="check-input" />
+            
+            <div className="sm:col-span-2">
+              <label className={labelClasses}><Package size={16} className={iconClasses} /> Current Stock Level</label>
+              <TextBox value={formData.currentStock} placeholder="Confirm current stock count" height={38} className="dx-custom-input" />
             </div>
-            <div className="group col-span-2">
-              <label className={labelClasses}><Info size={14} /> Remarks / Inspection Notes</label>
+            
+            <div className="sm:col-span-2">
+              <label className={labelClasses}><Info size={16} className={iconClasses} /> Remarks / Inspection Notes</label>
               <TextArea 
-                placeholder="Enter stock verification or adverse reaction notes..." 
-                height={90} 
-                className="check-input"
+                placeholder="Enter stock verification notes, conditions, or discrepancies..." 
+                height={80} 
+                className="dx-custom-input"
               />
             </div>
           </div>
 
           {/* Footer Info / Previous Records */}
-          <div className="pt-4 border-t border-slate-200 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-slate-400">
-               <RotateCcw size={12} />
-               <span className="text-[11px] font-bold uppercase tracking-widest">Previous Check Records</span>
-            </div>
-            <p className="text-[12px] text-slate-300 italic font-medium ml-5">No previous check history found for this item.</p>
+          <div className="mt-8 pt-5 border-t border-slate-200">
+            <h5 className="text-[13px] font-semibold text-slate-700 mb-1">Previous Check Records</h5>
+            <p className="text-[13px] text-slate-500">No previous check history found for this item.</p>
           </div>
         </div>
 
         {/* ACTION FOOTER */}
-        <div className="px-8 py-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[#00A3FF]/60 text-[10px] font-bold uppercase tracking-tight">
-            <Info size={14} /> Verify all fields before saving
-          </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={onClose}
-              className="px-6 py-2 border-2 border-slate-200 text-slate-500 font-bold rounded-xl text-[12px] hover:bg-white hover:text-slate-700 transition-all uppercase tracking-widest"
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={() => onSave(formData)}
-              className="px-8 py-2 bg-[#00A3FF] hover:bg-[#008bdb] text-white font-black rounded-xl text-[12px] shadow-lg shadow-[#00A3FF]/30 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest"
-            >
-              <Save size={16} /> Save Changes
-            </button>
-          </div>
+        <div className="px-6 py-4 bg-white border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+          <button 
+            onClick={onClose}
+            className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-medium rounded-lg text-[13px] hover:bg-slate-50 hover:text-slate-900 transition-colors focus:ring-2 focus:ring-slate-200 outline-none"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={() => onSave(formData)}
+            className="px-6 py-2.5 bg-[#00A3FF] hover:bg-[#008fdf] text-white font-medium rounded-lg text-[13px] shadow-sm transition-all focus:ring-4 focus:ring-[#00A3FF]/20 outline-none flex items-center gap-2"
+          >
+            <Save size={16} /> Save Details
+          </button>
         </div>
       </div>
 
+      {/* --- REFINED DEVEXTREME CSS OVERRIDES --- */}
       <style jsx global>{`
-        .check-input {
-          border-radius: 0.75rem !important; 
-          border: 2px solid #e2e8f0 !important; 
+        .dx-custom-input {
+          border-radius: 8px !important; 
+          border: 1px solid #cbd5e1 !important; 
           background-color: #ffffff !important;
-          transition: all 0.2s ease-in-out !important;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+          transition: all 0.15s ease-in-out !important;
         }
-        .check-input.dx-state-focused {
+        .dx-custom-input.dx-state-hover {
+          border-color: #94a3b8 !important;
+        }
+        .dx-custom-input.dx-state-focused {
           border-color: #00A3FF !important;
-          box-shadow: 0 0 0 4px rgba(0, 163, 255, 0.1) !important;
+          box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.15) !important;
         }
         .dx-texteditor-input {
-          padding-left: 16px !important;
-          font-weight: 700 !important;
+          padding-left: 12px !important;
+          font-weight: 400 !important;
           color: #334155 !important; 
-          font-size: 14px !important;
+          font-size: 13px !important;
         }
         .dx-placeholder {
           font-size: 13px !important;
-          padding-left: 16px !important;
+          padding-left: 12px !important;
           color: #94a3b8 !important; 
-          font-style: italic !important;
+        }
+        .dx-dropdowneditor-icon {
+          border-radius: 0 8px 8px 0 !important;
         }
       `}</style>
     </div>

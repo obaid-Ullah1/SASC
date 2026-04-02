@@ -36,6 +36,7 @@ import LibraryPage from './pages/Library/LibraryPage';
 
 // ✅ IMPORT NEW TESTING RESULT SCREEN
 import TestingResult from './pages/Testing/TestingResult';
+import OrganizationPage from './pages/Organization/OrganizationPage';
 
 /**
  * LayoutWrapper syncs the URL path with the MainLayout's activeTab state.
@@ -125,6 +126,7 @@ function App() {
 
           {/* PATH FOR BIO MANAGEMENT */}
           <Route path="/bio-management" element={<BioManagement />} />
+          <Route path="/organization" element={<OrganizationPage />} />
 
           {/* 404 / Fallback */}
           <Route path="*" element={

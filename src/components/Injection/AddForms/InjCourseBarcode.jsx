@@ -59,34 +59,48 @@ const PrintBarcodeSticker = ({ row, patient, injection }) => {
   const lastName = nameParts[0]?.trim() || '';
   const firstName = nameParts[1]?.trim() || '';
 
+  // Determine if text should be black or white based on background color
+  const isLightBackground = row?.colorName?.toLowerCase() === 'yellow' || row?.colorName?.toLowerCase() === 'grey';
+  const headerTextColor = isLightBackground ? '#000000' : '#FFFFFF';
+
   // A static array of widths to generate a realistic-looking fake barcode
   const barcodePattern = [2,1,2,3,1,1,2,2,1,2,1,3,1,2,2,1,1,2,3,1,2,1,2,2,1,1,2,1];
 
   return (
     <div className="bg-white flex flex-col text-left font-sans text-black w-[1.75in]">
-      {/* Patient Name */}
+      {/* 1. Name */}
       <div className="text-[14px] font-bold leading-tight truncate">{lastName}</div>
       <div className="text-[14px] font-bold leading-tight truncate">{firstName}</div>
       
-      {/* Mix Details */}
+      {/* 2. Injection Name */}
       <div className="text-[13px] font-normal leading-tight truncate mt-[2px]">{injection?.name}</div>
+      
+      {/* 3. Ratio, Color in Alphabet */}
       <div className="text-[13px] font-normal leading-tight truncate">{row?.ratio} ({row?.colorName})</div>
       
-      {/* Huge Patient Code (Reduced font size from 32px to 28px, refined margins for crisp alignment) */}
-      <div className="text-[28px] font-bold leading-none mt-[4px] mb-[4px] tracking-tight text-black">
+      {/* 4. 16-M (With dynamic bg color) */}
+      <div 
+        className="text-[28px] font-bold leading-none mt-[4px] mb-[4px] tracking-tight w-fit px-1 rounded-sm"
+        style={{ backgroundColor: row?.colorHex, color: headerTextColor }}
+      >
         {row?.ptCode}
       </div>
       
-      {/* Expiration Date */}
-      <div className="text-[13px] font-normal leading-tight mb-[4px]">
-        Exp: 09/09/2026
+      {/* 5. Barcode number in digits */}
+      <div className="text-[11px] font-bold text-black mb-[1px]">
+        {row?.ref}
       </div>
-      
-      {/* CSS Generated Barcode */}
-      <div className="flex items-stretch h-6 gap-[1.5px] w-full bg-white">
+
+      {/* 6. Barcode */}
+      <div className="flex items-stretch h-6 gap-[1.5px] w-full bg-white mb-[4px]">
         {barcodePattern.map((w, i) => (
           <div key={i} className="bg-black" style={{ width: `${w * 1.2}px` }}></div>
         ))}
+      </div>
+      
+      {/* 7. Exp Date */}
+      <div className="text-[13px] font-normal leading-tight">
+        Exp: 09/09/2026
       </div>
     </div>
   );

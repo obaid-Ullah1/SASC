@@ -1,4 +1,3 @@
-// src/components/inventory/InventoryGrid.jsx
 import React from "react";
 import DataGrid, {
   Column,
@@ -13,7 +12,8 @@ import DataGrid, {
 } from "devextreme-react/data-grid";
 import { Pencil, Trash2 } from "lucide-react";
 
-const InventoryGrid = ({ data, onEdit, onDelete, onCheckUpdate }) => {
+// ✅ Added onNameDoubleClick to the props
+const InventoryGrid = ({ data, onEdit, onDelete, onCheckUpdate, onNameDoubleClick }) => {
   // ✅ Decreased icon size to 14
   const actionCellRender = (cellData) => (
     <div className="flex justify-center gap-4">
@@ -31,8 +31,13 @@ const InventoryGrid = ({ data, onEdit, onDelete, onCheckUpdate }) => {
   );
 
   const handleCellDblClick = (e) => {
+    // Handles the QA Check Form
     if (e.column.dataField === "checkedOn" && e.data) {
       onCheckUpdate && onCheckUpdate(e.data);
+    }
+    // ✅ Handles the Reference Log Form
+    if (e.column.dataField === "name" && e.data) {
+      onNameDoubleClick && onNameDoubleClick(e.data);
     }
   };
 
@@ -76,7 +81,7 @@ const InventoryGrid = ({ data, onEdit, onDelete, onCheckUpdate }) => {
         hoverStateEnabled={true}
         height="100%"
         width="100%"
-        onCellDblClick={handleCellDblClick}
+        onCellDblClick={handleCellDblClick} // Attach the updated double-click handler
       >
         <Scrolling mode="standard" />
 
@@ -112,7 +117,13 @@ const InventoryGrid = ({ data, onEdit, onDelete, onCheckUpdate }) => {
           )}
         />
 
-        <Column dataField="name" caption="Name" cssClass="text-[#1D68F1] font-bold" />
+        {/* ✅ Added cursor-pointer and hover underline so users know it is clickable */}
+        <Column 
+          dataField="name" 
+          caption="Name" 
+          cssClass="text-[#1D68F1] font-bold cursor-pointer hover:underline" 
+        />
+        
         <Column dataField="description" caption="Description" width={180} />
         <Column dataField="purchaseOrder" caption="Purchase Order" width={120} />
         <Column dataField="purchaseDate" caption="Purchase Date" dataType="date" width={100} />

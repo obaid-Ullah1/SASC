@@ -10,7 +10,7 @@ import DataGrid, {
 import { Edit2, Trash2, Tag, TestTube2 } from 'lucide-react';
 
 import TableHeader from '../../../TableHeader'; 
-import Confirmpopup from '../../../global/Confirmpopup';
+import ConfirmPopup from '../../../global/ConfirmPopup';
 import SuccessPopup from '../../../global/SuccessPopup';
 
 // IMPORTING THE CUSTOM LAB TEST FORM
@@ -270,7 +270,7 @@ const LabTestGrid = () => {
       </div>
 
       {/* Global Popups */}
-      <Confirmpopup 
+      <ConfirmPopup 
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleConfirmDelete}

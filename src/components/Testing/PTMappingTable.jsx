@@ -175,7 +175,7 @@ const PTMappingTable = () => {
     id: i === 0 ? 1 : i === 1 ? 321 : 6 + i,
     office: "",
     patientNo: 108 + i,
-    fullName: i % 2 === 0 ? "Alcaraz Magan, Sandra" : "Aragon Louis , Jean",
+    fullName: i % 2 === 0 ? "Alcaraz Magana, Sandra" : "Aragon Louis , Jean",
     patientCode: i % 2 === 0 ? "LTE" : "JAR",
     startDate: "03/22/2024",
     authUnit: "active",

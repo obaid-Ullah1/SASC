@@ -3,7 +3,7 @@ import DataGrid, { Column, Scrolling, Paging, Pager, Sorting } from 'devextreme-
 import { Edit2, Trash2, Check } from 'lucide-react';
 
 import TableHeader from '../../TableHeader'; 
-import Confirmpopup from '../../global/Confirmpopup';
+import ConfirmPopup from '../../global/ConfirmPopup';
 import SuccessPopup from '../../global/SuccessPopup';
 
 // Correct path to the form from the BioDiagnosis folder
@@ -208,7 +208,7 @@ const SharedSimpleGrid = ({ title, icon: Icon, entityName, initialData }) => {
       </div>
 
       {/* Global Popups */}
-      <Confirmpopup 
+      <ConfirmPopup 
         isOpen={showDeleteConfirm} 
         onClose={() => setShowDeleteConfirm(false)} 
         onConfirm={handleConfirmDelete} 

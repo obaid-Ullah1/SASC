@@ -9,7 +9,7 @@ import DataGrid, {
 import { Edit2, Trash2, Check, TestTubes } from 'lucide-react';
 
 import TableHeader from '../../../TableHeader'; 
-import Confirmpopup from '../../../global/Confirmpopup';
+import ConfirmPopup from '../../../global/ConfirmPopup';
 import SuccessPopup from '../../../global/SuccessPopup';
 
 // IMPORTING THE SPECIALIZED FORM
@@ -169,7 +169,7 @@ const CompDoseAmountGrid = () => {
         </div>
       </div>
 
-      <Confirmpopup isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} onConfirm={handleConfirmDelete} title="Confirm Delete" message={`Delete record for "${itemToDelete?.injectionName}"?`} />
+      <ConfirmPopup isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} onConfirm={handleConfirmDelete} title="Confirm Delete" message={`Delete record for "${itemToDelete?.injectionName}"?`} />
       <SuccessPopup isOpen={showSuccess} onClose={() => setShowSuccess(false)} message={successMessage} />
     </div>
   );

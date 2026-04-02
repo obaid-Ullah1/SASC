@@ -11,7 +11,7 @@ import { Edit2, Trash2, Check, Tag } from 'lucide-react';
 
 import TableHeader from '../../../TableHeader'; 
 import IcdAddForm from './AddForms/IcdAddForm';
-import Confirmpopup from '../../../global/ConfirmPopup';
+import ConfirmPopup from '../../../global/ConfirmPopup';
 import SuccessPopup from '../../../global/SuccessPopup';
 
 const Icd10Grid = () => {
@@ -266,7 +266,7 @@ const Icd10Grid = () => {
       </div>
 
       {/* Global Popups */}
-      <Confirmpopup 
+      <ConfirmPopup 
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleConfirmDelete}
