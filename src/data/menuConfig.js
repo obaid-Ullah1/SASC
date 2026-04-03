@@ -57,14 +57,27 @@ export const menuItems = [
     isOpen: true,
     subItems: ["Diagnosis", "DX Summary"," Treatment"]
   },
-  { title: "Appointment", icon: Calendar },
-  { title: "Library", icon: Library },
+  { title: "Appointments",
+    icon: Calendar,
+    hasDropdown: true,
+     isOpen: true,
+     subItems: ["Appointment","History" , "Upcoming"]  
+   },
+
+
+  { title: "Library", icon: Library,
+    hasDropdown: true,
+     isOpen: true,
+     subItems: ["Library"]
+   },
   
   // ✅ Added Organization here
   { 
     title: "Organization", 
     icon: Building2, 
-    hasDropdown: false // Set to true if you want sub-items later
+    hasDropdown: true,
+     isOpen: true,
+     subItems: ["Organization"]// Set to true if you want sub-items later
   },
   
   { title: "About", icon: Info },

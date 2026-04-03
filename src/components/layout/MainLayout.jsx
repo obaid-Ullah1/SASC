@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ IMPORTED useNavigate
 import Sidebar from "../navigation/Sidebar";
 import { LogOut, UserCircle, Palette, Check, Menu, Lock, Info, X } from "lucide-react";
 import GlobalNotesDrawer from "../global/GlobalNotesDrawer";
@@ -17,6 +18,8 @@ const MainLayout = ({
   const [showMyNotes, setShowMyNotes] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
+  const navigate = useNavigate(); // ✅ INITIALIZED navigate
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -31,6 +34,13 @@ const MainLayout = ({
   }, []);
 
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+
+  // ✅ ADDED LOGOUT HANDLER
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Clear the auth token
+    navigate("/login"); // Navigate to login page
+    window.location.reload(); // Force reload to ensure App.jsx state resets completely
+  };
 
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden relative">
@@ -72,13 +82,10 @@ const MainLayout = ({
       {/* MAIN CONTENT WRAPPER */}
       <div className="flex-1 flex flex-col min-w-0 h-full">
         
-        {/* ========================================================= */}
-        {/* RESPONSIVE NAVBAR (HEADER)                                */}
-        {/* ========================================================= */}
+        {/* NAVBAR (HEADER) */}
         <header
-          className={`h-16 ${themeColor} flex items-center justify-between px-2 sm:px-4 lg:px-8 text-white shadow-lg z-30 transition-all duration-300 shrink-0`}
+          className={`h-16 ${themeColor} flex items-center justify-between px-4 lg:px-8 text-white shadow-lg z-30 transition-all duration-300 shrink-0`}
         >
-          {/* Left Side: Toggle & Logo */}
           <div className="flex items-center gap-1 sm:gap-4">
             <button
               onClick={toggleSidebar}
@@ -94,24 +101,18 @@ const MainLayout = ({
             </div>
           </div>
 
-          {/* Right Side: Actions & Profile */}
           <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
-            
-            {/* INSTRUCTIONS */}
             <button 
               onClick={() => setShowInstructions(true)}
               className="flex items-center gap-2 p-2 md:px-3 md:py-1.5 bg-blue-500/20 hover:bg-blue-500/40 border border-blue-200/30 backdrop-blur-md text-white rounded-lg sm:rounded-xl transition-all active:scale-95 group"
-              title="Instructions"
             >
               <Info size={18} className="text-blue-100 group-hover:rotate-12 transition-transform" />
               <span className="text-[11px] font-bold tracking-wide hidden lg:block">Instructions</span>
             </button>
 
-            {/* MY NOTES */}
             <button 
               onClick={() => setShowMyNotes(true)}
               className="flex items-center gap-2 p-2 md:px-3 md:py-1.5 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-200/30 backdrop-blur-md text-white rounded-lg sm:rounded-xl transition-all active:scale-95 group"
-              title="My Notes"
             >
               <Lock size={18} className="text-emerald-100 group-hover:-rotate-12 transition-transform" />
               <span className="text-[11px] font-bold tracking-wide hidden lg:block">My Notes</span>
@@ -119,13 +120,12 @@ const MainLayout = ({
 
             <div className="h-6 w-[1px] bg-white/20 mx-0.5" />
 
-            {/* THEME SELECTOR */}
             <div className="relative">
               <button
                 onClick={() => setShowThemeMenu(!showThemeMenu)}
                 className="p-2 bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl border border-white/20 transition-colors"
               >
-                <Palette size={18} sm:size={20} />
+                <Palette size={18} />
               </button>
 
               {showThemeMenu && (
@@ -150,12 +150,13 @@ const MainLayout = ({
               )}
             </div>
 
-            {/* USER PROFILE & LOGOUT */}
             <div className="flex items-center gap-1 sm:gap-3 pl-1 sm:pl-4 border-l border-white/20">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/40 shrink-0">
                 <UserCircle size={20} />
               </div>
-              <button className="p-2 hover:bg-red-500 rounded-lg sm:rounded-xl transition-all group shrink-0">
+              
+              {/* ✅ ADDED onClick={handleLogout} HERE */}
+              <button onClick={handleLogout} className="p-2 hover:bg-red-500 rounded-lg sm:rounded-xl transition-all group shrink-0">
                 <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -163,8 +164,14 @@ const MainLayout = ({
         </header>
 
         {/* MAIN PAGE AREA */}
+        {/* p-3 sm:p-4 md:p-6 creates the gap around the content */}
         <main className="flex-1 min-h-0 overflow-hidden p-3 sm:p-4 md:p-6">
-          <div className="h-full w-full bg-white/40 rounded-2xl sm:rounded-[2rem] border border-white shadow-inner overflow-hidden">
+          {/* - Removed rounded-2xl
+              - Removed bg-white/40 (changed to solid white or transparent as needed)
+              - Removed border border-white
+              - Added rounded-none or rounded-md for a professional square look
+          */}
+          <div className="h-full w-full bg-white shadow-sm overflow-hidden">
             {children}
           </div>
         </main>
